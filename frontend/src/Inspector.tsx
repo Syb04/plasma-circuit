@@ -1,0 +1,95 @@
+import { useEffect, useRef, useState } from 'react';
+import { Plus, SlidersHorizontal, FileCode2, Check, X } from 'lucide-react';
+import type { Analysis, AnalysisKind, CircuitDocument, Component, Json } from './types';
+import { analysisNames, clone, defaultSettings } from './types';
+
+export function JsonEditor({value,onApply,label='JSON',rows=8}:{value:unknown;onApply:(value:unknown)=>void;label?:string;rows?:number}) {
+  const [text,setText]=useState(JSON.stringify(value,null,2));
+  const [error,setError]=useState('');
+  useEffect(()=>{setText(JSON.stringify(value,null,2));setError('');},[value]);
+  const dirty=text!==JSON.stringify(value,null,2);
+  function apply() {try {onApply(JSON.parse(text));setError('');} catch(e) {setError(e instanceof Error?e.message:String(e));}}
+  return <div className="json-editor"><label>{label}</label><textarea spellCheck={false} rows={rows} value={text} onChange={e=>setText(e.target.value)} aria-label={label}/>{error&&<p className="field-error">{error}</p>}<button className="button small secondary" disabled={!dirty} onClick={apply}><Check size={13}/>適用</button></div>;
+}
+const fieldNames: Record<string,string>={value:'値（SI）',dc:'DC値',ac_magnitude:'AC振幅',ac_phase:'AC位相（°）',model:'モデル名',gain:'利得',control_source:'制御電圧源ID',inductor1:'インダクタ1 ID',inductor2:'インダクタ2 ID',coupling:'結合係数'};
+function ParameterInput({value,onChange}:{value:Json;onChange:(value:Json)=>void}){
+  const [text,setText]=useState(String(value??''));const emitted=useRef<Json>(value);
+  useEffect(()=>{if(value!==emitted.current){setText(String(value??''));emitted.current=value;}},[value]);
+  if(typeof value==='boolean')return <select value={String(value)} onChange={e=>onChange(e.target.value==='true')}><option value="true">true</option><option value="false">false</option></select>;
+  return <input value={text} spellCheck={false} onChange={e=>{const next=e.target.value;setText(next);if(typeof value==='number'){if(!next.trim()||!Number.isFinite(Number(next)))return;emitted.current=Number(next);onChange(Number(next));}else{emitted.current=next;onChange(next);}}} onBlur={()=>{if(typeof value==='number'&&(!text.trim()||!Number.isFinite(Number(text))))setText(String(value));}}/>;
+}
+function EddEditor({component,onChange}:{component:Component;onChange:(component:Component)=>void}) {
+  type Branch = {positive:string;negative:string;current:string;charge:string};
+  const original=component.parameters.branches;
+  const [branches,setBranches]=useState<Branch[]>(Array.isArray(original)?original as unknown as Branch[]:[]);
+  useEffect(()=>setBranches(Array.isArray(component.parameters.branches)?clone(component.parameters.branches) as unknown as Branch[]:[]),[component]);
+  const [error,setError]=useState('');
+  function update(index:number,key:keyof Branch,value:string){setBranches(branches.map((b,i)=>i===index?{...b,[key]:value}:b));}
+  function apply() {
+    const normalized=branches.map(b=>({...b,positive:b.positive.trim(),negative:b.negative.trim()}));
+    const ports=[...new Set(normalized.flatMap(b=>[b.positive,b.negative]))];
+    if (!normalized.length||ports.some(p=>!p)||normalized.some(b=>b.positive===b.negative)) {setError('各枝に異なる＋端子・−端子を指定してください。複数の枝で同じ端子を共有できます。');return;}
+    setError('');onChange({...component,ports,parameters:{...component.parameters,branches:normalized as unknown as Json}});
+  }
+  return <div className="edd-editor"><div className="info-box">枝 k の総電流 = Iₖ + dQₖ/dt<br/>Vₖ は＋端子から−端子への電圧。Iₖ は伝導電流です。</div>
+    {branches.map((branch,i)=><div className="edd-branch" key={i}><div className="branch-heading"><strong>枝 {i+1}</strong><button aria-label={`枝${i+1}を削除`} className="icon-button" disabled={branches.length===1} onClick={()=>setBranches(branches.filter((_,j)=>j!==i))}><X size={14}/></button></div><div className="form-grid"><label>＋端子<input value={branch.positive} onChange={e=>update(i,'positive',e.target.value)}/></label><label>−端子<input value={branch.negative} onChange={e=>update(i,'negative',e.target.value)}/></label></div><label>I{i+1}（A）<input className="code-input" value={branch.current} onChange={e=>update(i,'current',e.target.value)} spellCheck={false}/></label><label>Q{i+1}（C）<input className="code-input" value={branch.charge} onChange={e=>update(i,'charge',e.target.value)} spellCheck={false}/></label></div>)}
+    <div className="flex-row"><button className="button small secondary" onClick={()=>setBranches([...branches,{positive:`p${branches.length+1}`,negative:`n${branches.length+1}`,current:'0',charge:'0'}])}><Plus size={13}/>枝を追加</button><button className="button small primary" onClick={apply}>枝を適用</button></div>{error&&<p className="field-error">{error}</p>}
+    <JsonEditor label="定数パラメータ" value={component.parameters.parameters??{}} rows={4} onApply={v=>{if(!v||Array.isArray(v)||typeof v!=='object')throw new Error('JSONオブジェクトを指定してください。');onChange({...component,parameters:{...component.parameters,parameters:v as Json}});}}/>
+    <JsonEditor label="中間式" value={component.parameters.intermediates??{}} rows={4} onApply={v=>{if(!v||Array.isArray(v)||typeof v!=='object')throw new Error('JSONオブジェクトを指定してください。');onChange({...component,parameters:{...component.parameters,intermediates:v as Json}});}}/>
+    <p className="muted text-small">他の枝の V1, V2…、I1, I2…を参照できます。式はサポートされた数学構文で評価します。</p>
+  </div>;
+}
+export function ComponentInspector({component,components,onChange,onDelete}:{component:Component;components:Component[];onChange:(component:Component)=>void;onDelete:()=>void}) {
+  const references=(key:string)=>components.filter(c=>c.id!==component.id&&(key==='control_source'?c.kind==='V':c.kind==='L'));
+  return <div className="inspector-section"><div className="panel-heading"><SlidersHorizontal size={16}/><h3>部品の設定</h3><span className="kind-tag">{component.kind}</span></div><label>部品名<input value={component.label} onChange={e=>onChange({...component,label:e.target.value})}/></label>
+    {component.kind==='EDD'?<EddEditor component={component} onChange={onChange}/>:<>
+      {Object.entries(component.parameters).filter(([,v])=>typeof v!=='object').map(([key,value])=><label key={key}>{fieldNames[key]??key}{['control_source','inductor1','inductor2'].includes(key)?<select value={String(value??'')} onChange={e=>onChange({...component,parameters:{...component.parameters,[key]:e.target.value}})}><option value="">参照する部品を選択</option>{value&&!references(key).some(c=>c.id===value)&&<option value={String(value)}>未解決: {String(value)}</option>}{references(key).map(c=><option key={c.id} value={c.id}>{c.label} ({c.id})</option>)}</select>:<ParameterInput value={value} onChange={next=>onChange({...component,parameters:{...component.parameters,[key]:next}})}/>}</label>)}
+      <details className="advanced"><summary>全パラメータ・波形設定</summary><JsonEditor value={component.parameters} onApply={v=>{if(!v||Array.isArray(v)||typeof v!=='object')throw new Error('JSONオブジェクトを指定してください。');onChange({...component,parameters:v as Record<string,Json>});}} label="parameters"/></details>
+    </>}
+    {(component.kind==='X'||component.kind==='B')&&<label>端子名（カンマ区切り）<input value={component.ports.join(',')} onChange={e=>{const ports=e.target.value.split(',').map(s=>s.trim()).filter(Boolean);if(ports.length&&new Set(ports).size===ports.length)onChange({...component,ports});}}/></label>}
+    <div className="component-footer"><span className="muted">ID: {component.id}</span><span className="muted">端子: {component.ports.join(' · ')||'なし'}</span><button className="text-button danger" onClick={onDelete}>部品を削除</button></div>
+  </div>;
+}
+type Field = {key:string;label:string;unit?:string;factor?:number;min?:number;hint?:string};
+const plasmaFields:Field[]=[
+  {key:'frequency_hz',label:'RF周波数',unit:'MHz',factor:1e6,min:0},
+  {key:'rf_peak_voltage',label:'RF電圧・ピーク',unit:'V',min:0},
+  {key:'pressure_pa',label:'ガス圧力',unit:'mTorr',factor:0.1333223684,min:0},
+  {key:'gap_m',label:'電極間隔',unit:'mm',factor:0.001,min:0},
+  {key:'gas_temperature_k',label:'ガス温度',unit:'K',min:0},
+  {key:'cathode_diameter_m',label:'駆動電極直径',unit:'mm',factor:0.001,min:0},
+  {key:'area_ratio',label:'接地／駆動 有効面積比',min:0},
+  {key:'electron_density_m3',label:'電子密度 nₑ',unit:'m⁻³',min:0},
+  {key:'electron_temperature_ev',label:'電子温度 Tₑ',unit:'eV',min:0},
+];
+const fields:Record<AnalysisKind,Field[]>={
+  op:[],dc:[{key:'start',label:'開始値'},{key:'stop',label:'終了値'},{key:'step',label:'増分'}],
+  ac:[{key:'start_frequency',label:'開始周波数',unit:'Hz',min:0},{key:'stop_frequency',label:'終了周波数',unit:'Hz',min:0},{key:'points',label:'ポイント数',min:1}],
+  transient:[{key:'time_step',label:'出力時間刻み',unit:'µs',factor:1e-6,min:0},{key:'stop_time',label:'終了時間',unit:'ms',factor:0.001,min:0}],
+  ccp:plasmaFields,global:plasmaFields,
+};
+function NumberField({field,value,onChange}:{field:Field;value:Json|undefined;onChange:(v:number)=>void}) {
+  const scale=field.factor??1;
+  const numeric=typeof value==='number'?value:0;
+  const normalized=Number((numeric/scale).toPrecision(10));
+  const [text,setText]=useState(String(normalized));
+  const emitted=useRef(normalized);
+  useEffect(()=>{if(normalized!==emitted.current){setText(String(normalized));emitted.current=normalized;}},[normalized]);
+  return <label>{field.label}<div className="input-unit"><input type="number" step="any" min={field.min} value={text} onChange={e=>{setText(e.target.value);if(e.target.value.trim()&&Number.isFinite(Number(e.target.value))){emitted.current=Number(Number(e.target.value).toPrecision(10));onChange(Number(e.target.value)*scale);}}} onBlur={()=>{if(!text.trim())setText(String(normalized));}}/>{field.unit&&<span>{field.unit}</span>}</div></label>;
+}
+export function AnalysisPanel({analysis,onChange,document}:{analysis:Analysis;onChange:(a:Analysis)=>void;document:CircuitDocument}) {
+  const isPlasma=analysis.kind==='ccp'||analysis.kind==='global';
+  function setting(key:string,value:Json){onChange({...analysis,settings:{...analysis.settings,[key]:value}});}
+  const values={...defaultSettings[analysis.kind],...analysis.settings};
+  return <div className="inspector-section"><div className="panel-heading"><SlidersHorizontal size={16}/><h3>解析条件</h3></div><label>解析方法<select value={analysis.kind} onChange={e=>{const kind=e.target.value as AnalysisKind;const plasmaSwitch=isPlasma&&(kind==='ccp'||kind==='global');onChange({kind,settings:plasmaSwitch?{...clone(defaultSettings[kind]),...analysis.settings}:clone(defaultSettings[kind])});}}>{Object.entries(analysisNames).map(([kind,name])=><option key={kind} value={kind}>{name}</option>)}</select></label>
+    {analysis.kind==='op'&&<p className="muted text-small">回路の定常的な電圧・電流を求めます。</p>}
+    {analysis.kind==='dc'&&<label>スイープする独立電源<select value={String(values.source??'')} onChange={e=>setting('source',e.target.value)}><option value="">電源を選択</option>{document.components.filter(c=>c.kind==='V'||c.kind==='I').map(c=><option key={c.id} value={c.id}>{c.label}</option>)}</select></label>}
+    {analysis.kind==='ac'&&<label>周波数刻み<select value={String(values.variation)} onChange={e=>setting('variation',e.target.value)}><option value="dec">対数・decade</option><option value="oct">対数・octave</option><option value="lin">線形</option></select></label>}
+    {isPlasma&&<><label>単一ガス<select value={String(values.gas)} onChange={e=>setting('gas',e.target.value)}><option value="Ar">Ar — アルゴン</option><option value="O2">O₂ — 酸素</option>{!['Ar','O2'].includes(String(values.gas))&&<option value={String(values.gas)} disabled>{String(values.gas)} — 保存済み条件（新規選択は保留）</option>}</select></label><div className="info-box">RF電圧は電極のピーク値です。DC成分はモデルで計算します。{analysis.kind==='global'&&' nₑ・Tₑは初期推定値です。'}</div>{analysis.kind==='global'&&String(values.gas)!=='Ar'&&<div className="warning-box">O₂のグローバル計算には検証可能な反応データが必要です。未実装の場合、理由を表示して停止します。</div>}</>}
+    <div className="form-grid">{fields[analysis.kind].map(field=><NumberField key={`${analysis.kind}-${field.key}`} field={field} value={values[field.key]} onChange={v=>setting(field.key,v)}/>)}</div>
+    <details className="advanced"><summary>詳細な解析条件</summary><p className="muted text-small">SI単位で指定します。設定値は計算履歴に保存されます。</p><JsonEditor label="settings" value={analysis.settings} rows={8} onApply={v=>{if(!v||Array.isArray(v)||typeof v!=='object')throw new Error('JSONオブジェクトを指定してください。');onChange({...analysis,settings:v as Record<string,Json>});}}/></details>
+  </div>;
+}
+export function DocumentPanel({document,onChange}:{document:CircuitDocument;onChange:(doc:CircuitDocument)=>void}) {
+  return <div className="inspector-section"><div className="panel-heading"><FileCode2 size={16}/><h3>回路とモデル</h3></div><label>回路名<input value={document.name} onChange={e=>onChange({...document,name:e.target.value})}/></label><label>メモ<textarea value={document.description} rows={2} onChange={e=>onChange({...document,description:e.target.value})}/></label><details className="advanced"><summary>SPICEモデル・サブ回路</summary><JsonEditor label="モデル定義" value={document.models} rows={9} onApply={v=>{if(!Array.isArray(v)||v.some(m=>typeof m?.name!=='string'||typeof m?.definition!=='string'))throw new Error('name と definition を持つ配列を指定してください。');onChange({...document,models:v});}}/></details><details className="advanced"><summary>回路ドキュメントを編集</summary><JsonEditor label="回路JSON" value={document} rows={16} onApply={v=>{const d=v as CircuitDocument;if(!d||!Array.isArray(d.components)||!Array.isArray(d.wires)||!Array.isArray(d.models)||typeof d.name!=='string')throw new Error('回路ドキュメント形式を確認してください。');if(new Set(d.components.map(c=>c.id)).size!==d.components.length)throw new Error('部品IDが重複しています。');onChange(d);}}/></details></div>;
+}

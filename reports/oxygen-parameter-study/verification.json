@@ -1,0 +1,45 @@
+{
+  "unique_inputs": 121,
+  "independently_verified_successes": 118,
+  "failed_inputs_retained": [
+    {
+      "case_id": "pressure-check-1-h0.2",
+      "reasons": [
+        "species",
+        "electron",
+        "energy",
+        "neutral_pressure",
+        "oxygen_atoms",
+        "source_reaction_domain",
+        "no_temperature_bound"
+      ]
+    },
+    {
+      "case_id": "pressure-check-1-h0.1",
+      "reasons": [
+        "species",
+        "electron",
+        "energy",
+        "neutral_pressure",
+        "oxygen_atoms",
+        "source_reaction_domain",
+        "no_temperature_bound"
+      ]
+    },
+    {
+      "case_id": "pressure-check-1-h0.4",
+      "reasons": [
+        "species",
+        "electron",
+        "energy",
+        "neutral_pressure",
+        "oxygen_atoms",
+        "source_reaction_domain",
+        "no_temperature_bound"
+      ]
+    }
+  ],
+  "maximum_event_recalculation_relative_error": 2.868693663750139e-14,
+  "maximum_budget_recalculation_relative_error": 1.3001087971088574e-14,
+  "interpretation": "Independent numerical accounting under the declared reduced closure; not physical validation"
+}

@@ -1,0 +1,151 @@
+{
+  "unique_inputs": 44,
+  "rows": 45,
+  "numerically_converged": 38,
+  "failed_case_ids": [
+    "paired-1mtorr-100-explicit_h",
+    "paired-1mtorr-100-gudmundsson_2000",
+    "paired-1mtorr-500-explicit_h",
+    "paired-1mtorr-500-gudmundsson_2000",
+    "paired-1mtorr-1500-explicit_h",
+    "paired-1mtorr-1500-gudmundsson_2000"
+  ],
+  "maximum_relative_residuals": {
+    "energy_relative": 2.6716406864579765e-14,
+    "neutral_pressure_relative": 1.384491713045602e-13,
+    "oxygen_atoms_relative": 3.327997337058228e-11,
+    "charge_relative": 7.289449760223982e-17,
+    "species_relative": 3.3296472348724673e-12
+  },
+  "paired_10mtorr": [
+    {
+      "power_w": 100,
+      "mode": "explicit_h",
+      "te_ev": 3.7014278007683266,
+      "ne_m3": 1.2756744386794506e+16,
+      "o2plus_density_m3": 2.5159611030524864e+16,
+      "reference_density_m3": 2.9e+16,
+      "reference_deviation_rel": -0.13242720584397016
+    },
+    {
+      "power_w": 100,
+      "mode": "gudmundsson_2000",
+      "te_ev": 3.49034590254515,
+      "ne_m3": 1.5487748046190248e+16,
+      "o2plus_density_m3": 2.826911191563438e+16,
+      "reference_density_m3": 2.9e+16,
+      "reference_deviation_rel": -0.025203037391917982
+    },
+    {
+      "power_w": 500,
+      "mode": "explicit_h",
+      "te_ev": 3.5385270780260014,
+      "ne_m3": 8.572558407021154e+16,
+      "o2plus_density_m3": 6.186260571046462e+16,
+      "reference_density_m3": 5.7e+16,
+      "reference_deviation_rel": 0.08530887211341454
+    },
+    {
+      "power_w": 500,
+      "mode": "gudmundsson_2000",
+      "te_ev": 3.5990590325103917,
+      "ne_m3": 8.069547107845654e+16,
+      "o2plus_density_m3": 6.132893282228717e+16,
+      "reference_density_m3": 5.7e+16,
+      "reference_deviation_rel": 0.07594618986468715
+    },
+    {
+      "power_w": 1500,
+      "mode": "explicit_h",
+      "te_ev": 3.3236623505612473,
+      "ne_m3": 3.6358299496948346e+17,
+      "o2plus_density_m3": 4.528395590985495e+16,
+      "reference_density_m3": null,
+      "reference_deviation_rel": null
+    },
+    {
+      "power_w": 1500,
+      "mode": "gudmundsson_2000",
+      "te_ev": 3.5168353730273774,
+      "ne_m3": 3.002312107227885e+17,
+      "o2plus_density_m3": 5.4400596332716104e+16,
+      "reference_density_m3": null,
+      "reference_deviation_rel": null
+    }
+  ],
+  "new_baseline": {
+    "temperature_ev": 3.5990590325103917,
+    "electron_density_m3": 8.069547107845654e+16,
+    "electronegativity": 0.20831224796304978,
+    "loss_w": {
+      "ionization": 49.5533198758209,
+      "excitation": 362.41660868918785,
+      "elastic": 0.3960579538450243,
+      "electron_wall": 21.35376856111353,
+      "ion_wall": 66.28024492003286,
+      "total": 500.00000000000017
+    },
+    "transport": {
+      "mode": "gudmundsson_2000",
+      "closure_version": "gudmundsson-2000-eq17-19-0.1",
+      "axial_edge_factor": 0.27003749157814083,
+      "radial_edge_factor": 0.14830809595009806,
+      "ion_mean_free_path_m": 0.009331597796601225,
+      "inverse_mean_free_path_m": 107.16278410158465,
+      "alpha": 0.20831224796304978,
+      "gamma_temperature_ratio": 69.60890960549224,
+      "alpha_ominus": 0.20148865215788744,
+      "negative_ion_density_m3": 1.6809854980790552e+16,
+      "electronegative_correction": 0.8350307038933602,
+      "ion_temperature_k": 600.0,
+      "ground_neutral_densities_m3": {
+        "O": 3.3693336280647893e+19,
+        "O2": 1.0919037585479832e+20
+      },
+      "ion_momentum_cross_sections_m2": {
+        "O": 7.5e-19,
+        "O2": 7.5e-19
+      },
+      "effective_area_m2": 0.04996515455536517,
+      "bohm_speeds_m_s": {
+        "O+": 4658.849848674537,
+        "O2+": 3294.304320527686
+      },
+      "wall_rates_s": {
+        "k50": 42198.33426216933,
+        "k51": 29838.728311556562
+      },
+      "domain_valid": true,
+      "regime_checks": {
+        "collisional_upper_bound": true,
+        "ambipolar_lower_bound": true
+      },
+      "domain_valid_definition": "necessary source ordering conditions only; not sufficient evidence of physical applicability or validation",
+      "regime_limits_m": {
+        "upper_inclusive": 0.076,
+        "lower_inclusive": 0.002183628516255439
+      },
+      "regime_ratios": {
+        "R_over_lambda": 16.288743183440864,
+        "L_over_lambda": 8.144371591720432,
+        "gamma_lambda_over_R": 4.273436496700166,
+        "gamma_lambda_over_L": 8.546872993400331
+      },
+      "domain_warnings": [],
+      "normalization": "source-26 approximate edge-to-bulk positive-ion factors multiplied by bulk positive-ion densities",
+      "negative_ion_definition": "sum of O-, O2-, O3- / ne; explicit extension of source's O- approximation"
+    }
+  },
+  "cross": {
+    "cases": 27,
+    "ne_range_m3": [
+      7.611054773256072e+16,
+      8.645004052933992e+16
+    ],
+    "te_range_ev": [
+      3.5493210685962895,
+      3.633184469653261
+    ]
+  },
+  "interpretation": "Numerical conservation and descriptive comparison to source model predictions; not experimental or Si-CCP validation"
+}

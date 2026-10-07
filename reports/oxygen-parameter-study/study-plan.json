@@ -1,0 +1,3216 @@
+{
+  "metadata": {
+    "model_status": "exploratory_assumed_closure_not_validated",
+    "case_rows": 133,
+    "unique_inputs": 121,
+    "gas": "pure O2",
+    "source": {
+      "title": "Electronegativity of low-pressure high-density oxygen discharges",
+      "authors": [
+        "J. T. Gudmundsson",
+        "I. G. Kouznetsov",
+        "K. K. Patel",
+        "M. A. Lieberman"
+      ],
+      "year": 2001,
+      "doi": "10.1088/0022-3727/34/7/312",
+      "url": "https://doi.org/10.1088/0022-3727/34/7/312",
+      "full_text_url": "https://cden.ucsd.edu/internal/Publications/Archive/SFR/Plasma/GudPatelKouzJPD01.pdf",
+      "journal": "J. Phys. D: Appl. Phys.",
+      "volume": 34,
+      "pages": "1100–1109",
+      "checked_date": "2026-10-07"
+    },
+    "dataset_sha256": "23b945024ae05bf85fa15ccfa1c3a8bec7f97c5c7e42f3d32bf05906ad6e89f3",
+    "solver_sha256": "489e9934d36bd0bd92b0eac53070b84b18d0362ed12a99394e2978a954ce20a2",
+    "study_sha256": "f74ec9843b1bbb64e94bb11ed4aaa1ffc2bf99166e51d3c5b0ec3940ffddf245",
+    "power_definition": "Total prescribed absorbed power, including ion-wall energy; not generator RF power",
+    "frequency_note": "This prescribed-power chemistry study does not solve frequency-dependent CCP heating",
+    "energy_scope": "published_eq3_ground_neutral_approximation_not_all_48_reaction_energy_complete",
+    "individual_rate_domain": "k20 from paper section3.4 p1107 requires 1<Te<4.5eV; bound-pinned points fail",
+    "assumptions": {
+      "edge_factors": "hL=hR=.05,.1,.2,.4: exploratory inputs, not density-dependent electronegative transport",
+      "diffusion": "10 mTorr reference outputs scaled .5,1,2; 1 mTorr uses its own reference outputs",
+      "gamma_o": ".15-.19 is published .17±.02; .05 and .5 are wider hypotheses, not Si measurements",
+      "gamma_meta": ".007 originates from Fe; .001 and .03 are sensitivity assumptions",
+      "momentum_collision_frequency": "Each target O and O2 has 0,1e7,1e8 s^-1 as an assumption; total frequency is twice this value. Zero is an omitted-elastic limiting case",
+      "surface_temperature": "Not specified; gas 600 K is not wall temperature",
+      "flow": "50 sccm at STP273.15K/101325Pa; neutral-only pumping closure"
+    },
+    "references": [
+      {
+        "figure": 5,
+        "quantity": "O2+ density",
+        "pressure_mtorr": 1.0,
+        "power_w": 500.0,
+        "value": 2.8e+16,
+        "units": "m^-3",
+        "source": "Section 3.2 p.1105, numerical text",
+        "extraction_uncertainty_relative": null
+      },
+      {
+        "figure": 5,
+        "quantity": "O2+ density",
+        "pressure_mtorr": 10.0,
+        "power_w": 500.0,
+        "value": 5.7e+16,
+        "units": "m^-3",
+        "source": "Section 3.2 p.1105, numerical text",
+        "extraction_uncertainty_relative": null
+      },
+      {
+        "figure": 5,
+        "quantity": "O2+ density",
+        "pressure_mtorr": 100.0,
+        "power_w": 500.0,
+        "value": 4.5e+16,
+        "units": "m^-3",
+        "source": "Section 3.2 p.1105, numerical text",
+        "extraction_uncertainty_relative": null
+      },
+      {
+        "figure": 5,
+        "quantity": "O2+ density",
+        "pressure_mtorr": 10.0,
+        "power_w": 100.0,
+        "value": 2.9e+16,
+        "units": "m^-3",
+        "source": "Section 3.2 p.1105, numerical text",
+        "extraction_uncertainty_relative": null
+      },
+      {
+        "figure": 5,
+        "quantity": "O2+ density",
+        "pressure_mtorr": 100.0,
+        "power_w": 100.0,
+        "value": 2e+16,
+        "units": "m^-3",
+        "source": "Section 3.2 p.1105, numerical text",
+        "extraction_uncertainty_relative": null
+      }
+    ],
+    "reference_role": "Deviation is descriptive, not a pass criterion or proof of validation",
+    "source_corrections": [
+      {
+        "reaction": "k24",
+        "printed_products": {
+          "O2": 1
+        },
+        "implemented_products": {
+          "O2": 2
+        },
+        "basis": "Both reactants contain two oxygen atoms; add product multiplicity 2 to conserve oxygen.",
+        "status": "conservation_normalization_not_author_erratum"
+      },
+      {
+        "reaction": "k26",
+        "printed_units": "m^3/s",
+        "implemented_units": "m^6/s",
+        "basis": "Three reactant densities require coefficient m^6/s; numerical value preserved.",
+        "status": "dimensional_normalization_not_author_erratum"
+      },
+      {
+        "reaction": "k44",
+        "printed_coefficient": "6.9e-40*(300/Tg)^(-1.25)*[O2] m^3/s",
+        "basis": "Move the printed [O2] density factor into explicit three-body mass action; do not double-count.",
+        "status": "equivalent_mass_action_normalization"
+      },
+      {
+        "reaction": "k45",
+        "printed_products": {
+          "O3": 1,
+          "O": 1
+        },
+        "printed_coefficient": "3.82e-40*[O] m^3/s",
+        "implemented_products": {
+          "O3": 1,
+          "O": 1,
+          "e": 1
+        },
+        "basis": "Add emitted electron for charge conservation; separate printed [O] factor into third reactant.",
+        "status": "conservation_and_mass_action_normalization_not_author_erratum"
+      }
+    ],
+    "omitted_reactions": [
+      {
+        "reaction": "k49",
+        "printed_reactants": {
+          "O2+": 1,
+          "O_1D": 1
+        },
+        "printed_products": {
+          "O2_a": 1,
+          "O": 1
+        },
+        "reason": "Printed reaction destroys one positive charge without an electron. Replacing O2+ with neutral O2 would conserve charge but is an unverified interpretation, so the solver excludes k49.",
+        "effect": "Full 49-reaction reproduction not achieved; no success assertion permitted."
+      }
+    ],
+    "execution": {
+      "workers": 2,
+      "max_nfev": 2000,
+      "multistarts": 3
+    }
+  },
+  "cases": [
+    {
+      "case_id": "baseline",
+      "family": "baseline",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "oat-hL-0.05",
+      "family": "hL",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "oat-hL-0.1",
+      "family": "hL",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "oat-hL-0.4",
+      "family": "hL",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "oat-diffusion_scale-0.5",
+      "family": "diffusion_scale",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "oat-diffusion_scale-2",
+      "family": "diffusion_scale",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "oat-gamma_o-0.05",
+      "family": "gamma_o",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.05,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "oat-gamma_o-0.15",
+      "family": "gamma_o",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.15,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "oat-gamma_o-0.19",
+      "family": "gamma_o",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.19,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "oat-gamma_o-0.5",
+      "family": "gamma_o",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.5,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "oat-gamma_meta-0.001",
+      "family": "gamma_meta",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "oat-gamma_meta-0.03",
+      "family": "gamma_meta",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "oat-nu_s-0",
+      "family": "nu_s",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "oat-nu_s-1e+08",
+      "family": "nu_s",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D0.5-g0.001-nu0",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D0.5-g0.001-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D0.5-g0.001-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D0.5-g0.007-nu0",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D0.5-g0.007-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D0.5-g0.007-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D0.5-g0.03-nu0",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D0.5-g0.03-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D0.5-g0.03-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D1-g0.001-nu0",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D1-g0.001-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D1-g0.001-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D1-g0.007-nu0",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D1-g0.007-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D1-g0.007-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D1-g0.03-nu0",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D1-g0.03-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D1-g0.03-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D2-g0.001-nu0",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D2-g0.001-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D2-g0.001-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D2-g0.007-nu0",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D2-g0.007-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D2-g0.007-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D2-g0.03-nu0",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D2-g0.03-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.05-D2-g0.03-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D0.5-g0.001-nu0",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D0.5-g0.001-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D0.5-g0.001-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D0.5-g0.007-nu0",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D0.5-g0.007-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D0.5-g0.007-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D0.5-g0.03-nu0",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D0.5-g0.03-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D0.5-g0.03-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D1-g0.001-nu0",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D1-g0.001-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D1-g0.001-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D1-g0.007-nu0",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D1-g0.007-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D1-g0.007-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D1-g0.03-nu0",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D1-g0.03-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D1-g0.03-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D2-g0.001-nu0",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D2-g0.001-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D2-g0.001-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D2-g0.007-nu0",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D2-g0.007-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D2-g0.007-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D2-g0.03-nu0",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D2-g0.03-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.1-D2-g0.03-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D0.5-g0.001-nu0",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D0.5-g0.001-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D0.5-g0.001-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D0.5-g0.007-nu0",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D0.5-g0.007-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D0.5-g0.007-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D0.5-g0.03-nu0",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D0.5-g0.03-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D0.5-g0.03-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D1-g0.001-nu0",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D1-g0.001-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D1-g0.001-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D1-g0.007-nu0",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D1-g0.007-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D1-g0.007-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D1-g0.03-nu0",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D1-g0.03-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D1-g0.03-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D2-g0.001-nu0",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D2-g0.001-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D2-g0.001-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D2-g0.007-nu0",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D2-g0.007-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D2-g0.007-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D2-g0.03-nu0",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D2-g0.03-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.2-D2-g0.03-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D0.5-g0.001-nu0",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D0.5-g0.001-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D0.5-g0.001-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D0.5-g0.007-nu0",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D0.5-g0.007-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D0.5-g0.007-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D0.5-g0.03-nu0",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D0.5-g0.03-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D0.5-g0.03-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D1-g0.001-nu0",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D1-g0.001-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D1-g0.001-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D1-g0.007-nu0",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D1-g0.007-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D1-g0.007-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D1-g0.03-nu0",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D1-g0.03-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D1-g0.03-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D2-g0.001-nu0",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D2-g0.001-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D2-g0.001-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.001
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D2-g0.007-nu0",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D2-g0.007-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D2-g0.007-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D2-g0.03-nu0",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 0.0,
+          "O2": 0.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D2-g0.03-nu1e+07",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "cross-h0.4-D2-g0.03-nu1e+08",
+      "family": "cross",
+      "diffusion_scale": 2,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 2.4,
+        "diffusion_o2_m2_s": 1.68,
+        "electron_momentum_nu_s": {
+          "O": 100000000.0,
+          "O2": 100000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.03
+      }
+    },
+    {
+      "case_id": "power-100",
+      "family": "power",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 100.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "power-1500",
+      "family": "power",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 1500.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "pressure-1mtorr",
+      "family": "pressure",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 0.13332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 8.8,
+        "diffusion_o2_m2_s": 6.3,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "power-check-100-h0.05",
+      "family": "power_check",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 100.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "pressure-check-1-h0.05",
+      "family": "pressure_check",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 0.13332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 8.8,
+        "diffusion_o2_m2_s": 6.3,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "power-check-100-h0.1",
+      "family": "power_check",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 100.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "pressure-check-1-h0.1",
+      "family": "pressure_check",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 0.13332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 8.8,
+        "diffusion_o2_m2_s": 6.3,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "power-check-100-h0.2",
+      "family": "power_check",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 100.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "pressure-check-1-h0.2",
+      "family": "pressure_check",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 0.13332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 8.8,
+        "diffusion_o2_m2_s": 6.3,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "power-check-100-h0.4",
+      "family": "power_check",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 100.0,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    },
+    {
+      "case_id": "pressure-check-1-h0.4",
+      "family": "pressure_check",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500.0,
+        "pressure_pa": 0.13332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 8.8,
+        "diffusion_o2_m2_s": 6.3,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600.0,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50.0,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      }
+    }
+  ]
+}

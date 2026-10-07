@@ -1,0 +1,2454 @@
+{
+  "metadata": {
+    "model_status": "exploratory_assumed_closure_not_validated",
+    "case_rows": 5,
+    "unique_inputs": 5,
+    "gas": "pure O2",
+    "source": {
+      "title": "Electronegativity of low-pressure high-density oxygen discharges",
+      "authors": [
+        "J. T. Gudmundsson",
+        "I. G. Kouznetsov",
+        "K. K. Patel",
+        "M. A. Lieberman"
+      ],
+      "year": 2001,
+      "doi": "10.1088/0022-3727/34/7/312",
+      "url": "https://doi.org/10.1088/0022-3727/34/7/312",
+      "full_text_url": "https://cden.ucsd.edu/internal/Publications/Archive/SFR/Plasma/GudPatelKouzJPD01.pdf",
+      "journal": "J. Phys. D: Appl. Phys.",
+      "volume": 34,
+      "pages": "1100–1109",
+      "checked_date": "2026-10-07"
+    },
+    "dataset_sha256": "23b945024ae05bf85fa15ccfa1c3a8bec7f97c5c7e42f3d32bf05906ad6e89f3",
+    "solver_sha256": "de2154aaef580389a7b4b73299f8290700dd010e2b9111d5822621a0deeb528b",
+    "study_sha256": "3f5583c176a67c065ee6424cbb17b5b8e6ecce389a9c62ef2839ee44010b5605",
+    "power_definition": "Total prescribed absorbed power, including ion-wall energy; not generator RF power",
+    "frequency_note": "This prescribed-power chemistry study does not solve frequency-dependent CCP heating",
+    "energy_scope": "published_eq3_ground_neutral_approximation_not_all_48_reaction_energy_complete",
+    "assumptions": {
+      "edge_factors": "hL=hR=.05,.1,.2,.4: exploratory inputs, not density-dependent electronegative transport",
+      "diffusion": "10 mTorr reference outputs scaled .5,1,2; 1 mTorr uses its own reference outputs",
+      "gamma_o": ".15-.19 is published .17±.02; .05 and .5 are wider hypotheses, not Si measurements",
+      "gamma_meta": ".007 originates from Fe; .001 and .03 are sensitivity assumptions",
+      "momentum_collision_frequency": "Each target O and O2 has 0,1e7,1e8 s^-1 as an assumption; total frequency is twice this value. Zero is an omitted-elastic limiting case",
+      "surface_temperature": "Not specified; gas 600 K is not wall temperature",
+      "flow": "50 sccm at STP273.15K/101325Pa; neutral-only pumping closure"
+    },
+    "references": [
+      {
+        "figure": 5,
+        "quantity": "O2+ density",
+        "pressure_mtorr": 1.0,
+        "power_w": 500.0,
+        "value": 2.8e+16,
+        "units": "m^-3",
+        "source": "Section 3.2 p.1105, numerical text",
+        "extraction_uncertainty_relative": null
+      },
+      {
+        "figure": 5,
+        "quantity": "O2+ density",
+        "pressure_mtorr": 10.0,
+        "power_w": 500.0,
+        "value": 5.7e+16,
+        "units": "m^-3",
+        "source": "Section 3.2 p.1105, numerical text",
+        "extraction_uncertainty_relative": null
+      },
+      {
+        "figure": 5,
+        "quantity": "O2+ density",
+        "pressure_mtorr": 100.0,
+        "power_w": 500.0,
+        "value": 4.5e+16,
+        "units": "m^-3",
+        "source": "Section 3.2 p.1105, numerical text",
+        "extraction_uncertainty_relative": null
+      },
+      {
+        "figure": 5,
+        "quantity": "O2+ density",
+        "pressure_mtorr": 10.0,
+        "power_w": 100.0,
+        "value": 2.9e+16,
+        "units": "m^-3",
+        "source": "Section 3.2 p.1105, numerical text",
+        "extraction_uncertainty_relative": null
+      },
+      {
+        "figure": 5,
+        "quantity": "O2+ density",
+        "pressure_mtorr": 100.0,
+        "power_w": 100.0,
+        "value": 2e+16,
+        "units": "m^-3",
+        "source": "Section 3.2 p.1105, numerical text",
+        "extraction_uncertainty_relative": null
+      }
+    ],
+    "reference_role": "Deviation is descriptive, not a pass criterion or proof of validation",
+    "source_corrections": [
+      {
+        "reaction": "k24",
+        "printed_products": {
+          "O2": 1
+        },
+        "implemented_products": {
+          "O2": 2
+        },
+        "basis": "Both reactants contain two oxygen atoms; add product multiplicity 2 to conserve oxygen.",
+        "status": "conservation_normalization_not_author_erratum"
+      },
+      {
+        "reaction": "k26",
+        "printed_units": "m^3/s",
+        "implemented_units": "m^6/s",
+        "basis": "Three reactant densities require coefficient m^6/s; numerical value preserved.",
+        "status": "dimensional_normalization_not_author_erratum"
+      },
+      {
+        "reaction": "k44",
+        "printed_coefficient": "6.9e-40*(300/Tg)^(-1.25)*[O2] m^3/s",
+        "basis": "Move the printed [O2] density factor into explicit three-body mass action; do not double-count.",
+        "status": "equivalent_mass_action_normalization"
+      },
+      {
+        "reaction": "k45",
+        "printed_products": {
+          "O3": 1,
+          "O": 1
+        },
+        "printed_coefficient": "3.82e-40*[O] m^3/s",
+        "implemented_products": {
+          "O3": 1,
+          "O": 1,
+          "e": 1
+        },
+        "basis": "Add emitted electron for charge conservation; separate printed [O] factor into third reactant.",
+        "status": "conservation_and_mass_action_normalization_not_author_erratum"
+      }
+    ],
+    "omitted_reactions": [
+      {
+        "reaction": "k49",
+        "printed_reactants": {
+          "O2+": 1,
+          "O_1D": 1
+        },
+        "printed_products": {
+          "O2_a": 1,
+          "O": 1
+        },
+        "reason": "Printed reaction destroys one positive charge without an electron. Replacing O2+ with neutral O2 would conserve charge but is an unverified interpretation, so the solver excludes k49.",
+        "effect": "Full 49-reaction reproduction not achieved; no success assertion permitted."
+      }
+    ],
+    "execution": {
+      "workers": 2,
+      "max_nfev": 2000,
+      "multistarts": 3
+    },
+    "elapsed_seconds": 0.261348492000252,
+    "unique_converged": 5,
+    "row_converged": 5
+  },
+  "cases": [
+    {
+      "case_id": "baseline",
+      "family": "baseline",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      },
+      "input_sha256": "8c0da32f10b6fed2448e64f3d1edecf4677176e1c80f248b9d636a6485c7cfb4",
+      "result": {
+        "success": true,
+        "status": "converged_numerically",
+        "inputs": {
+          "absorbed_power_w": 500,
+          "pressure_pa": 1.3332236842105263,
+          "axial_edge_factor": 0.2,
+          "radial_edge_factor": 0.2,
+          "diffusion_o_m2_s": 1.2,
+          "diffusion_o2_m2_s": 0.84,
+          "electron_momentum_nu_s": {
+            "O": 10000000.0,
+            "O2": 10000000.0
+          },
+          "gas_temperature_k": 600,
+          "radius_m": 0.152,
+          "length_m": 0.076,
+          "flow_sccm": 50,
+          "gamma_o": 0.17,
+          "gamma_meta": 0.007
+        },
+        "temperature_ev": 3.538527078025996,
+        "electron_density_m3": 8.572558407021192e+16,
+        "densities_m3": {
+          "O2": 1.089878268087088e+20,
+          "O2_a": 1.395375569948911e+19,
+          "O": 3.3747637040052265e+19,
+          "O_1D": 3.6841338499996605e+18,
+          "O3": 5.683105354661494e+17,
+          "O-": 1.6260785366573612e+16,
+          "O2-": 415688547337009.94,
+          "O3-": 126246624695580.78,
+          "O+": 4.0665698898352904e+16,
+          "O2+": 6.1862605710465224e+16,
+          "e": 8.572558407021192e+16
+        },
+        "electronegativity": 0.19600590326505388,
+        "pumping_rate_s": 28.48099121005302,
+        "residence_time_s": 0.03511113755222912,
+        "feed_molecules_s": 2.238983426498703e+19,
+        "volume_m3": 0.005516335106808931,
+        "neutral_density_target_m3": 1.6094166393371597e+20,
+        "plasma_potential_v": 20.687384959644053,
+        "loss_w": {
+          "ionization": 48.173493121361865,
+          "excitation": 371.0599114786309,
+          "elastic": 0.4136695788749607,
+          "electron_wall": 19.254680467323826,
+          "ion_wall": 61.09824535380766,
+          "total": 499.9999999999992
+        },
+        "residuals": {
+          "checks": {
+            "species": true,
+            "electron": true,
+            "energy": true,
+            "neutral_pressure": true,
+            "oxygen_atoms": true,
+            "charge": true,
+            "positive_densities": true,
+            "temperature_range": true,
+            "positive_pumping": true,
+            "nonnegative_sheath": true,
+            "no_density_bound": true,
+            "finite": true
+          },
+          "species_relative": {
+            "O2": 1.0256978158239575e-14,
+            "O2_a": -1.6646561094820615e-14,
+            "O": -1.9640541144115535e-16,
+            "O_1D": -1.9280254612488942e-14,
+            "O3": 7.28125332189123e-15,
+            "O-": -4.114821778669216e-15,
+            "O2-": -7.880512005797324e-15,
+            "O3-": 2.1755740786853e-15,
+            "O+": -5.008789806914105e-15,
+            "O2+": -7.357754828264345e-15,
+            "e": -6.0824162641485854e-15
+          },
+          "energy_relative": -1.5916157281026244e-15,
+          "neutral_pressure_relative": 2.0360172250670616e-16,
+          "oxygen_atoms_relative": 5.166895415570539e-16,
+          "charge_relative": 2.575508304828527e-17,
+          "max_relative": 1.9280254612488942e-14,
+          "tolerance": 1e-06,
+          "oxygen_atom_in_m3_s": 8.117648341323852e+21,
+          "oxygen_atom_out_m3_s": 8.117648341323848e+21
+        },
+        "particle_production_loss_m3_s": {
+          "O2": {
+            "production": 2.9033461844780922e+22,
+            "loss": 2.9033461844780624e+22,
+            "net": 297795584.0
+          },
+          "O2_a": {
+            "production": 6.614007504183831e+21,
+            "loss": 6.614007504183941e+21,
+            "net": -110100480.0
+          },
+          "O": {
+            "production": 4.271067654626865e+22,
+            "loss": 4.271067654626866e+22,
+            "net": -8388608.0
+          },
+          "O_1D": {
+            "production": 1.696843317556999e+22,
+            "loss": 1.6968433175570317e+22,
+            "net": -327155712.0
+          },
+          "O3": {
+            "production": 6.660479708101065e+20,
+            "loss": 6.660479708101016e+20,
+            "net": 4849664.0
+          },
+          "O-": {
+            "production": 4.140971569736046e+20,
+            "loss": 4.140971569736063e+20,
+            "net": -1703936.0
+          },
+          "O2-": {
+            "production": 1.2474316380418122e+19,
+            "loss": 1.247431638041822e+19,
+            "net": -98304.0
+          },
+          "O3-": {
+            "production": 3.530102732535325e+18,
+            "loss": 3.5301027325353175e+18,
+            "net": 7680.0
+          },
+          "O+": {
+            "production": 1.6747774059954307e+21,
+            "loss": 1.674777405995439e+21,
+            "net": -8388608.0
+          },
+          "O2+": {
+            "production": 3.5628259723059627e+21,
+            "loss": 3.562825972305989e+21,
+            "net": -26214400.0
+          },
+          "e": {
+            "production": 5.344234032714622e+21,
+            "loss": 5.344234032714655e+21,
+            "net": -32505856.0
+          }
+        },
+        "reaction_event_rates_m3_s": {
+          "k1": 2.9918419134624983e+21,
+          "k2": 1.1667057614596559e+21,
+          "k3": 2.3710754460908238e+20,
+          "k4": 1.3508328535266655e+21,
+          "k5": 1.0669547165000081e+20,
+          "k6": 1.2624626094217318e+20,
+          "k7": 5.5751951299694715e+19,
+          "k8": 5.837702110761271e+21,
+          "k9": 1.1641022907809089e+20,
+          "k10": 1.0225744838501218e+19,
+          "k11": 5.420534469621114e+19,
+          "k12": 6.2678880566689595e+19,
+          "k13": 9.46373981328127e+21,
+          "k14": 6.815653175680641e+21,
+          "k15": 1.2045772259515995e+22,
+          "k16": 1.0070795770117432e+21,
+          "k17": 2.5951346293405263e+20,
+          "k18": 6.614007504183831e+21,
+          "k19": 5.0814176063087673e+20,
+          "k20": 1.4278334809456065e+20,
+          "k21": 3.59730053726518e+21,
+          "k22": 1.36923656673016e+21,
+          "k23": 1.7648602430093783e+18,
+          "k24": 3.6367317336589583e+18,
+          "k25": 2.390624125133483e+18,
+          "k26": 1627270981689870.5,
+          "k27": 2.2911358467283277e+17,
+          "k28": 1.1074087249300358e+17,
+          "k29": 3.28340477099743e+18,
+          "k30": 2.0697083129893347e+19,
+          "k31": 9.743750517218044e+18,
+          "k32": 6265770978507088.0,
+          "k33": 3.5297204860187566e+18,
+          "k34": 1.6341764589817472e+17,
+          "k35": 2.7123396617362437e+20,
+          "k36": 3.463283918967218e+18,
+          "k37": 9.640468186394895e+17,
+          "k38": 9.037938924745213e+17,
+          "k39": 1.1044930374892404e+18,
+          "k40": 5.5776898393206637e+17,
+          "k41": 6.68188135681069e+16,
+          "k42": 2.985815214713675e+18,
+          "k43": 3.4449360324574046e+20,
+          "k44": 6.578637264671206e+20,
+          "k45": 180849853564754.97,
+          "k46": 31530569521165.26,
+          "k47": 31530569521165.26,
+          "k48": 6.888110730234059e+20
+        },
+        "wall_rates_s": {
+          "k50": 36469.780412182736,
+          "k51": 25788.02903783874,
+          "k52": 963.9009430426511,
+          "k53": 963.9009430426511,
+          "k54": 42.54934579792047
+        },
+        "electron_wall_loss_m3_s": 3.0783837815487175e+21,
+        "optimizer": {
+          "method": "bounded log least_squares with physical multistarts",
+          "attempts": [
+            {
+              "nfev": 9,
+              "optimizer_success": true,
+              "optimizer_status": 1,
+              "max_relative": 1.9280254612488942e-14,
+              "numerical_success": true
+            }
+          ],
+          "message": "`gtol` termination condition is satisfied.",
+          "total_nfev": 9
+        },
+        "metadata": {
+          "model_version": "oxygen-explicit-input-study-0.1",
+          "validation_status": "exploratory_not_literature_validated",
+          "success_definition": "numerical particle, reduced energy, pressure, atom and charge closure only",
+          "source_values": {
+            "chemistry_reference": "https://doi.org/10.1088/0022-3727/34/7/312",
+            "excitation_reference": "https://doi.org/10.1088/0022-3727/33/11/311",
+            "implemented_reaction_count": 48,
+            "excitation_term_count": 16,
+            "source_corrections": [
+              {
+                "reaction": "k24",
+                "printed_products": {
+                  "O2": 1
+                },
+                "implemented_products": {
+                  "O2": 2
+                },
+                "basis": "Both reactants contain two oxygen atoms; add product multiplicity 2 to conserve oxygen.",
+                "status": "conservation_normalization_not_author_erratum"
+              },
+              {
+                "reaction": "k26",
+                "printed_units": "m^3/s",
+                "implemented_units": "m^6/s",
+                "basis": "Three reactant densities require coefficient m^6/s; numerical value preserved.",
+                "status": "dimensional_normalization_not_author_erratum"
+              },
+              {
+                "reaction": "k44",
+                "printed_coefficient": "6.9e-40*(300/Tg)^(-1.25)*[O2] m^3/s",
+                "basis": "Move the printed [O2] density factor into explicit three-body mass action; do not double-count.",
+                "status": "equivalent_mass_action_normalization"
+              },
+              {
+                "reaction": "k45",
+                "printed_products": {
+                  "O3": 1,
+                  "O": 1
+                },
+                "printed_coefficient": "3.82e-40*[O] m^3/s",
+                "implemented_products": {
+                  "O3": 1,
+                  "O": 1,
+                  "e": 1
+                },
+                "basis": "Add emitted electron for charge conservation; separate printed [O] factor into third reactant.",
+                "status": "conservation_and_mass_action_normalization_not_author_erratum"
+              }
+            ],
+            "omitted_reactions": [
+              {
+                "reaction": "k49",
+                "printed_reactants": {
+                  "O2+": 1,
+                  "O_1D": 1
+                },
+                "printed_products": {
+                  "O2_a": 1,
+                  "O": 1
+                },
+                "reason": "Printed reaction destroys one positive charge without an electron. Replacing O2+ with neutral O2 would conserve charge but is an unverified interpretation, so the solver excludes k49.",
+                "effect": "Full 49-reaction reproduction not achieved; no success assertion permitted."
+              }
+            ],
+            "wall_return_reactions": [
+              {
+                "id": "k50",
+                "reactants": {
+                  "O+": 1
+                },
+                "products": {
+                  "O": 1
+                },
+                "charge_sink": "wall circuit",
+                "units": "s^-1",
+                "formula": "uB_Oplus*Aeff/V",
+                "source": "Table 2 p.1103"
+              },
+              {
+                "id": "k51",
+                "reactants": {
+                  "O2+": 1
+                },
+                "products": {
+                  "O2": 1
+                },
+                "charge_sink": "wall circuit",
+                "units": "s^-1",
+                "formula": "uB_O2plus*Aeff/V",
+                "source": "Table 2 p.1103"
+              },
+              {
+                "id": "k52",
+                "reactants": {
+                  "O": 1
+                },
+                "products": {
+                  "O2": 0.5
+                },
+                "gamma": 0.17,
+                "gamma_uncertainty": 0.02,
+                "units": "s^-1",
+                "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                "source": "Table 2 p.1103; section 2.2 p.1104; gamma measured stainless steel at 300 K"
+              },
+              {
+                "id": "k53",
+                "reactants": {
+                  "O_1D": 1
+                },
+                "products": {
+                  "O2": 0.5
+                },
+                "gamma": 0.17,
+                "units": "s^-1",
+                "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                "source": "Table 2 p.1103; assumes same probability as atomic O"
+              },
+              {
+                "id": "k54",
+                "reactants": {
+                  "O2_a": 1
+                },
+                "products": {
+                  "O2": 1
+                },
+                "gamma": 0.007,
+                "units": "s^-1",
+                "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                "source": "Table 2 p.1103; section 2.2 p.1104; quenching measured on Fe surface"
+              }
+            ],
+            "published_conditions": {
+              "radius_m": 0.152,
+              "length_m": 0.076,
+              "absorbed_power_w": 500.0,
+              "flow_sccm": 50.0,
+              "gas_temperature_k": 600.0,
+              "wall_material": "stainless steel",
+              "pressure_range_mtorr": [
+                1.0,
+                100.0
+              ],
+              "usual_global_model_range_mtorr": [
+                1.0,
+                20.0
+              ],
+              "figure2_powers_w": [
+                100.0,
+                500.0,
+                1500.0
+              ],
+              "source": "Section 3 p.1104; figure 1–3 captions; table 3"
+            }
+          },
+          "supplementary_values": {
+            "ionization_energies_ev": {
+              "O": {
+                "value": 13.618055,
+                "uncertainty_ev": 7e-06,
+                "source": "NIST Atomic Spectra Database, neutral oxygen ground-state ionization energy",
+                "url": "https://physics.nist.gov/cgi-bin/ASD/ie.pl?at_num_out=1&biblio=1&e_out=0&el_name_out=1&ion_charge_out=1&spectra=oxygen&unc_out=1&units=1"
+              },
+              "O2": {
+                "value": 12.0697,
+                "uncertainty_ev": 0.0002,
+                "source": "NIST Chemistry WebBook SRD69, evaluated molecular oxygen ionization energy",
+                "url": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C7782447&Mask=262"
+              },
+              "role": "Supplementary physical threshold values, not numerical values explicitly verified in the 2001/2000 paper. Rate-fit activation parameters are not thresholds.",
+              "checked_date": "2026-10-07"
+            },
+            "flow_standard_temperature_k": 273.15,
+            "flow_standard_pressure_pa": 101325.0
+          },
+          "case_inputs_and_assumptions": {
+            "absorbed_power_w": 500,
+            "pressure_pa": 1.3332236842105263,
+            "axial_edge_factor": 0.2,
+            "radial_edge_factor": 0.2,
+            "diffusion_o_m2_s": 1.2,
+            "diffusion_o2_m2_s": 0.84,
+            "electron_momentum_nu_s": {
+              "O": 10000000.0,
+              "O2": 10000000.0
+            },
+            "gas_temperature_k": 600,
+            "radius_m": 0.152,
+            "length_m": 0.076,
+            "flow_sccm": 50,
+            "gamma_o": 0.17,
+            "gamma_meta": 0.007
+          },
+          "closures": {
+            "absorbed_power": "total plasma absorbed power: collisional + electron-wall + ion-wall",
+            "energy": "source eq.(3) reduced ground-target collisional budget; not all 48 reaction energies",
+            "ionization": "ground O2 k1 and ground O k4 with supplementary NIST thresholds",
+            "excitation": "all 16 source-26 terms once; no additional per-particle excitation charge",
+            "elastic": "3*me/mi*Te*ne*nu_i; supplied nu_i are per-electron s^-1 frequencies, not m^3/s",
+            "wall_energy": "electron: 2Te; ion: phi+Te/2; each applied once to ion-balanced wall flux",
+            "sheath": "phi=Te*log(ne*sqrt(eTe/(2*pi*me))*A/(V*sum_i(kwi*ni)))",
+            "pressure": "sum of five neutral densities = p/(kB*Tg); ion pressure neglected",
+            "flow": "pure O2 feed; common unknown neutral pumping rate; charged pumping zero",
+            "negative_ion_wall_loss_s": 0.0,
+            "hL_hR": "explicit inputs; source electronegative edge closure not solved",
+            "surface": "explicit gammaO (also O_1D), gammaMeta; source candidate is SUS, not Si",
+            "zero_elastic": false
+          },
+          "unresolved_energy_channels": [
+            "Excited-target ionization k17/k19 has no additional reaction-resolved energy term in the reduced source budget.",
+            "Electron detachment k7, superelastic k21, attachment k3/k20 and additional dissociation k22/k43 lack a full supplied energy-transfer table.",
+            "New electrons from heavy-particle detachment do not have a supplied birth-energy distribution."
+          ],
+          "no_parameter_calibration": true,
+          "literature_reproduction_success": false
+        }
+      }
+    },
+    {
+      "case_id": "oat-hL-0.05",
+      "family": "hL",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.05,
+        "radial_edge_factor": 0.05,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      },
+      "input_sha256": "e486c1977302dbaefd7eb059a442ab841a0a41a9e969927cdaebbeff564c8173",
+      "result": {
+        "success": true,
+        "status": "converged_numerically",
+        "inputs": {
+          "absorbed_power_w": 500,
+          "pressure_pa": 1.3332236842105263,
+          "axial_edge_factor": 0.05,
+          "radial_edge_factor": 0.05,
+          "diffusion_o_m2_s": 1.2,
+          "diffusion_o2_m2_s": 0.84,
+          "electron_momentum_nu_s": {
+            "O": 10000000.0,
+            "O2": 10000000.0
+          },
+          "gas_temperature_k": 600,
+          "radius_m": 0.152,
+          "length_m": 0.076,
+          "flow_sccm": 50,
+          "gamma_o": 0.17,
+          "gamma_meta": 0.007
+        },
+        "temperature_ev": 3.0856256685080843,
+        "electron_density_m3": 1.3558161607787154e+17,
+        "densities_m3": {
+          "O2": 1.0920727361452999e+20,
+          "O2_a": 1.5023572358609865e+19,
+          "O": 3.252350444093479e+19,
+          "O_1D": 3.770170828556248e+18,
+          "O3": 4.171426910850762e+17,
+          "O-": 1.5470656253795284e+16,
+          "O2-": 380983322571691.94,
+          "O3-": 99793631880876.44,
+          "O+": 1.0254113031047138e+17,
+          "O2+": 4.899191897564802e+16,
+          "e": 1.3558161607787154e+17
+        },
+        "electronegativity": 0.11765188872720117,
+        "pumping_rate_s": 28.382711442644258,
+        "residence_time_s": 0.03523271559240556,
+        "feed_molecules_s": 2.238983426498703e+19,
+        "volume_m3": 0.005516335106808931,
+        "neutral_density_target_m3": 1.6094166393371597e+20,
+        "plasma_potential_v": 22.23316384584545,
+        "loss_w": {
+          "ionization": 35.61264484249148,
+          "excitation": 432.9029625643802,
+          "elastic": 0.5705118283080176,
+          "electron_wall": 6.370450309899167,
+          "ion_wall": 24.5434304549211,
+          "total": 499.99999999999994
+        },
+        "residuals": {
+          "checks": {
+            "species": true,
+            "electron": true,
+            "energy": true,
+            "neutral_pressure": true,
+            "oxygen_atoms": true,
+            "charge": true,
+            "positive_densities": true,
+            "temperature_range": true,
+            "positive_pumping": true,
+            "nonnegative_sheath": true,
+            "no_density_bound": true,
+            "finite": true
+          },
+          "species_relative": {
+            "O2": 7.209152861286608e-15,
+            "O2_a": -1.0580329771875586e-14,
+            "O": -5.37166345994421e-15,
+            "O_1D": -2.4213647253418126e-16,
+            "O3": 2.0357337496052905e-15,
+            "O-": 2.985645027054528e-15,
+            "O2-": 2.80826322951479e-15,
+            "O3-": 1.5171934361952467e-14,
+            "O+": 3.715169472156292e-15,
+            "O2+": 5.818741083045411e-16,
+            "e": 1.0321364364193916e-15
+          },
+          "energy_relative": -1.1368683772161603e-16,
+          "neutral_pressure_relative": 0.0,
+          "oxygen_atoms_relative": 1.2917238538926346e-16,
+          "charge_relative": 1.1961087093137689e-17,
+          "max_relative": 1.5171934361952467e-14,
+          "tolerance": 1e-06,
+          "oxygen_atom_in_m3_s": 8.117648341323852e+21,
+          "oxygen_atom_out_m3_s": 8.117648341323851e+21
+        },
+        "particle_production_loss_m3_s": {
+          "O2": {
+            "production": 2.9090130842720456e+22,
+            "loss": 2.9090130842720246e+22,
+            "net": 209715200.0
+          },
+          "O2_a": {
+            "production": 9.216874152563576e+21,
+            "loss": 9.216874152563673e+21,
+            "net": -97517568.0
+          },
+          "O": {
+            "production": 4.372593811050818e+22,
+            "loss": 4.372593811050841e+22,
+            "net": -234881024.0
+          },
+          "O_1D": {
+            "production": 1.7322066172447063e+22,
+            "loss": 1.7322066172447067e+22,
+            "net": -4194304.0
+          },
+          "O3": {
+            "production": 6.438563000953028e+20,
+            "loss": 6.438563000953015e+20,
+            "net": 1310720.0
+          },
+          "O-": {
+            "production": 5.7070950650855136e+20,
+            "loss": 5.7070950650854965e+20,
+            "net": 1703936.0
+          },
+          "O2-": {
+            "production": 1.3856250935110236e+19,
+            "loss": 1.3856250935110197e+19,
+            "net": 38912.0
+          },
+          "O3-": {
+            "production": 2.4634960255120763e+18,
+            "loss": 2.463496025512039e+18,
+            "net": 37376.0
+          },
+          "O+": {
+            "production": 1.3406483976918474e+21,
+            "loss": 1.3406483976918425e+21,
+            "net": 4980736.0
+          },
+          "O2+": {
+            "production": 2.703100168149766e+21,
+            "loss": 2.7031001681497644e+21,
+            "net": 1572864.0
+          },
+          "e": {
+            "production": 4.0637108157430786e+21,
+            "loss": 4.0637108157430744e+21,
+            "net": 4194304.0
+          }
+        },
+        "reaction_event_rates_m3_s": {
+          "k1": 2.137771551955835e+21,
+          "k2": 1.4613287808843784e+21,
+          "k3": 3.1307291504863026e+20,
+          "k4": 1.0641754339569155e+21,
+          "k5": 8.039137346563822e+19,
+          "k6": 3.028695436824071e+20,
+          "k7": 7.2314557558822175e+19,
+          "k8": 6.475616963923063e+21,
+          "k9": 1.067363453643094e+20,
+          "k10": 7.476059143465872e+18,
+          "k11": 3.3127195621576573e+19,
+          "k12": 1.583669902835299e+20,
+          "k13": 7.011661237603254e+21,
+          "k14": 9.44710181148104e+21,
+          "k15": 1.2351902317429914e+22,
+          "k16": 9.932152582536157e+20,
+          "k17": 2.3586970896988943e+20,
+          "k18": 9.216874152563576e+21,
+          "k19": 4.0665916605438906e+20,
+          "k20": 2.2110410560724845e+20,
+          "k21": 5.59135765515186e+21,
+          "k22": 1.9265675388833725e+21,
+          "k23": 1.8078385247661e+18,
+          "k24": 2.6396443319614346e+18,
+          "k25": 5.524831830969732e+18,
+          "k26": 2584028965139142.0,
+          "k27": 5.49652134831035e+17,
+          "k28": 1.092767938251276e+17,
+          "k29": 2.9001221883939154e+18,
+          "k30": 2.6156256364890337e+19,
+          "k31": 1.1311376038477408e+19,
+          "k32": 5973313491879956.0,
+          "k33": 3.6156770495322e+18,
+          "k34": 3.024598560124014e+17,
+          "k35": 1.9186553611101323e+20,
+          "k36": 2.4185454147515884e+18,
+          "k37": 7.344041869791485e+17,
+          "k38": 6.885039252929517e+17,
+          "k39": 6.914205403587634e+17,
+          "k40": 3.491673728811754e+17,
+          "k41": 4.4950610760487816e+16,
+          "k42": 2.637271234763047e+18,
+          "k43": 3.9991753506792014e+20,
+          "k44": 6.365566366398393e+20,
+          "k45": 153944436452640.3,
+          "k46": 48155922440661.81,
+          "k47": 48155922440661.81,
+          "k48": 8.627534712279393e+20
+        },
+        "wall_rates_s": {
+          "k50": 8513.997429721516,
+          "k51": 6020.305317560921,
+          "k52": 963.9009430426511,
+          "k53": 963.9009430426511,
+          "k54": 42.54934579792047
+        },
+        "electron_wall_loss_m3_s": 1.1679812302306999e+21,
+        "optimizer": {
+          "method": "bounded log least_squares with physical multistarts",
+          "attempts": [
+            {
+              "nfev": 13,
+              "optimizer_success": true,
+              "optimizer_status": 1,
+              "max_relative": 1.5171934361952467e-14,
+              "numerical_success": true
+            }
+          ],
+          "message": "`gtol` termination condition is satisfied.",
+          "total_nfev": 13
+        },
+        "metadata": {
+          "model_version": "oxygen-explicit-input-study-0.1",
+          "validation_status": "exploratory_not_literature_validated",
+          "success_definition": "numerical particle, reduced energy, pressure, atom and charge closure only",
+          "source_values": {
+            "chemistry_reference": "https://doi.org/10.1088/0022-3727/34/7/312",
+            "excitation_reference": "https://doi.org/10.1088/0022-3727/33/11/311",
+            "implemented_reaction_count": 48,
+            "excitation_term_count": 16,
+            "source_corrections": [
+              {
+                "reaction": "k24",
+                "printed_products": {
+                  "O2": 1
+                },
+                "implemented_products": {
+                  "O2": 2
+                },
+                "basis": "Both reactants contain two oxygen atoms; add product multiplicity 2 to conserve oxygen.",
+                "status": "conservation_normalization_not_author_erratum"
+              },
+              {
+                "reaction": "k26",
+                "printed_units": "m^3/s",
+                "implemented_units": "m^6/s",
+                "basis": "Three reactant densities require coefficient m^6/s; numerical value preserved.",
+                "status": "dimensional_normalization_not_author_erratum"
+              },
+              {
+                "reaction": "k44",
+                "printed_coefficient": "6.9e-40*(300/Tg)^(-1.25)*[O2] m^3/s",
+                "basis": "Move the printed [O2] density factor into explicit three-body mass action; do not double-count.",
+                "status": "equivalent_mass_action_normalization"
+              },
+              {
+                "reaction": "k45",
+                "printed_products": {
+                  "O3": 1,
+                  "O": 1
+                },
+                "printed_coefficient": "3.82e-40*[O] m^3/s",
+                "implemented_products": {
+                  "O3": 1,
+                  "O": 1,
+                  "e": 1
+                },
+                "basis": "Add emitted electron for charge conservation; separate printed [O] factor into third reactant.",
+                "status": "conservation_and_mass_action_normalization_not_author_erratum"
+              }
+            ],
+            "omitted_reactions": [
+              {
+                "reaction": "k49",
+                "printed_reactants": {
+                  "O2+": 1,
+                  "O_1D": 1
+                },
+                "printed_products": {
+                  "O2_a": 1,
+                  "O": 1
+                },
+                "reason": "Printed reaction destroys one positive charge without an electron. Replacing O2+ with neutral O2 would conserve charge but is an unverified interpretation, so the solver excludes k49.",
+                "effect": "Full 49-reaction reproduction not achieved; no success assertion permitted."
+              }
+            ],
+            "wall_return_reactions": [
+              {
+                "id": "k50",
+                "reactants": {
+                  "O+": 1
+                },
+                "products": {
+                  "O": 1
+                },
+                "charge_sink": "wall circuit",
+                "units": "s^-1",
+                "formula": "uB_Oplus*Aeff/V",
+                "source": "Table 2 p.1103"
+              },
+              {
+                "id": "k51",
+                "reactants": {
+                  "O2+": 1
+                },
+                "products": {
+                  "O2": 1
+                },
+                "charge_sink": "wall circuit",
+                "units": "s^-1",
+                "formula": "uB_O2plus*Aeff/V",
+                "source": "Table 2 p.1103"
+              },
+              {
+                "id": "k52",
+                "reactants": {
+                  "O": 1
+                },
+                "products": {
+                  "O2": 0.5
+                },
+                "gamma": 0.17,
+                "gamma_uncertainty": 0.02,
+                "units": "s^-1",
+                "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                "source": "Table 2 p.1103; section 2.2 p.1104; gamma measured stainless steel at 300 K"
+              },
+              {
+                "id": "k53",
+                "reactants": {
+                  "O_1D": 1
+                },
+                "products": {
+                  "O2": 0.5
+                },
+                "gamma": 0.17,
+                "units": "s^-1",
+                "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                "source": "Table 2 p.1103; assumes same probability as atomic O"
+              },
+              {
+                "id": "k54",
+                "reactants": {
+                  "O2_a": 1
+                },
+                "products": {
+                  "O2": 1
+                },
+                "gamma": 0.007,
+                "units": "s^-1",
+                "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                "source": "Table 2 p.1103; section 2.2 p.1104; quenching measured on Fe surface"
+              }
+            ],
+            "published_conditions": {
+              "radius_m": 0.152,
+              "length_m": 0.076,
+              "absorbed_power_w": 500.0,
+              "flow_sccm": 50.0,
+              "gas_temperature_k": 600.0,
+              "wall_material": "stainless steel",
+              "pressure_range_mtorr": [
+                1.0,
+                100.0
+              ],
+              "usual_global_model_range_mtorr": [
+                1.0,
+                20.0
+              ],
+              "figure2_powers_w": [
+                100.0,
+                500.0,
+                1500.0
+              ],
+              "source": "Section 3 p.1104; figure 1–3 captions; table 3"
+            }
+          },
+          "supplementary_values": {
+            "ionization_energies_ev": {
+              "O": {
+                "value": 13.618055,
+                "uncertainty_ev": 7e-06,
+                "source": "NIST Atomic Spectra Database, neutral oxygen ground-state ionization energy",
+                "url": "https://physics.nist.gov/cgi-bin/ASD/ie.pl?at_num_out=1&biblio=1&e_out=0&el_name_out=1&ion_charge_out=1&spectra=oxygen&unc_out=1&units=1"
+              },
+              "O2": {
+                "value": 12.0697,
+                "uncertainty_ev": 0.0002,
+                "source": "NIST Chemistry WebBook SRD69, evaluated molecular oxygen ionization energy",
+                "url": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C7782447&Mask=262"
+              },
+              "role": "Supplementary physical threshold values, not numerical values explicitly verified in the 2001/2000 paper. Rate-fit activation parameters are not thresholds.",
+              "checked_date": "2026-10-07"
+            },
+            "flow_standard_temperature_k": 273.15,
+            "flow_standard_pressure_pa": 101325.0
+          },
+          "case_inputs_and_assumptions": {
+            "absorbed_power_w": 500,
+            "pressure_pa": 1.3332236842105263,
+            "axial_edge_factor": 0.05,
+            "radial_edge_factor": 0.05,
+            "diffusion_o_m2_s": 1.2,
+            "diffusion_o2_m2_s": 0.84,
+            "electron_momentum_nu_s": {
+              "O": 10000000.0,
+              "O2": 10000000.0
+            },
+            "gas_temperature_k": 600,
+            "radius_m": 0.152,
+            "length_m": 0.076,
+            "flow_sccm": 50,
+            "gamma_o": 0.17,
+            "gamma_meta": 0.007
+          },
+          "closures": {
+            "absorbed_power": "total plasma absorbed power: collisional + electron-wall + ion-wall",
+            "energy": "source eq.(3) reduced ground-target collisional budget; not all 48 reaction energies",
+            "ionization": "ground O2 k1 and ground O k4 with supplementary NIST thresholds",
+            "excitation": "all 16 source-26 terms once; no additional per-particle excitation charge",
+            "elastic": "3*me/mi*Te*ne*nu_i; supplied nu_i are per-electron s^-1 frequencies, not m^3/s",
+            "wall_energy": "electron: 2Te; ion: phi+Te/2; each applied once to ion-balanced wall flux",
+            "sheath": "phi=Te*log(ne*sqrt(eTe/(2*pi*me))*A/(V*sum_i(kwi*ni)))",
+            "pressure": "sum of five neutral densities = p/(kB*Tg); ion pressure neglected",
+            "flow": "pure O2 feed; common unknown neutral pumping rate; charged pumping zero",
+            "negative_ion_wall_loss_s": 0.0,
+            "hL_hR": "explicit inputs; source electronegative edge closure not solved",
+            "surface": "explicit gammaO (also O_1D), gammaMeta; source candidate is SUS, not Si",
+            "zero_elastic": false
+          },
+          "unresolved_energy_channels": [
+            "Excited-target ionization k17/k19 has no additional reaction-resolved energy term in the reduced source budget.",
+            "Electron detachment k7, superelastic k21, attachment k3/k20 and additional dissociation k22/k43 lack a full supplied energy-transfer table.",
+            "New electrons from heavy-particle detachment do not have a supplied birth-energy distribution."
+          ],
+          "no_parameter_calibration": true,
+          "literature_reproduction_success": false
+        }
+      }
+    },
+    {
+      "case_id": "oat-hL-0.1",
+      "family": "hL",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.1,
+        "radial_edge_factor": 0.1,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      },
+      "input_sha256": "b9146e4dd9fc8fe37124beff51aff77e175088bcb4eb91124c0c446dcb6a3df9",
+      "result": {
+        "success": true,
+        "status": "converged_numerically",
+        "inputs": {
+          "absorbed_power_w": 500,
+          "pressure_pa": 1.3332236842105263,
+          "axial_edge_factor": 0.1,
+          "radial_edge_factor": 0.1,
+          "diffusion_o_m2_s": 1.2,
+          "diffusion_o2_m2_s": 0.84,
+          "electron_momentum_nu_s": {
+            "O": 10000000.0,
+            "O2": 10000000.0
+          },
+          "gas_temperature_k": 600,
+          "radius_m": 0.152,
+          "length_m": 0.076,
+          "flow_sccm": 50,
+          "gamma_o": 0.17,
+          "gamma_meta": 0.007
+        },
+        "temperature_ev": 3.285864369941777,
+        "electron_density_m3": 1.1075115910725222e+17,
+        "densities_m3": {
+          "O2": 1.086243689337882e+20,
+          "O2_a": 1.453524586866488e+19,
+          "O": 3.352154341358106e+19,
+          "O_1D": 3.7787846448545203e+18,
+          "O3": 4.817210728189624e+17,
+          "O-": 1.5952494729021444e+16,
+          "O2-": 398281484647554.5,
+          "O3-": 108196434266749.64,
+          "O+": 6.884068566908376e+16,
+          "O2+": 5.836944608610421e+16,
+          "e": 1.1075115910725222e+17
+        },
+        "electronegativity": 0.14861219314189533,
+        "pumping_rate_s": 28.476509882847804,
+        "residence_time_s": 0.035116662965861835,
+        "feed_molecules_s": 2.238983426498703e+19,
+        "volume_m3": 0.005516335106808931,
+        "neutral_density_target_m3": 1.6094166393371597e+20,
+        "plasma_potential_v": 21.455929032854336,
+        "loss_w": {
+          "ionization": 41.68894166822648,
+          "excitation": 407.0752012430422,
+          "elastic": 0.49627057021405946,
+          "electron_wall": 11.238293523952638,
+          "ion_wall": 39.50129299456839,
+          "total": 500.00000000000375
+        },
+        "residuals": {
+          "checks": {
+            "species": true,
+            "electron": true,
+            "energy": true,
+            "neutral_pressure": true,
+            "oxygen_atoms": true,
+            "charge": true,
+            "positive_densities": true,
+            "temperature_range": true,
+            "positive_pumping": true,
+            "nonnegative_sheath": true,
+            "no_density_bound": true,
+            "finite": true
+          },
+          "species_relative": {
+            "O2": -1.4113781193450794e-12,
+            "O2_a": -6.283672601282602e-13,
+            "O": -5.142956231017922e-13,
+            "O_1D": -1.5852143434901405e-13,
+            "O3": -2.5759295298345377e-13,
+            "O-": -3.198077684758847e-14,
+            "O2-": -9.70354016106648e-15,
+            "O3-": -1.762377842771882e-14,
+            "O+": -1.1654168533137877e-14,
+            "O2+": -2.883990069410456e-15,
+            "e": -2.2350890987884346e-15
+          },
+          "energy_relative": 7.503331289626658e-15,
+          "neutral_pressure_relative": -5.171483751670337e-14,
+          "oxygen_atoms_relative": -1.4528405701675556e-11,
+          "charge_relative": -1.627474534799047e-17,
+          "max_relative": 1.4528405701675556e-11,
+          "tolerance": 1e-06,
+          "oxygen_atom_in_m3_s": 8.117648341323852e+21,
+          "oxygen_atom_out_m3_s": 8.117648341441789e+21
+        },
+        "particle_production_loss_m3_s": {
+          "O2": {
+            "production": 2.9081830291508526e+22,
+            "loss": 2.908183029154957e+22,
+            "net": -41045458944.0
+          },
+          "O2_a": {
+            "production": 7.961516160112655e+21,
+            "loss": 7.961516160117658e+21,
+            "net": -5002756096.0
+          },
+          "O": {
+            "production": 4.381099133625875e+22,
+            "loss": 4.381099133628128e+22,
+            "net": -22531801088.0
+          },
+          "O_1D": {
+            "production": 1.7343813997710425e+22,
+            "loss": 1.7343813997713175e+22,
+            "net": -2749366272.0
+          },
+          "O3": {
+            "production": 6.569044301876756e+20,
+            "loss": 6.569044301878449e+20,
+            "net": -169213952.0
+          },
+          "O-": {
+            "production": 4.959139071443602e+20,
+            "loss": 4.9591390714437606e+20,
+            "net": -15859712.0
+          },
+          "O2-": {
+            "production": 1.3296590508037655e+19,
+            "loss": 1.3296590508037784e+19,
+            "net": -129024.0
+          },
+          "O3-": {
+            "production": 2.934217552273923e+18,
+            "loss": 2.934217552273975e+18,
+            "net": -51712.0
+          },
+          "O+": {
+            "production": 1.5295636020118726e+21,
+            "loss": 1.5295636020118904e+21,
+            "net": -17825792.0
+          },
+          "O2+": {
+            "production": 3.090473887041485e+21,
+            "loss": 3.090473887041494e+21,
+            "net": -8912896.0
+          },
+          "e": {
+            "production": 4.6914281876655157e+21,
+            "loss": 4.691428187665526e+21,
+            "net": -10485760.0
+          }
+        },
+        "reaction_event_rates_m3_s": {
+          "k1": 2.526204274037159e+21,
+          "k2": 1.4221864383065544e+21,
+          "k3": 2.7746475477393205e+20,
+          "k4": 1.2247575865110933e+21,
+          "k5": 9.876212891022002e+19,
+          "k6": 2.0966337066346925e+20,
+          "k7": 6.537309205227341e+19,
+          "k8": 6.23544158866423e+21,
+          "k9": 1.1343808152634761e+20,
+          "k10": 8.769189611072139e+18,
+          "k11": 4.227904824839538e+19,
+          "k12": 1.0575172289007706e+20,
+          "k13": 8.182047128555174e+21,
+          "k14": 8.321742133914002e+21,
+          "k15": 1.2314042921520325e+22,
+          "k16": 1.0260326175368215e+21,
+          "k17": 2.537577776413119e+20,
+          "k18": 7.961516160112655e+21,
+          "k19": 4.582833993001566e+20,
+          "k20": 1.8282473955048194e+20,
+          "k21": 4.615125255727295e+21,
+          "k22": 1.6673833088599445e+21,
+          "k23": 1.8035520461803548e+18,
+          "k24": 3.2876886863139835e+18,
+          "k25": 3.877486572315141e+18,
+          "k26": 2088316184379644.5,
+          "k27": 3.8050019120407386e+17,
+          "k28": 1.1052518896334114e+17,
+          "k29": 3.1248352112729216e+18,
+          "k30": 2.373034767026335e+19,
+          "k31": 1.0670233436217807e+19,
+          "k32": 6126478061601169.0,
+          "k33": 3.6071040923607096e+18,
+          "k34": 2.344908140921595e+17,
+          "k35": 2.2836768484443993e+20,
+          "k36": 2.8799511842590664e+18,
+          "k37": 8.206763821173261e+17,
+          "k38": 7.69384108234993e+17,
+          "k39": 8.931276158947877e+17,
+          "k40": 4.510294460268677e+17,
+          "k41": 5.426636801485645e+16,
+          "k42": 2.841617518408306e+18,
+          "k43": 3.772497209796524e+20,
+          "k44": 6.491052540741741e+20,
+          "k45": 170962749232542.62,
+          "k46": 40327337786960.02,
+          "k47": 40327337786960.02,
+          "k48": 8.396442350500454e+20
+        },
+        "wall_rates_s": {
+          "k50": 17571.818454794782,
+          "k51": 12425.151987164314,
+          "k52": 963.9009430426511,
+          "k53": 963.9009430426511,
+          "k54": 42.54934579792047
+        },
+        "electron_wall_loss_m3_s": 1.9349052699071708e+21,
+        "optimizer": {
+          "method": "bounded log least_squares with physical multistarts",
+          "attempts": [
+            {
+              "nfev": 10,
+              "optimizer_success": true,
+              "optimizer_status": 1,
+              "max_relative": 1.4528405701675556e-11,
+              "numerical_success": true
+            }
+          ],
+          "message": "`gtol` termination condition is satisfied.",
+          "total_nfev": 10
+        },
+        "metadata": {
+          "model_version": "oxygen-explicit-input-study-0.1",
+          "validation_status": "exploratory_not_literature_validated",
+          "success_definition": "numerical particle, reduced energy, pressure, atom and charge closure only",
+          "source_values": {
+            "chemistry_reference": "https://doi.org/10.1088/0022-3727/34/7/312",
+            "excitation_reference": "https://doi.org/10.1088/0022-3727/33/11/311",
+            "implemented_reaction_count": 48,
+            "excitation_term_count": 16,
+            "source_corrections": [
+              {
+                "reaction": "k24",
+                "printed_products": {
+                  "O2": 1
+                },
+                "implemented_products": {
+                  "O2": 2
+                },
+                "basis": "Both reactants contain two oxygen atoms; add product multiplicity 2 to conserve oxygen.",
+                "status": "conservation_normalization_not_author_erratum"
+              },
+              {
+                "reaction": "k26",
+                "printed_units": "m^3/s",
+                "implemented_units": "m^6/s",
+                "basis": "Three reactant densities require coefficient m^6/s; numerical value preserved.",
+                "status": "dimensional_normalization_not_author_erratum"
+              },
+              {
+                "reaction": "k44",
+                "printed_coefficient": "6.9e-40*(300/Tg)^(-1.25)*[O2] m^3/s",
+                "basis": "Move the printed [O2] density factor into explicit three-body mass action; do not double-count.",
+                "status": "equivalent_mass_action_normalization"
+              },
+              {
+                "reaction": "k45",
+                "printed_products": {
+                  "O3": 1,
+                  "O": 1
+                },
+                "printed_coefficient": "3.82e-40*[O] m^3/s",
+                "implemented_products": {
+                  "O3": 1,
+                  "O": 1,
+                  "e": 1
+                },
+                "basis": "Add emitted electron for charge conservation; separate printed [O] factor into third reactant.",
+                "status": "conservation_and_mass_action_normalization_not_author_erratum"
+              }
+            ],
+            "omitted_reactions": [
+              {
+                "reaction": "k49",
+                "printed_reactants": {
+                  "O2+": 1,
+                  "O_1D": 1
+                },
+                "printed_products": {
+                  "O2_a": 1,
+                  "O": 1
+                },
+                "reason": "Printed reaction destroys one positive charge without an electron. Replacing O2+ with neutral O2 would conserve charge but is an unverified interpretation, so the solver excludes k49.",
+                "effect": "Full 49-reaction reproduction not achieved; no success assertion permitted."
+              }
+            ],
+            "wall_return_reactions": [
+              {
+                "id": "k50",
+                "reactants": {
+                  "O+": 1
+                },
+                "products": {
+                  "O": 1
+                },
+                "charge_sink": "wall circuit",
+                "units": "s^-1",
+                "formula": "uB_Oplus*Aeff/V",
+                "source": "Table 2 p.1103"
+              },
+              {
+                "id": "k51",
+                "reactants": {
+                  "O2+": 1
+                },
+                "products": {
+                  "O2": 1
+                },
+                "charge_sink": "wall circuit",
+                "units": "s^-1",
+                "formula": "uB_O2plus*Aeff/V",
+                "source": "Table 2 p.1103"
+              },
+              {
+                "id": "k52",
+                "reactants": {
+                  "O": 1
+                },
+                "products": {
+                  "O2": 0.5
+                },
+                "gamma": 0.17,
+                "gamma_uncertainty": 0.02,
+                "units": "s^-1",
+                "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                "source": "Table 2 p.1103; section 2.2 p.1104; gamma measured stainless steel at 300 K"
+              },
+              {
+                "id": "k53",
+                "reactants": {
+                  "O_1D": 1
+                },
+                "products": {
+                  "O2": 0.5
+                },
+                "gamma": 0.17,
+                "units": "s^-1",
+                "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                "source": "Table 2 p.1103; assumes same probability as atomic O"
+              },
+              {
+                "id": "k54",
+                "reactants": {
+                  "O2_a": 1
+                },
+                "products": {
+                  "O2": 1
+                },
+                "gamma": 0.007,
+                "units": "s^-1",
+                "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                "source": "Table 2 p.1103; section 2.2 p.1104; quenching measured on Fe surface"
+              }
+            ],
+            "published_conditions": {
+              "radius_m": 0.152,
+              "length_m": 0.076,
+              "absorbed_power_w": 500.0,
+              "flow_sccm": 50.0,
+              "gas_temperature_k": 600.0,
+              "wall_material": "stainless steel",
+              "pressure_range_mtorr": [
+                1.0,
+                100.0
+              ],
+              "usual_global_model_range_mtorr": [
+                1.0,
+                20.0
+              ],
+              "figure2_powers_w": [
+                100.0,
+                500.0,
+                1500.0
+              ],
+              "source": "Section 3 p.1104; figure 1–3 captions; table 3"
+            }
+          },
+          "supplementary_values": {
+            "ionization_energies_ev": {
+              "O": {
+                "value": 13.618055,
+                "uncertainty_ev": 7e-06,
+                "source": "NIST Atomic Spectra Database, neutral oxygen ground-state ionization energy",
+                "url": "https://physics.nist.gov/cgi-bin/ASD/ie.pl?at_num_out=1&biblio=1&e_out=0&el_name_out=1&ion_charge_out=1&spectra=oxygen&unc_out=1&units=1"
+              },
+              "O2": {
+                "value": 12.0697,
+                "uncertainty_ev": 0.0002,
+                "source": "NIST Chemistry WebBook SRD69, evaluated molecular oxygen ionization energy",
+                "url": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C7782447&Mask=262"
+              },
+              "role": "Supplementary physical threshold values, not numerical values explicitly verified in the 2001/2000 paper. Rate-fit activation parameters are not thresholds.",
+              "checked_date": "2026-10-07"
+            },
+            "flow_standard_temperature_k": 273.15,
+            "flow_standard_pressure_pa": 101325.0
+          },
+          "case_inputs_and_assumptions": {
+            "absorbed_power_w": 500,
+            "pressure_pa": 1.3332236842105263,
+            "axial_edge_factor": 0.1,
+            "radial_edge_factor": 0.1,
+            "diffusion_o_m2_s": 1.2,
+            "diffusion_o2_m2_s": 0.84,
+            "electron_momentum_nu_s": {
+              "O": 10000000.0,
+              "O2": 10000000.0
+            },
+            "gas_temperature_k": 600,
+            "radius_m": 0.152,
+            "length_m": 0.076,
+            "flow_sccm": 50,
+            "gamma_o": 0.17,
+            "gamma_meta": 0.007
+          },
+          "closures": {
+            "absorbed_power": "total plasma absorbed power: collisional + electron-wall + ion-wall",
+            "energy": "source eq.(3) reduced ground-target collisional budget; not all 48 reaction energies",
+            "ionization": "ground O2 k1 and ground O k4 with supplementary NIST thresholds",
+            "excitation": "all 16 source-26 terms once; no additional per-particle excitation charge",
+            "elastic": "3*me/mi*Te*ne*nu_i; supplied nu_i are per-electron s^-1 frequencies, not m^3/s",
+            "wall_energy": "electron: 2Te; ion: phi+Te/2; each applied once to ion-balanced wall flux",
+            "sheath": "phi=Te*log(ne*sqrt(eTe/(2*pi*me))*A/(V*sum_i(kwi*ni)))",
+            "pressure": "sum of five neutral densities = p/(kB*Tg); ion pressure neglected",
+            "flow": "pure O2 feed; common unknown neutral pumping rate; charged pumping zero",
+            "negative_ion_wall_loss_s": 0.0,
+            "hL_hR": "explicit inputs; source electronegative edge closure not solved",
+            "surface": "explicit gammaO (also O_1D), gammaMeta; source candidate is SUS, not Si",
+            "zero_elastic": false
+          },
+          "unresolved_energy_channels": [
+            "Excited-target ionization k17/k19 has no additional reaction-resolved energy term in the reduced source budget.",
+            "Electron detachment k7, superelastic k21, attachment k3/k20 and additional dissociation k22/k43 lack a full supplied energy-transfer table.",
+            "New electrons from heavy-particle detachment do not have a supplied birth-energy distribution."
+          ],
+          "no_parameter_calibration": true,
+          "literature_reproduction_success": false
+        }
+      }
+    },
+    {
+      "case_id": "oat-hL-0.4",
+      "family": "hL",
+      "diffusion_scale": 1,
+      "inputs": {
+        "absorbed_power_w": 500,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.4,
+        "radial_edge_factor": 0.4,
+        "diffusion_o_m2_s": 1.2,
+        "diffusion_o2_m2_s": 0.84,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      },
+      "input_sha256": "f5fe9d6038214b341847bcbbd5960bed51f8fd6f1debceb9e6eac6a21dbfeb0b",
+      "result": {
+        "success": true,
+        "status": "converged_numerically",
+        "inputs": {
+          "absorbed_power_w": 500,
+          "pressure_pa": 1.3332236842105263,
+          "axial_edge_factor": 0.4,
+          "radial_edge_factor": 0.4,
+          "diffusion_o_m2_s": 1.2,
+          "diffusion_o2_m2_s": 0.84,
+          "electron_momentum_nu_s": {
+            "O": 10000000.0,
+            "O2": 10000000.0
+          },
+          "gas_temperature_k": 600,
+          "radius_m": 0.152,
+          "length_m": 0.076,
+          "flow_sccm": 50,
+          "gamma_o": 0.17,
+          "gamma_meta": 0.007
+        },
+        "temperature_ev": 3.9069856604509643,
+        "electron_density_m3": 6.014950015265795e+16,
+        "densities_m3": {
+          "O2": 1.103752383500294e+20,
+          "O2_a": 1.3053849780836246e+19,
+          "O": 3.3284959181692903e+19,
+          "O_1D": 3.5308269316614016e+18,
+          "O3": 6.967896894960545e+17,
+          "O-": 1.585159450372097e+16,
+          "O2-": 428455295384641.44,
+          "O3-": 160977545653844.03,
+          "O+": 2.187195969066418e+16,
+          "O2+": 5.4718567806753224e+16,
+          "e": 6.014950015265795e+16
+        },
+        "electronegativity": 0.2733360593692804,
+        "pumping_rate_s": 28.40679345919961,
+        "residence_time_s": 0.035202846862539765,
+        "feed_molecules_s": 2.238983426498703e+19,
+        "volume_m3": 0.005516335106808931,
+        "neutral_density_target_m3": 1.6094166393371597e+20,
+        "plasma_potential_v": 20.046115928482706,
+        "loss_w": {
+          "ionization": 56.00777176594686,
+          "excitation": 321.3619440478323,
+          "elastic": 0.32047521535491025,
+          "electron_wall": 32.05671163984023,
+          "ion_wall": 90.25309733102655,
+          "total": 500.00000000000085
+        },
+        "residuals": {
+          "checks": {
+            "species": true,
+            "electron": true,
+            "energy": true,
+            "neutral_pressure": true,
+            "oxygen_atoms": true,
+            "charge": true,
+            "positive_densities": true,
+            "temperature_range": true,
+            "positive_pumping": true,
+            "nonnegative_sheath": true,
+            "no_density_bound": true,
+            "finite": true
+          },
+          "species_relative": {
+            "O2": -7.805665996313235e-15,
+            "O2_a": 1.3968424726831396e-14,
+            "O": -1.8597192230053994e-15,
+            "O_1D": 1.8156181340432638e-14,
+            "O3": -5.253740790243894e-15,
+            "O-": -5.305521646091272e-15,
+            "O2-": 3.65537924018153e-16,
+            "O3-": -3.6365159239753645e-15,
+            "O+": 1.8869670269196413e-14,
+            "O2+": 3.732269408391276e-15,
+            "e": 8.412546437661537e-15
+          },
+          "energy_relative": 1.7053025658242404e-15,
+          "neutral_pressure_relative": 2.0360172250670616e-16,
+          "oxygen_atoms_relative": -1.0333790831141067e-15,
+          "charge_relative": -2.2644771575159634e-17,
+          "max_relative": 1.8869670269196413e-14,
+          "tolerance": 1e-06,
+          "oxygen_atom_in_m3_s": 8.117648341323852e+21,
+          "oxygen_atom_out_m3_s": 8.117648341323861e+21
+        },
+        "particle_production_loss_m3_s": {
+          "O2": {
+            "production": 2.9016411425620177e+22,
+            "loss": 2.9016411425620403e+22,
+            "net": -226492416.0
+          },
+          "O2_a": {
+            "production": 5.104596215709031e+21,
+            "loss": 5.10459621570896e+21,
+            "net": 71303168.0
+          },
+          "O": {
+            "production": 4.0596166919214915e+22,
+            "loss": 4.059616691921499e+22,
+            "net": -75497472.0
+          },
+          "O_1D": {
+            "production": 1.6401884207712144e+22,
+            "loss": 1.6401884207711846e+22,
+            "net": 297795584.0
+          },
+          "O3": {
+            "production": 6.736046069443966e+20,
+            "loss": 6.736046069444001e+20,
+            "net": -3538944.0
+          },
+          "O-": {
+            "production": 3.211627646935205e+20,
+            "loss": 3.211627646935222e+20,
+            "net": -1703936.0
+          },
+          "O2-": {
+            "production": 1.1205403682810728e+19,
+            "loss": 1.1205403682810724e+19,
+            "net": 4096.0
+          },
+          "O3-": {
+            "production": 4.2238231101181896e+18,
+            "loss": 4.223823110118205e+18,
+            "net": -15360.0
+          },
+          "O+": {
+            "production": 1.7782203674632071e+21,
+            "loss": 1.7782203674631736e+21,
+            "net": 33554432.0
+          },
+          "O2+": {
+            "production": 4.214229542121808e+21,
+            "loss": 4.214229542121792e+21,
+            "net": 15728640.0
+          },
+          "e": {
+            "production": 6.107570921686625e+21,
+            "loss": 6.107570921686573e+21,
+            "net": 51380224.0
+          }
+        },
+        "reaction_event_rates_m3_s": {
+          "k1": 3.626046033641774e+21,
+          "k2": 7.240847905820156e+20,
+          "k3": 1.8944762103619617e+20,
+          "k4": 1.4396498360255064e+21,
+          "k5": 9.199917591387687e+19,
+          "k6": 6.619259651831939e+19,
+          "k7": 4.195178075103525e+19,
+          "k8": 5.216741655322604e+21,
+          "k9": 1.1192503524059072e+20,
+          "k10": 1.201127840583492e+19,
+          "k11": 7.175763591513869e+19,
+          "k12": 3.4140851541380133e+19,
+          "k13": 1.0960787012786921e+22,
+          "k14": 5.013484860042116e+21,
+          "k15": 1.169147592464486e+22,
+          "k16": 9.519397854135593e+20,
+          "k17": 2.5480161711672705e+20,
+          "k18": 5.104596215709031e+21,
+          "k19": 5.539348927621037e+20,
+          "k20": 9.962139594247725e+19,
+          "k21": 2.5038601241664495e+21,
+          "k22": 1.0159937584367607e+21,
+          "k23": 1.6094935930340406e+18,
+          "k24": 3.315547348213293e+18,
+          "k25": 1.3252817253681687e+18,
+          "k26": 1171032026765048.5,
+          "k27": 1.2012730479250555e+17,
+          "k28": 1.0678073152401509e+17,
+          "k29": 3.3378478743027907e+18,
+          "k30": 1.6744599336773663e+19,
+          "k31": 8.382310306942659e+18,
+          "k32": 6185853283150123.0,
+          "k33": 3.218987186068081e+18,
+          "k34": 1.0776417655021414e+17,
+          "k35": 3.279931262175489e+20,
+          "k36": 4.1393823325221837e+18,
+          "k37": 1.2124066528715507e+18,
+          "k38": 1.1366312370670787e+18,
+          "k39": 1.2457044652355983e+18,
+          "k40": 6.29080754943977e+17,
+          "k41": 8.444077759600566e+16,
+          "k42": 3.035323897779879e+18,
+          "k43": 2.963594230024522e+20,
+          "k44": 6.654691434590593e+20,
+          "k45": 181328026571595.1,
+          "k46": 22097935712767.92,
+          "k47": 22097935712767.92,
+          "k48": 4.274922075783141e+20
+        },
+        "wall_rates_s": {
+          "k50": 76643.05210439322,
+          "k51": 54194.82187385034,
+          "k52": 963.9009430426511,
+          "k53": 963.9009430426511,
+          "k54": 42.54934579792047
+        },
+        "electron_wall_loss_m3_s": 4.6417967816759554e+21,
+        "optimizer": {
+          "method": "bounded log least_squares with physical multistarts",
+          "attempts": [
+            {
+              "nfev": 8,
+              "optimizer_success": true,
+              "optimizer_status": 1,
+              "max_relative": 1.8869670269196413e-14,
+              "numerical_success": true
+            }
+          ],
+          "message": "`gtol` termination condition is satisfied.",
+          "total_nfev": 8
+        },
+        "metadata": {
+          "model_version": "oxygen-explicit-input-study-0.1",
+          "validation_status": "exploratory_not_literature_validated",
+          "success_definition": "numerical particle, reduced energy, pressure, atom and charge closure only",
+          "source_values": {
+            "chemistry_reference": "https://doi.org/10.1088/0022-3727/34/7/312",
+            "excitation_reference": "https://doi.org/10.1088/0022-3727/33/11/311",
+            "implemented_reaction_count": 48,
+            "excitation_term_count": 16,
+            "source_corrections": [
+              {
+                "reaction": "k24",
+                "printed_products": {
+                  "O2": 1
+                },
+                "implemented_products": {
+                  "O2": 2
+                },
+                "basis": "Both reactants contain two oxygen atoms; add product multiplicity 2 to conserve oxygen.",
+                "status": "conservation_normalization_not_author_erratum"
+              },
+              {
+                "reaction": "k26",
+                "printed_units": "m^3/s",
+                "implemented_units": "m^6/s",
+                "basis": "Three reactant densities require coefficient m^6/s; numerical value preserved.",
+                "status": "dimensional_normalization_not_author_erratum"
+              },
+              {
+                "reaction": "k44",
+                "printed_coefficient": "6.9e-40*(300/Tg)^(-1.25)*[O2] m^3/s",
+                "basis": "Move the printed [O2] density factor into explicit three-body mass action; do not double-count.",
+                "status": "equivalent_mass_action_normalization"
+              },
+              {
+                "reaction": "k45",
+                "printed_products": {
+                  "O3": 1,
+                  "O": 1
+                },
+                "printed_coefficient": "3.82e-40*[O] m^3/s",
+                "implemented_products": {
+                  "O3": 1,
+                  "O": 1,
+                  "e": 1
+                },
+                "basis": "Add emitted electron for charge conservation; separate printed [O] factor into third reactant.",
+                "status": "conservation_and_mass_action_normalization_not_author_erratum"
+              }
+            ],
+            "omitted_reactions": [
+              {
+                "reaction": "k49",
+                "printed_reactants": {
+                  "O2+": 1,
+                  "O_1D": 1
+                },
+                "printed_products": {
+                  "O2_a": 1,
+                  "O": 1
+                },
+                "reason": "Printed reaction destroys one positive charge without an electron. Replacing O2+ with neutral O2 would conserve charge but is an unverified interpretation, so the solver excludes k49.",
+                "effect": "Full 49-reaction reproduction not achieved; no success assertion permitted."
+              }
+            ],
+            "wall_return_reactions": [
+              {
+                "id": "k50",
+                "reactants": {
+                  "O+": 1
+                },
+                "products": {
+                  "O": 1
+                },
+                "charge_sink": "wall circuit",
+                "units": "s^-1",
+                "formula": "uB_Oplus*Aeff/V",
+                "source": "Table 2 p.1103"
+              },
+              {
+                "id": "k51",
+                "reactants": {
+                  "O2+": 1
+                },
+                "products": {
+                  "O2": 1
+                },
+                "charge_sink": "wall circuit",
+                "units": "s^-1",
+                "formula": "uB_O2plus*Aeff/V",
+                "source": "Table 2 p.1103"
+              },
+              {
+                "id": "k52",
+                "reactants": {
+                  "O": 1
+                },
+                "products": {
+                  "O2": 0.5
+                },
+                "gamma": 0.17,
+                "gamma_uncertainty": 0.02,
+                "units": "s^-1",
+                "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                "source": "Table 2 p.1103; section 2.2 p.1104; gamma measured stainless steel at 300 K"
+              },
+              {
+                "id": "k53",
+                "reactants": {
+                  "O_1D": 1
+                },
+                "products": {
+                  "O2": 0.5
+                },
+                "gamma": 0.17,
+                "units": "s^-1",
+                "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                "source": "Table 2 p.1103; assumes same probability as atomic O"
+              },
+              {
+                "id": "k54",
+                "reactants": {
+                  "O2_a": 1
+                },
+                "products": {
+                  "O2": 1
+                },
+                "gamma": 0.007,
+                "units": "s^-1",
+                "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                "source": "Table 2 p.1103; section 2.2 p.1104; quenching measured on Fe surface"
+              }
+            ],
+            "published_conditions": {
+              "radius_m": 0.152,
+              "length_m": 0.076,
+              "absorbed_power_w": 500.0,
+              "flow_sccm": 50.0,
+              "gas_temperature_k": 600.0,
+              "wall_material": "stainless steel",
+              "pressure_range_mtorr": [
+                1.0,
+                100.0
+              ],
+              "usual_global_model_range_mtorr": [
+                1.0,
+                20.0
+              ],
+              "figure2_powers_w": [
+                100.0,
+                500.0,
+                1500.0
+              ],
+              "source": "Section 3 p.1104; figure 1–3 captions; table 3"
+            }
+          },
+          "supplementary_values": {
+            "ionization_energies_ev": {
+              "O": {
+                "value": 13.618055,
+                "uncertainty_ev": 7e-06,
+                "source": "NIST Atomic Spectra Database, neutral oxygen ground-state ionization energy",
+                "url": "https://physics.nist.gov/cgi-bin/ASD/ie.pl?at_num_out=1&biblio=1&e_out=0&el_name_out=1&ion_charge_out=1&spectra=oxygen&unc_out=1&units=1"
+              },
+              "O2": {
+                "value": 12.0697,
+                "uncertainty_ev": 0.0002,
+                "source": "NIST Chemistry WebBook SRD69, evaluated molecular oxygen ionization energy",
+                "url": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C7782447&Mask=262"
+              },
+              "role": "Supplementary physical threshold values, not numerical values explicitly verified in the 2001/2000 paper. Rate-fit activation parameters are not thresholds.",
+              "checked_date": "2026-10-07"
+            },
+            "flow_standard_temperature_k": 273.15,
+            "flow_standard_pressure_pa": 101325.0
+          },
+          "case_inputs_and_assumptions": {
+            "absorbed_power_w": 500,
+            "pressure_pa": 1.3332236842105263,
+            "axial_edge_factor": 0.4,
+            "radial_edge_factor": 0.4,
+            "diffusion_o_m2_s": 1.2,
+            "diffusion_o2_m2_s": 0.84,
+            "electron_momentum_nu_s": {
+              "O": 10000000.0,
+              "O2": 10000000.0
+            },
+            "gas_temperature_k": 600,
+            "radius_m": 0.152,
+            "length_m": 0.076,
+            "flow_sccm": 50,
+            "gamma_o": 0.17,
+            "gamma_meta": 0.007
+          },
+          "closures": {
+            "absorbed_power": "total plasma absorbed power: collisional + electron-wall + ion-wall",
+            "energy": "source eq.(3) reduced ground-target collisional budget; not all 48 reaction energies",
+            "ionization": "ground O2 k1 and ground O k4 with supplementary NIST thresholds",
+            "excitation": "all 16 source-26 terms once; no additional per-particle excitation charge",
+            "elastic": "3*me/mi*Te*ne*nu_i; supplied nu_i are per-electron s^-1 frequencies, not m^3/s",
+            "wall_energy": "electron: 2Te; ion: phi+Te/2; each applied once to ion-balanced wall flux",
+            "sheath": "phi=Te*log(ne*sqrt(eTe/(2*pi*me))*A/(V*sum_i(kwi*ni)))",
+            "pressure": "sum of five neutral densities = p/(kB*Tg); ion pressure neglected",
+            "flow": "pure O2 feed; common unknown neutral pumping rate; charged pumping zero",
+            "negative_ion_wall_loss_s": 0.0,
+            "hL_hR": "explicit inputs; source electronegative edge closure not solved",
+            "surface": "explicit gammaO (also O_1D), gammaMeta; source candidate is SUS, not Si",
+            "zero_elastic": false
+          },
+          "unresolved_energy_channels": [
+            "Excited-target ionization k17/k19 has no additional reaction-resolved energy term in the reduced source budget.",
+            "Electron detachment k7, superelastic k21, attachment k3/k20 and additional dissociation k22/k43 lack a full supplied energy-transfer table.",
+            "New electrons from heavy-particle detachment do not have a supplied birth-energy distribution."
+          ],
+          "no_parameter_calibration": true,
+          "literature_reproduction_success": false
+        }
+      }
+    },
+    {
+      "case_id": "oat-diffusion_scale-0.5",
+      "family": "diffusion_scale",
+      "diffusion_scale": 0.5,
+      "inputs": {
+        "absorbed_power_w": 500,
+        "pressure_pa": 1.3332236842105263,
+        "axial_edge_factor": 0.2,
+        "radial_edge_factor": 0.2,
+        "diffusion_o_m2_s": 0.6,
+        "diffusion_o2_m2_s": 0.42,
+        "electron_momentum_nu_s": {
+          "O": 10000000.0,
+          "O2": 10000000.0
+        },
+        "gas_temperature_k": 600,
+        "radius_m": 0.152,
+        "length_m": 0.076,
+        "flow_sccm": 50,
+        "gamma_o": 0.17,
+        "gamma_meta": 0.007
+      },
+      "input_sha256": "0be7219c837ae451429b4c17c511349415937c329636b5a0ba5299046ca740ab",
+      "result": {
+        "success": true,
+        "status": "converged_numerically",
+        "inputs": {
+          "absorbed_power_w": 500,
+          "pressure_pa": 1.3332236842105263,
+          "axial_edge_factor": 0.2,
+          "radial_edge_factor": 0.2,
+          "diffusion_o_m2_s": 0.6,
+          "diffusion_o2_m2_s": 0.42,
+          "electron_momentum_nu_s": {
+            "O": 10000000.0,
+            "O2": 10000000.0
+          },
+          "gas_temperature_k": 600,
+          "radius_m": 0.152,
+          "length_m": 0.076,
+          "flow_sccm": 50,
+          "gamma_o": 0.17,
+          "gamma_meta": 0.007
+        },
+        "temperature_ev": 3.480012566584621,
+        "electron_density_m3": 9.216006645015531e+16,
+        "densities_m3": {
+          "O2": 9.960885901052551e+19,
+          "O2_a": 1.2921455064459885e+19,
+          "O": 4.34016770635154e+19,
+          "O_1D": 4.4843729884416036e+18,
+          "O3": 5.252998067735696e+17,
+          "O-": 1.3835530317328106e+16,
+          "O2-": 343429076575042.25,
+          "O3-": 90810214876583.39,
+          "O+": 5.226699353452706e+16,
+          "O2+": 5.416284252440798e+16,
+          "e": 9.216006645015531e+16
+        },
+        "electronegativity": 0.15483679817546056,
+        "pumping_rate_s": 29.57005726681609,
+        "residence_time_s": 0.03381799334971912,
+        "feed_molecules_s": 2.238983426498703e+19,
+        "volume_m3": 0.005516335106808931,
+        "neutral_density_target_m3": 1.6094166393371597e+20,
+        "plasma_potential_v": 20.352158785113353,
+        "loss_w": {
+          "ionization": 49.39439360365384,
+          "excitation": 366.0641841753628,
+          "elastic": 0.43736517497228167,
+          "electron_wall": 20.148785574521277,
+          "ion_wall": 63.955271471490384,
+          "total": 500.00000000000057
+        },
+        "residuals": {
+          "checks": {
+            "species": true,
+            "electron": true,
+            "energy": true,
+            "neutral_pressure": true,
+            "oxygen_atoms": true,
+            "charge": true,
+            "positive_densities": true,
+            "temperature_range": true,
+            "positive_pumping": true,
+            "nonnegative_sheath": true,
+            "no_density_bound": true,
+            "finite": true
+          },
+          "species_relative": {
+            "O2": -6.959226038859061e-15,
+            "O2_a": 3.929991519301798e-15,
+            "O": 3.109058603308152e-15,
+            "O_1D": 7.598042784856393e-15,
+            "O3": 9.733361279146882e-15,
+            "O-": 7.495150759292823e-15,
+            "O2-": 1.7114878356185786e-16,
+            "O3-": -4.6130200281533636e-15,
+            "O+": 8.717329459055239e-15,
+            "O2+": 6.523380369669469e-16,
+            "e": 2.901308956857088e-15
+          },
+          "energy_relative": 1.1368683772161603e-15,
+          "neutral_pressure_relative": 0.0,
+          "oxygen_atoms_relative": -1.2917238538926344e-16,
+          "charge_relative": -1.7103404152497332e-17,
+          "max_relative": 9.733361279146882e-15,
+          "tolerance": 1e-06,
+          "oxygen_atom_in_m3_s": 8.117648341323852e+21,
+          "oxygen_atom_out_m3_s": 8.117648341323853e+21
+        },
+        "particle_production_loss_m3_s": {
+          "O2": {
+            "production": 2.7121360758522295e+22,
+            "loss": 2.7121360758522484e+22,
+            "net": -188743680.0
+          },
+          "O2_a": {
+            "production": 6.403531375678633e+21,
+            "loss": 6.403531375678608e+21,
+            "net": 25165824.0
+          },
+          "O": {
+            "production": 4.316989324588074e+22,
+            "loss": 4.316989324588061e+22,
+            "net": 134217728.0
+          },
+          "O_1D": {
+            "production": 1.8492812949151575e+22,
+            "loss": 1.8492812949151434e+22,
+            "net": 140509184.0
+          },
+          "O3": {
+            "production": 7.137119234321568e+20,
+            "loss": 7.137119234321499e+20,
+            "net": 6946816.0
+          },
+          "O-": {
+            "production": 4.022141911238136e+20,
+            "loss": 4.022141911238106e+20,
+            "net": 3014656.0
+          },
+          "O2-": {
+            "production": 1.1966196647023184e+19,
+            "loss": 1.1966196647023182e+19,
+            "net": 2048.0
+          },
+          "O3-": {
+            "production": 2.7747549158428227e+18,
+            "loss": 2.7747549158428355e+18,
+            "net": -12800.0
+          },
+          "O+": {
+            "production": 2.1050116421765633e+21,
+            "loss": 2.105011642176545e+21,
+            "net": 18350080.0
+          },
+          "O2+": {
+            "production": 3.2148240347147807e+21,
+            "loss": 3.2148240347147786e+21,
+            "net": 2097152.0
+          },
+          "e": {
+            "production": 5.421222018712004e+21,
+            "loss": 5.421222018711988e+21,
+            "net": 15728640.0
+          }
+        },
+        "reaction_event_rates_m3_s": {
+          "k1": 2.677965753245492e+21,
+          "k2": 1.0981632565593253e+21,
+          "k3": 2.281484034708948e+20,
+          "k4": 1.7304605160742063e+21,
+          "k5": 7.94828662824063e+19,
+          "k6": 1.3806134382974937e+20,
+          "k7": 5.013703875854195e+19,
+          "k8": 5.506130377841843e+21,
+          "k9": 1.2738215107218704e+20,
+          "k10": 9.190595601776927e+18,
+          "k11": 4.7709301694752735e+19,
+          "k12": 7.362757264395724e+19,
+          "k13": 8.522904934648409e+21,
+          "k14": 9.321313175113928e+21,
+          "k15": 1.3400498302688554e+22,
+          "k16": 1.576497397041228e+21,
+          "k17": 3.1765122880582726e+20,
+          "k18": 6.403531375678633e+21,
+          "k19": 4.6303656670751497e+20,
+          "k20": 1.4060615854371068e+20,
+          "k21": 3.543963468325788e+21,
+          "k22": 1.333638565244208e+21,
+          "k23": 1.3905445885214784e+18,
+          "k24": 2.6305920813860347e+18,
+          "k25": 2.5385140975165686e+18,
+          "k26": 1461275663079655.5,
+          "k27": 2.5055577213547104e+17,
+          "k28": 8.472220495493358e+16,
+          "k29": 3.4886433196045107e+18,
+          "k30": 2.0780350345264808e+19,
+          "k31": 9.68233301970113e+18,
+          "k32": 4872465606969590.0,
+          "k33": 2.781089177042957e+18,
+          "k34": 1.9414211781600253e+17,
+          "k35": 3.224250308681287e+20,
+          "k36": 2.7237291776190787e+18,
+          "k37": 8.918179205756148e+17,
+          "k38": 8.360793005396389e+17,
+          "k39": 6.955865081246391e+17,
+          "k40": 3.5127118660294266e+17,
+          "k41": 5.102573822374397e+16,
+          "k42": 3.1724520821781197e+18,
+          "k43": 3.4232216679685456e+20,
+          "k44": 7.06706404889442e+20,
+          "k45": 247123159270374.12,
+          "k46": 39842561881426.03,
+          "k47": 39842561881426.03,
+          "k48": 6.483442836171024e+20
+        },
+        "wall_rates_s": {
+          "k50": 36166.98390097052,
+          "k51": 25573.919571440947,
+          "k52": 683.6101418065093,
+          "k53": 683.6101418065093,
+          "k54": 41.47691509869439
+        },
+        "electron_wall_loss_m3_s": 3.2754956921952015e+21,
+        "optimizer": {
+          "method": "bounded log least_squares with physical multistarts",
+          "attempts": [
+            {
+              "nfev": 9,
+              "optimizer_success": true,
+              "optimizer_status": 1,
+              "max_relative": 9.733361279146882e-15,
+              "numerical_success": true
+            }
+          ],
+          "message": "`gtol` termination condition is satisfied.",
+          "total_nfev": 9
+        },
+        "metadata": {
+          "model_version": "oxygen-explicit-input-study-0.1",
+          "validation_status": "exploratory_not_literature_validated",
+          "success_definition": "numerical particle, reduced energy, pressure, atom and charge closure only",
+          "source_values": {
+            "chemistry_reference": "https://doi.org/10.1088/0022-3727/34/7/312",
+            "excitation_reference": "https://doi.org/10.1088/0022-3727/33/11/311",
+            "implemented_reaction_count": 48,
+            "excitation_term_count": 16,
+            "source_corrections": [
+              {
+                "reaction": "k24",
+                "printed_products": {
+                  "O2": 1
+                },
+                "implemented_products": {
+                  "O2": 2
+                },
+                "basis": "Both reactants contain two oxygen atoms; add product multiplicity 2 to conserve oxygen.",
+                "status": "conservation_normalization_not_author_erratum"
+              },
+              {
+                "reaction": "k26",
+                "printed_units": "m^3/s",
+                "implemented_units": "m^6/s",
+                "basis": "Three reactant densities require coefficient m^6/s; numerical value preserved.",
+                "status": "dimensional_normalization_not_author_erratum"
+              },
+              {
+                "reaction": "k44",
+                "printed_coefficient": "6.9e-40*(300/Tg)^(-1.25)*[O2] m^3/s",
+                "basis": "Move the printed [O2] density factor into explicit three-body mass action; do not double-count.",
+                "status": "equivalent_mass_action_normalization"
+              },
+              {
+                "reaction": "k45",
+                "printed_products": {
+                  "O3": 1,
+                  "O": 1
+                },
+                "printed_coefficient": "3.82e-40*[O] m^3/s",
+                "implemented_products": {
+                  "O3": 1,
+                  "O": 1,
+                  "e": 1
+                },
+                "basis": "Add emitted electron for charge conservation; separate printed [O] factor into third reactant.",
+                "status": "conservation_and_mass_action_normalization_not_author_erratum"
+              }
+            ],
+            "omitted_reactions": [
+              {
+                "reaction": "k49",
+                "printed_reactants": {
+                  "O2+": 1,
+                  "O_1D": 1
+                },
+                "printed_products": {
+                  "O2_a": 1,
+                  "O": 1
+                },
+                "reason": "Printed reaction destroys one positive charge without an electron. Replacing O2+ with neutral O2 would conserve charge but is an unverified interpretation, so the solver excludes k49.",
+                "effect": "Full 49-reaction reproduction not achieved; no success assertion permitted."
+              }
+            ],
+            "wall_return_reactions": [
+              {
+                "id": "k50",
+                "reactants": {
+                  "O+": 1
+                },
+                "products": {
+                  "O": 1
+                },
+                "charge_sink": "wall circuit",
+                "units": "s^-1",
+                "formula": "uB_Oplus*Aeff/V",
+                "source": "Table 2 p.1103"
+              },
+              {
+                "id": "k51",
+                "reactants": {
+                  "O2+": 1
+                },
+                "products": {
+                  "O2": 1
+                },
+                "charge_sink": "wall circuit",
+                "units": "s^-1",
+                "formula": "uB_O2plus*Aeff/V",
+                "source": "Table 2 p.1103"
+              },
+              {
+                "id": "k52",
+                "reactants": {
+                  "O": 1
+                },
+                "products": {
+                  "O2": 0.5
+                },
+                "gamma": 0.17,
+                "gamma_uncertainty": 0.02,
+                "units": "s^-1",
+                "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                "source": "Table 2 p.1103; section 2.2 p.1104; gamma measured stainless steel at 300 K"
+              },
+              {
+                "id": "k53",
+                "reactants": {
+                  "O_1D": 1
+                },
+                "products": {
+                  "O2": 0.5
+                },
+                "gamma": 0.17,
+                "units": "s^-1",
+                "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                "source": "Table 2 p.1103; assumes same probability as atomic O"
+              },
+              {
+                "id": "k54",
+                "reactants": {
+                  "O2_a": 1
+                },
+                "products": {
+                  "O2": 1
+                },
+                "gamma": 0.007,
+                "units": "s^-1",
+                "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                "source": "Table 2 p.1103; section 2.2 p.1104; quenching measured on Fe surface"
+              }
+            ],
+            "published_conditions": {
+              "radius_m": 0.152,
+              "length_m": 0.076,
+              "absorbed_power_w": 500.0,
+              "flow_sccm": 50.0,
+              "gas_temperature_k": 600.0,
+              "wall_material": "stainless steel",
+              "pressure_range_mtorr": [
+                1.0,
+                100.0
+              ],
+              "usual_global_model_range_mtorr": [
+                1.0,
+                20.0
+              ],
+              "figure2_powers_w": [
+                100.0,
+                500.0,
+                1500.0
+              ],
+              "source": "Section 3 p.1104; figure 1–3 captions; table 3"
+            }
+          },
+          "supplementary_values": {
+            "ionization_energies_ev": {
+              "O": {
+                "value": 13.618055,
+                "uncertainty_ev": 7e-06,
+                "source": "NIST Atomic Spectra Database, neutral oxygen ground-state ionization energy",
+                "url": "https://physics.nist.gov/cgi-bin/ASD/ie.pl?at_num_out=1&biblio=1&e_out=0&el_name_out=1&ion_charge_out=1&spectra=oxygen&unc_out=1&units=1"
+              },
+              "O2": {
+                "value": 12.0697,
+                "uncertainty_ev": 0.0002,
+                "source": "NIST Chemistry WebBook SRD69, evaluated molecular oxygen ionization energy",
+                "url": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C7782447&Mask=262"
+              },
+              "role": "Supplementary physical threshold values, not numerical values explicitly verified in the 2001/2000 paper. Rate-fit activation parameters are not thresholds.",
+              "checked_date": "2026-10-07"
+            },
+            "flow_standard_temperature_k": 273.15,
+            "flow_standard_pressure_pa": 101325.0
+          },
+          "case_inputs_and_assumptions": {
+            "absorbed_power_w": 500,
+            "pressure_pa": 1.3332236842105263,
+            "axial_edge_factor": 0.2,
+            "radial_edge_factor": 0.2,
+            "diffusion_o_m2_s": 0.6,
+            "diffusion_o2_m2_s": 0.42,
+            "electron_momentum_nu_s": {
+              "O": 10000000.0,
+              "O2": 10000000.0
+            },
+            "gas_temperature_k": 600,
+            "radius_m": 0.152,
+            "length_m": 0.076,
+            "flow_sccm": 50,
+            "gamma_o": 0.17,
+            "gamma_meta": 0.007
+          },
+          "closures": {
+            "absorbed_power": "total plasma absorbed power: collisional + electron-wall + ion-wall",
+            "energy": "source eq.(3) reduced ground-target collisional budget; not all 48 reaction energies",
+            "ionization": "ground O2 k1 and ground O k4 with supplementary NIST thresholds",
+            "excitation": "all 16 source-26 terms once; no additional per-particle excitation charge",
+            "elastic": "3*me/mi*Te*ne*nu_i; supplied nu_i are per-electron s^-1 frequencies, not m^3/s",
+            "wall_energy": "electron: 2Te; ion: phi+Te/2; each applied once to ion-balanced wall flux",
+            "sheath": "phi=Te*log(ne*sqrt(eTe/(2*pi*me))*A/(V*sum_i(kwi*ni)))",
+            "pressure": "sum of five neutral densities = p/(kB*Tg); ion pressure neglected",
+            "flow": "pure O2 feed; common unknown neutral pumping rate; charged pumping zero",
+            "negative_ion_wall_loss_s": 0.0,
+            "hL_hR": "explicit inputs; source electronegative edge closure not solved",
+            "surface": "explicit gammaO (also O_1D), gammaMeta; source candidate is SUS, not Si",
+            "zero_elastic": false
+          },
+          "unresolved_energy_channels": [
+            "Excited-target ionization k17/k19 has no additional reaction-resolved energy term in the reduced source budget.",
+            "Electron detachment k7, superelastic k21, attachment k3/k20 and additional dissociation k22/k43 lack a full supplied energy-transfer table.",
+            "New electrons from heavy-particle detachment do not have a supplied birth-energy distribution."
+          ],
+          "no_parameter_calibration": true,
+          "literature_reproduction_success": false
+        }
+      }
+    }
+  ]
+}

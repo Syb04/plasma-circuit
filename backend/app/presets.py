@@ -1,0 +1,57 @@
+"""Starter circuits and agreed CCP benchmark conditions (SI units)."""
+from __future__ import annotations
+
+from copy import deepcopy
+
+
+def component(id: str, kind: str, x: float, y: float, parameters: dict, ports: list[str] | None = None) -> dict:
+    return {"id": id, "kind": kind, "label": id.upper(), "ports": ports or (["g"] if kind == "GND" else ["p", "n"]), "parameters": parameters, "position": {"x": x, "y": y}, "rotation": 90 if kind in {"V", "I"} else 0}
+
+
+def wire(id: str, source: str, source_port: str, target: str, target_port: str) -> dict:
+    return {"id": id, "source": {"component_id": source, "port": source_port}, "target": {"component_id": target, "port": target_port}}
+
+
+def document(name: str, description: str, components: list[dict], wires: list[dict], parameters: dict | None = None) -> dict:
+    return {"schema_version": 1, "name": name, "description": description, "components": components, "wires": wires, "parameters": parameters or {}, "models": []}
+
+
+_DIVIDER = document(
+    "抵抗分圧回路", "5 Vを1 kΩと2 kΩで分圧する検証回路です。出力の期待値は約3.333 Vです。",
+    [component("v1", "V", 80, 100, {"dc": 5}), component("r1", "R", 330, 100, {"value": 1000}), component("r2", "R", 330, 300, {"value": 2000}), component("gnd", "GND", 80, 300, {})],
+    [wire("w1", "v1", "p", "r1", "p"), wire("w2", "r1", "n", "r2", "p"), wire("w3", "r2", "n", "gnd", "g"), wire("w4", "v1", "n", "gnd", "g")],
+)
+
+_RC = document(
+    "RCローパスフィルター", "R=1 kΩ、C=1 µF。遮断周波数は約159.15 Hzです。",
+    [component("v1", "V", 80, 100, {"dc": 0, "ac_magnitude": 1, "ac_phase": 0, "waveform": {"kind": "sin", "offset": 0, "amplitude": 1, "frequency": 100}}), component("r1", "R", 330, 100, {"value": 1000}), component("c1", "C", 330, 300, {"value": 1e-6}), component("gnd", "GND", 80, 300, {})],
+    [wire("w1", "v1", "p", "r1", "p"), wire("w2", "r1", "n", "c1", "p"), wire("w3", "c1", "n", "gnd", "g"), wire("w4", "v1", "n", "gnd", "g")],
+)
+
+_EDD = document(
+    "非線形電荷EDD", "I1=V1/R、Q1=C0*V1+alpha*V1^3。伝導電流と電荷による電流を同時に計算します。",
+    [component("v1", "V", 80, 100, {"dc": 0, "ac_magnitude": 1, "waveform": {"kind": "sin", "offset": 0, "amplitude": 5, "frequency": 1000}}), component("r1", "R", 330, 100, {"value": 100}), component("edd1", "EDD", 330, 300, {"branches": [{"positive": "p1", "negative": "n1", "current": "V1/R", "charge": "C0*V1+alpha*V1^3"}], "parameters": {"R": 1000, "C0": 1e-6, "alpha": 1e-7}, "intermediates": {}}, ["p1", "n1"]), component("gnd", "GND", 80, 300, {})],
+    [wire("w1", "v1", "p", "r1", "p"), wire("w2", "r1", "n", "edd1", "p1"), wire("w3", "edd1", "n1", "gnd", "g"), wire("w4", "v1", "n", "gnd", "g")],
+)
+
+CCP_SETTINGS = {
+    "gas": "Ar", "frequency_hz": 40e6, "rf_peak_voltage": 250,
+    "pressure_pa": 1.3332236842105263, "gap_m": 0.05,
+    "gas_temperature_k": 300, "cathode_diameter_m": 0.3, "area_ratio": 5,
+    "electron_density_m3": 1e16, "electron_temperature_ev": 3,
+}
+
+
+def get_presets() -> dict:
+    presets = [
+        {"id": "divider", "name": _DIVIDER["name"], "description": _DIVIDER["description"], "document": _DIVIDER, "analysis": {"kind": "op", "settings": {}}},
+        {"id": "rc", "name": _RC["name"], "description": _RC["description"], "document": _RC, "analysis": {"kind": "ac", "settings": {"start_frequency": 1, "stop_frequency": 100000, "points": 40, "variation": "dec"}}},
+        {"id": "edd", "name": _EDD["name"], "description": _EDD["description"], "document": _EDD, "analysis": {"kind": "transient", "settings": {"time_step": 2e-6, "stop_time": 0.005, "max_step": 2e-6}}},
+    ]
+    for gas in ("Ar", "O2"):
+        name = f"{gas} CCP — 40 MHz / 250 Vpeak"
+        description = "合意した条件の設定専用CCPモデル。回路図編集は通常の回路プリセットで行います。固定密度・温度は入力値です。"
+        doc = document(name, description, [], [], {"builtin_ccp_template": 1.0})
+        settings = {**CCP_SETTINGS, "gas": gas}
+        presets.append({"id": f"ccp-{gas.lower()}", "name": name, "description": description, "document": doc, "analysis": {"kind": "ccp", "settings": settings}})
+    return {"presets": deepcopy(presets)}

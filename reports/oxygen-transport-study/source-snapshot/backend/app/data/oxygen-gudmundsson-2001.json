@@ -1,0 +1,1962 @@
+{
+  "name": "Oxygen literature reproduction candidate — stainless steel — under validation",
+  "display_name_ja": "O₂文献再現用・SUS条件・まだ検証中",
+  "version": "o2-gudmundsson-2001-0.1",
+  "gas": "O2",
+  "status": "literature_reproduction_unvalidated_incomplete_closures",
+  "reference": {
+    "title": "Electronegativity of low-pressure high-density oxygen discharges",
+    "authors": [
+      "J. T. Gudmundsson",
+      "I. G. Kouznetsov",
+      "K. K. Patel",
+      "M. A. Lieberman"
+    ],
+    "year": 2001,
+    "doi": "10.1088/0022-3727/34/7/312",
+    "url": "https://doi.org/10.1088/0022-3727/34/7/312",
+    "full_text_url": "https://cden.ucsd.edu/internal/Publications/Archive/SFR/Plasma/GudPatelKouzJPD01.pdf",
+    "journal": "J. Phys. D: Appl. Phys.",
+    "volume": 34,
+    "pages": "1100–1109",
+    "checked_date": "2026-10-07"
+  },
+  "electron_distribution": "Maxwellian",
+  "temperature_range_ev": [
+    1.0,
+    7.0
+  ],
+  "species": [
+    {
+      "name": "e",
+      "charge": -1,
+      "mass_amu": 0.000548579909,
+      "elements": {},
+      "state": "electron"
+    },
+    {
+      "name": "O2",
+      "charge": 0,
+      "mass_amu": 31.998,
+      "elements": {
+        "O": 2
+      },
+      "state": "O2(X3Sigma_g-)"
+    },
+    {
+      "name": "O2_a",
+      "charge": 0,
+      "mass_amu": 31.998,
+      "elements": {
+        "O": 2
+      },
+      "state": "O2(a1Delta_g)"
+    },
+    {
+      "name": "O",
+      "charge": 0,
+      "mass_amu": 15.999,
+      "elements": {
+        "O": 1
+      },
+      "state": "O(3P)"
+    },
+    {
+      "name": "O_1D",
+      "charge": 0,
+      "mass_amu": 15.999,
+      "elements": {
+        "O": 1
+      },
+      "state": "O(1D)"
+    },
+    {
+      "name": "O3",
+      "charge": 0,
+      "mass_amu": 47.997,
+      "elements": {
+        "O": 3
+      },
+      "state": "ozone"
+    },
+    {
+      "name": "O+",
+      "charge": 1,
+      "mass_amu": 15.999,
+      "elements": {
+        "O": 1
+      },
+      "state": "positive atomic ion"
+    },
+    {
+      "name": "O2+",
+      "charge": 1,
+      "mass_amu": 31.998,
+      "elements": {
+        "O": 2
+      },
+      "state": "positive molecular ion"
+    },
+    {
+      "name": "O-",
+      "charge": -1,
+      "mass_amu": 15.999,
+      "elements": {
+        "O": 1
+      },
+      "state": "negative atomic ion"
+    },
+    {
+      "name": "O2-",
+      "charge": -1,
+      "mass_amu": 31.998,
+      "elements": {
+        "O": 2
+      },
+      "state": "negative molecular ion"
+    },
+    {
+      "name": "O3-",
+      "charge": -1,
+      "mass_amu": 47.997,
+      "elements": {
+        "O": 3
+      },
+      "state": "negative ozone ion"
+    }
+  ],
+  "mass_source": "Atomic oxygen standard atomic weight 15.999 u; state/charge mass differences neglected in transport; electron mass from physical constants.",
+  "reactions": [
+    {
+      "id": "k1",
+      "reactants": {
+        "e": 1,
+        "O2": 1
+      },
+      "products": {
+        "O2+": 1,
+        "e": 2
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 9e-16,
+        "te_power": 2,
+        "activation_ev": 12.6
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k1; source reference [23]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 23
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k2",
+      "reactants": {
+        "e": 1,
+        "O2+": 1
+      },
+      "products": {
+        "O": 2
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "constant",
+        "coefficient": 2.2e-13
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k2; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k3",
+      "reactants": {
+        "e": 1,
+        "O2": 1
+      },
+      "products": {
+        "O": 1,
+        "O-": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 8.8e-17,
+        "te_power": 0,
+        "activation_ev": 4.4
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k3; source reference [46]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 46
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k4",
+      "reactants": {
+        "e": 1,
+        "O": 1
+      },
+      "products": {
+        "O+": 1,
+        "e": 2
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 9e-15,
+        "te_power": 0.7,
+        "activation_ev": 13.6
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k4; source reference [46]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 46
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k5",
+      "reactants": {
+        "O-": 1,
+        "O2+": 1
+      },
+      "products": {
+        "O": 1,
+        "O2": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 1.5e-13,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k5; source reference [23]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 23
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k6",
+      "reactants": {
+        "O-": 1,
+        "O+": 1
+      },
+      "products": {
+        "O": 2
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 2.7e-13,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k6; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k7",
+      "reactants": {
+        "e": 1,
+        "O-": 1
+      },
+      "products": {
+        "O": 1,
+        "e": 2
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 1.1e-13,
+        "te_power": 0,
+        "activation_ev": 3.58
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k7; source reference [47]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 47
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k8",
+      "reactants": {
+        "e": 1,
+        "O2": 1
+      },
+      "products": {
+        "O": 2,
+        "e": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 7.1e-15,
+        "te_power": 0,
+        "activation_ev": 8.6
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k8; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k9",
+      "reactants": {
+        "O": 1,
+        "O-": 1
+      },
+      "products": {
+        "O2": 1,
+        "e": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 3e-16,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k9; source reference [46]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 46
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k10",
+      "reactants": {
+        "e": 1,
+        "O2": 1
+      },
+      "products": {
+        "O-": 1,
+        "O+": 1,
+        "e": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 7.1e-17,
+        "te_power": 0.5,
+        "activation_ev": 17
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k10; source reference [46]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 46
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k11",
+      "reactants": {
+        "e": 1,
+        "O2": 1
+      },
+      "products": {
+        "O": 1,
+        "O+": 1,
+        "e": 2
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 5.3e-16,
+        "te_power": 0.9,
+        "activation_ev": 20
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k11; source reference [46]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 46
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k12",
+      "reactants": {
+        "O+": 1,
+        "O2": 1
+      },
+      "products": {
+        "O": 1,
+        "O2+": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 2e-17,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k12; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k13",
+      "reactants": {
+        "e": 1,
+        "O2": 1
+      },
+      "products": {
+        "O": 1,
+        "O_1D": 1,
+        "e": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 1.8e-13,
+        "te_power": 0,
+        "activation_ev": 18.33
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k13; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k14",
+      "reactants": {
+        "e": 1,
+        "O": 1
+      },
+      "products": {
+        "O_1D": 1,
+        "e": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 4.5e-15,
+        "te_power": 0,
+        "activation_ev": 2.29
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k14; source reference [23]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 23
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k15",
+      "reactants": {
+        "O_1D": 1,
+        "O2": 1
+      },
+      "products": {
+        "O": 1,
+        "O2": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "constant",
+        "coefficient": 3e-17
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k15; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k16",
+      "reactants": {
+        "O_1D": 1,
+        "O": 1
+      },
+      "products": {
+        "O": 2
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "constant",
+        "coefficient": 8.1e-18
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k16; source reference [23]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 23
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k17",
+      "reactants": {
+        "e": 1,
+        "O_1D": 1
+      },
+      "products": {
+        "O+": 1,
+        "e": 2
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 9e-15,
+        "te_power": 0.7,
+        "activation_ev": 11.6
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k17; source reference [23]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 23
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k18",
+      "reactants": {
+        "e": 1,
+        "O2": 1
+      },
+      "products": {
+        "O2_a": 1,
+        "e": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 1.7e-15,
+        "te_power": 0,
+        "activation_ev": 3.1
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k18; source reference [46]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 46
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k19",
+      "reactants": {
+        "e": 1,
+        "O2_a": 1
+      },
+      "products": {
+        "O2+": 1,
+        "e": 2
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 9e-16,
+        "te_power": 2,
+        "activation_ev": 11.6
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k19; source reference [46]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 46
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k20",
+      "reactants": {
+        "e": 1,
+        "O2_a": 1
+      },
+      "products": {
+        "O-": 1,
+        "O": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 2.28e-16,
+        "te_power": 0,
+        "activation_ev": 2.29
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k20; source reference [30]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 30
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k21",
+      "reactants": {
+        "e": 1,
+        "O2_a": 1
+      },
+      "products": {
+        "O2": 1,
+        "e": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 5.6e-15,
+        "te_power": 0,
+        "activation_ev": 2.2
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k21; source reference [46]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 46
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k22",
+      "reactants": {
+        "e": 1,
+        "O2_a": 1
+      },
+      "products": {
+        "O": 2,
+        "e": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 4.2e-15,
+        "te_power": 0,
+        "activation_ev": 4.6
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k22; source reference [46]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 46
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k23",
+      "reactants": {
+        "O-": 1,
+        "O2_a": 1
+      },
+      "products": {
+        "O2-": 1,
+        "O": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 1.1e-17,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k23; source reference [41]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 41
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k24",
+      "reactants": {
+        "O2-": 1,
+        "O2+": 1
+      },
+      "products": {
+        "O2": 2
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 2e-13,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k24; source reference [46]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 46
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k25",
+      "reactants": {
+        "O2-": 1,
+        "O+": 1
+      },
+      "products": {
+        "O2": 1,
+        "O": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 2e-13,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k25; source reference [46]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 46
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k26",
+      "reactants": {
+        "e": 1,
+        "O2": 2
+      },
+      "products": {
+        "O2-": 1,
+        "O2": 1
+      },
+      "order": 3,
+      "rate_units": "m^6/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 2.26e-42,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k26; source reference [48]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 48
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k27",
+      "reactants": {
+        "O-": 1,
+        "O+": 1
+      },
+      "products": {
+        "O": 1,
+        "O_1D": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 4.9e-16,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k27; source reference [43]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 43
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k28",
+      "reactants": {
+        "O2-": 1,
+        "O2_a": 1
+      },
+      "products": {
+        "O2": 2,
+        "e": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 2.7e-17,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k28; source reference [41]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 41
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k29",
+      "reactants": {
+        "O2-": 1,
+        "O": 1
+      },
+      "products": {
+        "O-": 1,
+        "O2": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 3.31e-16,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k29; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k30",
+      "reactants": {
+        "e": 1,
+        "O3": 1
+      },
+      "products": {
+        "O-": 1,
+        "O2": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 9.3e-16,
+        "te_power": -0.62,
+        "activation_ev": 0
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k30; source reference [45]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 45
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k31",
+      "reactants": {
+        "e": 1,
+        "O3": 1
+      },
+      "products": {
+        "O": 1,
+        "O2-": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "constant",
+        "coefficient": 2e-16
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k31; source reference [45]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 45
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k32",
+      "reactants": {
+        "O-": 1,
+        "O2": 1
+      },
+      "products": {
+        "O3": 1,
+        "e": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 5e-21,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k32; source reference [12]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 12
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k33",
+      "reactants": {
+        "O-": 1,
+        "O2_a": 1
+      },
+      "products": {
+        "O3": 1,
+        "e": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 2.2e-17,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k33; source reference [41]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 41
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k34",
+      "reactants": {
+        "O+": 1,
+        "O3": 1
+      },
+      "products": {
+        "O2+": 1,
+        "O2": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 1e-17,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k34; source reference [46]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 46
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k35",
+      "reactants": {
+        "O": 1,
+        "O3": 1
+      },
+      "products": {
+        "O2": 2
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 2e-17,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k35; source reference [46]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 46
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k36",
+      "reactants": {
+        "O-": 1,
+        "O3": 1
+      },
+      "products": {
+        "O3-": 1,
+        "O": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 5.3e-16,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k36; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k37",
+      "reactants": {
+        "O3-": 1,
+        "O": 1
+      },
+      "products": {
+        "O2-": 1,
+        "O2": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 3.2e-16,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k37; source reference [12]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 12
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k38",
+      "reactants": {
+        "O3-": 1,
+        "O": 1
+      },
+      "products": {
+        "O2": 2,
+        "e": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 3e-16,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k38; source reference [12]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 12
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k39",
+      "reactants": {
+        "O3-": 1,
+        "O2+": 1
+      },
+      "products": {
+        "O2": 1,
+        "O3": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 2e-13,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k39; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k40",
+      "reactants": {
+        "O3-": 1,
+        "O2+": 1
+      },
+      "products": {
+        "O": 2,
+        "O3": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 1.01e-13,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k40; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k41",
+      "reactants": {
+        "O2-": 1,
+        "O3": 1
+      },
+      "products": {
+        "O2": 1,
+        "O3-": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 4e-16,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k41; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k42",
+      "reactants": {
+        "O2-": 1,
+        "O": 1
+      },
+      "products": {
+        "O3": 1,
+        "e": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 3.01e-16,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k42; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k43",
+      "reactants": {
+        "e": 1,
+        "O3": 1
+      },
+      "products": {
+        "O": 1,
+        "O2": 1,
+        "e": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 1e-14,
+        "tg_power": 0.5
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k43; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k44",
+      "reactants": {
+        "O2": 2,
+        "O": 1
+      },
+      "products": {
+        "O3": 1,
+        "O2": 1
+      },
+      "order": 3,
+      "rate_units": "m^6/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 6.9e-40,
+        "tg_power": -1.25
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k44; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k45",
+      "reactants": {
+        "O2-": 1,
+        "O": 2
+      },
+      "products": {
+        "O3": 1,
+        "O": 1,
+        "e": 1
+      },
+      "order": 3,
+      "rate_units": "m^6/s",
+      "rate_formula": {
+        "kind": "constant",
+        "coefficient": 3.82e-40
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k45; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k46",
+      "reactants": {
+        "e": 1,
+        "O": 1,
+        "O2": 1
+      },
+      "products": {
+        "O2-": 1,
+        "O": 1
+      },
+      "order": 3,
+      "rate_units": "m^6/s",
+      "rate_formula": {
+        "kind": "constant",
+        "coefficient": 1e-43
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k46; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k47",
+      "reactants": {
+        "e": 1,
+        "O": 1,
+        "O2": 1
+      },
+      "products": {
+        "O-": 1,
+        "O2": 1
+      },
+      "order": 3,
+      "rate_units": "m^6/s",
+      "rate_formula": {
+        "kind": "constant",
+        "coefficient": 1e-43
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k47; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k48",
+      "reactants": {
+        "e": 1,
+        "O2+": 1
+      },
+      "products": {
+        "O_1D": 1,
+        "O": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 2.11e-13,
+        "tg_power": 0.7
+      },
+      "implemented": true,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k48; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    },
+    {
+      "id": "k49",
+      "reactants": {
+        "O2+": 1,
+        "O_1D": 1
+      },
+      "products": {
+        "O2_a": 1,
+        "O": 1
+      },
+      "order": 2,
+      "rate_units": "m^3/s",
+      "rate_formula": {
+        "kind": "tg_power",
+        "prefactor": 1e-18,
+        "tg_power": 0.5
+      },
+      "implemented": false,
+      "source": "https://doi.org/10.1088/0022-3727/34/7/312; Table 1 p.1102, k49; source reference [11]",
+      "source_location": {
+        "table": 1,
+        "page": 1102,
+        "reference_number": 11
+      },
+      "electron_energy_loss_ev": null,
+      "electron_energy_note": "Particle reaction table does not supply a complete electron-energy transfer table; use separate source-26 excitation budget."
+    }
+  ],
+  "source_corrections": [
+    {
+      "reaction": "k24",
+      "printed_products": {
+        "O2": 1
+      },
+      "implemented_products": {
+        "O2": 2
+      },
+      "basis": "Both reactants contain two oxygen atoms; add product multiplicity 2 to conserve oxygen.",
+      "status": "conservation_normalization_not_author_erratum"
+    },
+    {
+      "reaction": "k26",
+      "printed_units": "m^3/s",
+      "implemented_units": "m^6/s",
+      "basis": "Three reactant densities require coefficient m^6/s; numerical value preserved.",
+      "status": "dimensional_normalization_not_author_erratum"
+    },
+    {
+      "reaction": "k44",
+      "printed_coefficient": "6.9e-40*(300/Tg)^(-1.25)*[O2] m^3/s",
+      "basis": "Move the printed [O2] density factor into explicit three-body mass action; do not double-count.",
+      "status": "equivalent_mass_action_normalization"
+    },
+    {
+      "reaction": "k45",
+      "printed_products": {
+        "O3": 1,
+        "O": 1
+      },
+      "printed_coefficient": "3.82e-40*[O] m^3/s",
+      "implemented_products": {
+        "O3": 1,
+        "O": 1,
+        "e": 1
+      },
+      "basis": "Add emitted electron for charge conservation; separate printed [O] factor into third reactant.",
+      "status": "conservation_and_mass_action_normalization_not_author_erratum"
+    }
+  ],
+  "omitted_reactions": [
+    {
+      "reaction": "k49",
+      "printed_reactants": {
+        "O2+": 1,
+        "O_1D": 1
+      },
+      "printed_products": {
+        "O2_a": 1,
+        "O": 1
+      },
+      "reason": "Printed reaction destroys one positive charge without an electron. Replacing O2+ with neutral O2 would conserve charge but is an unverified interpretation, so the solver excludes k49.",
+      "effect": "Full 49-reaction reproduction not achieved; no success assertion permitted."
+    }
+  ],
+  "electron_excitation": [
+    {
+      "target": "O",
+      "excited_state": "1D",
+      "threshold_ev": 1.96,
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 4.47e-15,
+        "te_power": 0,
+        "activation_ev": 2.286
+      },
+      "rate_units": "m^3/s",
+      "source": "https://doi.org/10.1088/0022-3727/33/11/311; Table 3 p.1330"
+    },
+    {
+      "target": "O",
+      "excited_state": "1S",
+      "threshold_ev": 4.18,
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 4.54e-15,
+        "te_power": 0,
+        "activation_ev": 4.49
+      },
+      "rate_units": "m^3/s",
+      "source": "https://doi.org/10.1088/0022-3727/33/11/311; Table 3 p.1330"
+    },
+    {
+      "target": "O",
+      "excited_state": "5S_o",
+      "threshold_ev": 9.14,
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 9.67e-16,
+        "te_power": 0,
+        "activation_ev": 9.97
+      },
+      "rate_units": "m^3/s",
+      "source": "https://doi.org/10.1088/0022-3727/33/11/311; Table 3 p.1330"
+    },
+    {
+      "target": "O",
+      "excited_state": "3S_o",
+      "threshold_ev": 9.51,
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 9.67e-16,
+        "te_power": 0,
+        "activation_ev": 9.75
+      },
+      "rate_units": "m^3/s",
+      "source": "https://doi.org/10.1088/0022-3727/33/11/311; Table 3 p.1330"
+    },
+    {
+      "target": "O",
+      "excited_state": "O_h",
+      "threshold_ev": 12.0,
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 4.31e-14,
+        "te_power": 0,
+        "activation_ev": 18.6
+      },
+      "rate_units": "m^3/s",
+      "source": "https://doi.org/10.1088/0022-3727/33/11/311; Table 3 p.1330"
+    },
+    {
+      "target": "O",
+      "excited_state": "3P_o",
+      "threshold_ev": 15.65,
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 4.54e-15,
+        "te_power": 0,
+        "activation_ev": 17.34
+      },
+      "rate_units": "m^3/s",
+      "source": "https://doi.org/10.1088/0022-3727/33/11/311; Table 3 p.1330"
+    },
+    {
+      "target": "O2",
+      "excited_state": "rotation",
+      "threshold_ev": 0.02,
+      "rate_formula": {
+        "kind": "constant",
+        "coefficient": 0.0
+      },
+      "rate_units": "m^3/s",
+      "source": "https://doi.org/10.1088/0022-3727/33/11/311; Table 3 p.1330"
+    },
+    {
+      "target": "O2",
+      "excited_state": "v1",
+      "threshold_ev": 0.19,
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 2.8e-15,
+        "te_power": 0,
+        "activation_ev": 3.72
+      },
+      "rate_units": "m^3/s",
+      "source": "https://doi.org/10.1088/0022-3727/33/11/311; Table 3 p.1330"
+    },
+    {
+      "target": "O2",
+      "excited_state": "v2",
+      "threshold_ev": 0.38,
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 1.28e-15,
+        "te_power": 0,
+        "activation_ev": 3.67
+      },
+      "rate_units": "m^3/s",
+      "source": "https://doi.org/10.1088/0022-3727/33/11/311; Table 3 p.1330"
+    },
+    {
+      "target": "O2",
+      "excited_state": "a1Delta_g",
+      "threshold_ev": 0.977,
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 1.37e-15,
+        "te_power": 0,
+        "activation_ev": 2.14
+      },
+      "rate_units": "m^3/s",
+      "source": "https://doi.org/10.1088/0022-3727/33/11/311; Table 3 p.1330"
+    },
+    {
+      "target": "O2",
+      "excited_state": "b1Sigma_g+",
+      "threshold_ev": 1.627,
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 3.24e-16,
+        "te_power": 0,
+        "activation_ev": 2.218
+      },
+      "rate_units": "m^3/s",
+      "source": "https://doi.org/10.1088/0022-3727/33/11/311; Table 3 p.1330"
+    },
+    {
+      "target": "O2",
+      "excited_state": "ex1",
+      "threshold_ev": 4.5,
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 1.07e-15,
+        "te_power": 0,
+        "activation_ev": 3.43
+      },
+      "rate_units": "m^3/s",
+      "source": "https://doi.org/10.1088/0022-3727/33/11/311; Table 3 p.1330"
+    },
+    {
+      "target": "O2",
+      "excited_state": "1dis",
+      "threshold_ev": 6.0,
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 3.73e-15,
+        "te_power": 0,
+        "activation_ev": 4.9
+      },
+      "rate_units": "m^3/s",
+      "source": "https://doi.org/10.1088/0022-3727/33/11/311; Table 3 p.1330"
+    },
+    {
+      "target": "O2",
+      "excited_state": "2dis",
+      "threshold_ev": 8.4,
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 3.91e-14,
+        "te_power": 0,
+        "activation_ev": 8.29
+      },
+      "rate_units": "m^3/s",
+      "source": "https://doi.org/10.1088/0022-3727/33/11/311; Table 3 p.1330"
+    },
+    {
+      "target": "O2",
+      "excited_state": "3dis",
+      "threshold_ev": 9.97,
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 1.92e-16,
+        "te_power": 0,
+        "activation_ev": 11.48
+      },
+      "rate_units": "m^3/s",
+      "source": "https://doi.org/10.1088/0022-3727/33/11/311; Table 3 p.1330"
+    },
+    {
+      "target": "O2",
+      "excited_state": "ex2",
+      "threshold_ev": 14.7,
+      "rate_formula": {
+        "kind": "te_arrhenius",
+        "prefactor": 1.13e-15,
+        "te_power": 0,
+        "activation_ev": 18.35
+      },
+      "rate_units": "m^3/s",
+      "source": "https://doi.org/10.1088/0022-3727/33/11/311; Table 3 p.1330"
+    }
+  ],
+  "energy_source": {
+    "title": "On the plasma parameters of a planar inductive oxygen discharge",
+    "authors": [
+      "J. T. Gudmundsson",
+      "A. M. Marakhtanov",
+      "K. K. Patel",
+      "V. P. Gopinath",
+      "M. A. Lieberman"
+    ],
+    "year": 2000,
+    "doi": "10.1088/0022-3727/33/11/311",
+    "url": "https://doi.org/10.1088/0022-3727/33/11/311",
+    "full_text_url": "https://cden.ucsd.edu/internal/Publications/Archive/SFR/Plasma/PlanarIndOxyDisch.pdf",
+    "location": "Table 3, p.1330; requested by 2001 eq.(3), p.1101",
+    "temperature_range_ev": [
+      1.0,
+      7.0
+    ]
+  },
+  "supplementary_ionization_energies_ev": {
+    "O": {
+      "value": 13.618055,
+      "uncertainty_ev": 7e-06,
+      "source": "NIST Atomic Spectra Database, neutral oxygen ground-state ionization energy",
+      "url": "https://physics.nist.gov/cgi-bin/ASD/ie.pl?at_num_out=1&biblio=1&e_out=0&el_name_out=1&ion_charge_out=1&spectra=oxygen&unc_out=1&units=1"
+    },
+    "O2": {
+      "value": 12.0697,
+      "uncertainty_ev": 0.0002,
+      "source": "NIST Chemistry WebBook SRD69, evaluated molecular oxygen ionization energy",
+      "url": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C7782447&Mask=262"
+    },
+    "role": "Supplementary physical threshold values, not numerical values explicitly verified in the 2001/2000 paper. Rate-fit activation parameters are not thresholds.",
+    "checked_date": "2026-10-07"
+  },
+  "energy_balance": {
+    "source_equation": 3,
+    "expression": "Ec=Eiz+sum(Eex_i*kex_i/kiz)+(kel/kiz)*(3*me/mi)*Te",
+    "collision_power_expression": "e*ne*(nO2*k1*Ec_O2+nO*k4*Ec_O)",
+    "wall_power_expression": "e*(Ee+Ei)*(k50*nOplus+k51*nO2plus)",
+    "electron_wall_energy_ev": "2*Te",
+    "ion_wall_energy_ev": "Vpl+Te/2",
+    "wall_energy_source": "Source-26 p.1328 (definitions following eqs.12–16)",
+    "plasma_potential_flux_balance": "Gamma_e+Gamma_Ominus=Gamma_Oplus+Gamma_O2plus",
+    "electron_flux": "ne*sqrt(e*Te/(2*pi*me))*exp(-Vpl/Te)",
+    "ion_flux": "uB_i*ni*(R^2*hL+R*L*hR)/(R^2+R*L)",
+    "missing_terms": [
+      "Numerical kel(O) and kel(O2) are not published in either inspected table.",
+      "Source papers do not explicitly specify ionization-energy values. Supplementary NIST thresholds are supplied, but the authors' exact convention remains unverified.",
+      "The 2001 electronegative sheath-edge closure eqs.8–16 requires implementation; source-26 eqs.17–18 are a different earlier approximation."
+    ],
+    "note": "Activation values in the particle rate fits must not be used as excitation threshold energies. Source-26 table3 O2(a) rate differs from particle reaction k18; table3 is retained for the energy budget as instructed by the 2001 paper."
+  },
+  "wall_reactions": [
+    {
+      "id": "k50",
+      "reactants": {
+        "O+": 1
+      },
+      "products": {
+        "O": 1
+      },
+      "charge_sink": "wall circuit",
+      "units": "s^-1",
+      "formula": "uB_Oplus*Aeff/V",
+      "source": "Table 2 p.1103"
+    },
+    {
+      "id": "k51",
+      "reactants": {
+        "O2+": 1
+      },
+      "products": {
+        "O2": 1
+      },
+      "charge_sink": "wall circuit",
+      "units": "s^-1",
+      "formula": "uB_O2plus*Aeff/V",
+      "source": "Table 2 p.1103"
+    },
+    {
+      "id": "k52",
+      "reactants": {
+        "O": 1
+      },
+      "products": {
+        "O2": 0.5
+      },
+      "gamma": 0.17,
+      "gamma_uncertainty": 0.02,
+      "units": "s^-1",
+      "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+      "source": "Table 2 p.1103; section 2.2 p.1104; gamma measured stainless steel at 300 K"
+    },
+    {
+      "id": "k53",
+      "reactants": {
+        "O_1D": 1
+      },
+      "products": {
+        "O2": 0.5
+      },
+      "gamma": 0.17,
+      "units": "s^-1",
+      "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+      "source": "Table 2 p.1103; assumes same probability as atomic O"
+    },
+    {
+      "id": "k54",
+      "reactants": {
+        "O2_a": 1
+      },
+      "products": {
+        "O2": 1
+      },
+      "gamma": 0.007,
+      "units": "s^-1",
+      "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+      "source": "Table 2 p.1103; section 2.2 p.1104; quenching measured on Fe surface"
+    }
+  ],
+  "wall_assumptions": {
+    "negative_ion_wall_loss_s": 0.0,
+    "ozone_sticking_probability": 0.0,
+    "hR": "hL for the paper's short cylinder L<2R, section 2.1 p.1104",
+    "effective_area": "2*pi*R*(R*hL+L*hR)",
+    "effective_diffusion_length": "((pi/L)^2+(2.405/R)^2)^(-1/2)",
+    "transport_cross_section_m2": {
+      "O": 7.5e-19,
+      "O2": 7.5e-19
+    },
+    "cross_section_note": "Ion-neutral momentum-transfer cross section: atomic value cited, molecular value assumed equal by authors, p.1103.",
+    "silicon_applicability": "These wall probabilities are not Si electrode coefficients. No Si default is supplied."
+  },
+  "published_conditions": {
+    "radius_m": 0.152,
+    "length_m": 0.076,
+    "absorbed_power_w": 500.0,
+    "flow_sccm": 50.0,
+    "gas_temperature_k": 600.0,
+    "wall_material": "stainless steel",
+    "pressure_range_mtorr": [
+      1.0,
+      100.0
+    ],
+    "usual_global_model_range_mtorr": [
+      1.0,
+      20.0
+    ],
+    "figure2_powers_w": [
+      100.0,
+      500.0,
+      1500.0
+    ],
+    "source": "Section 3 p.1104; figure 1–3 captions; table 3"
+  },
+  "diffusion_reference_points": [
+    {
+      "pressure_mtorr": 1.0,
+      "O+": 14.7,
+      "O2+": 10.0,
+      "O": 8.8,
+      "O2": 6.3
+    },
+    {
+      "pressure_mtorr": 10.0,
+      "O+": 2.1,
+      "O2+": 1.4,
+      "O": 1.2,
+      "O2": 0.84
+    }
+  ],
+  "diffusion_reference_units": "m^2/s",
+  "comparison_points": [
+    {
+      "figure": 5,
+      "quantity": "O2+ density",
+      "pressure_mtorr": 1.0,
+      "power_w": 500.0,
+      "value": 2.8e+16,
+      "units": "m^-3",
+      "source": "Section 3.2 p.1105, numerical text",
+      "extraction_uncertainty_relative": null
+    },
+    {
+      "figure": 5,
+      "quantity": "O2+ density",
+      "pressure_mtorr": 10.0,
+      "power_w": 500.0,
+      "value": 5.7e+16,
+      "units": "m^-3",
+      "source": "Section 3.2 p.1105, numerical text",
+      "extraction_uncertainty_relative": null
+    },
+    {
+      "figure": 5,
+      "quantity": "O2+ density",
+      "pressure_mtorr": 100.0,
+      "power_w": 500.0,
+      "value": 4.5e+16,
+      "units": "m^-3",
+      "source": "Section 3.2 p.1105, numerical text",
+      "extraction_uncertainty_relative": null
+    },
+    {
+      "figure": 5,
+      "quantity": "O2+ density",
+      "pressure_mtorr": 10.0,
+      "power_w": 100.0,
+      "value": 2.9e+16,
+      "units": "m^-3",
+      "source": "Section 3.2 p.1105, numerical text",
+      "extraction_uncertainty_relative": null
+    },
+    {
+      "figure": 5,
+      "quantity": "O2+ density",
+      "pressure_mtorr": 100.0,
+      "power_w": 100.0,
+      "value": 2e+16,
+      "units": "m^-3",
+      "source": "Section 3.2 p.1105, numerical text",
+      "extraction_uncertainty_relative": null
+    }
+  ],
+  "validation": {
+    "status": "not_reproduced",
+    "successful_reproduction": false,
+    "reason": "Reaction k49 unresolved; elastic energy and complete particle/wall/flow closure still require implementation and verification.",
+    "figure2_3_digitization_status": "pending_original_pdf_rasterization",
+    "published_number_uncertainty": "No uncertainty is stated for section-3.2 textual density values; null does not mean zero uncertainty.",
+    "no_parameter_calibration": true
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "base_url": "http://localhost:8080",
+  "modes": [
+    "system",
+    "light",
+    "dark"
+  ],
+  "system_default_and_live_os_change": true,
+  "explicit_mode_overrides_os": true,
+  "light_and_dark_persist_after_reload": true,
+  "desktop_and_mobile_no_horizontal_overflow": true,
+  "existing_waveform_rendered": true,
+  "database_mutating_requests": 0,
+  "browser_runtime_errors": []
+}

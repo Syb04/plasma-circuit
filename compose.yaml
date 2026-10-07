@@ -1,0 +1,68 @@
+name: plasma-circuit
+services:
+  db:
+    image: postgres:16.8-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: plasma
+      POSTGRES_USER: plasma
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-plasma-development}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U plasma -d plasma"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  redis:
+    image: redis:7.4.3-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  api:
+    build: ./backend
+    image: plasma-circuit-backend:local
+    restart: unless-stopped
+    environment: &backend_environment
+      DATABASE_URL: postgresql+psycopg://plasma:${POSTGRES_PASSWORD:-local-plasma-development}@db:5432/plasma
+      REDIS_URL: redis://redis:6379/0
+      RQ_QUEUE: simulations
+      JOB_TIMEOUT_SECONDS: ${JOB_TIMEOUT_SECONDS:-300}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  worker:
+    image: plasma-circuit-backend:local
+    restart: unless-stopped
+    command: ["python", "-m", "app.worker"]
+    environment: *backend_environment
+    depends_on:
+      api:
+        condition: service_healthy
+    mem_limit: 2g
+    cpus: 2
+    init: true
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+volumes:
+  postgres_data:
+  redis_data:

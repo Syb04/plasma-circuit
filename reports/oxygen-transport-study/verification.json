@@ -1,0 +1,96 @@
+{
+  "unique_inputs": 44,
+  "independently_verified_successes": 38,
+  "failed_inputs_retained": [
+    {
+      "case_id": "paired-1mtorr-100-explicit_h",
+      "reasons": [
+        "species",
+        "electron",
+        "energy",
+        "neutral_pressure",
+        "oxygen_atoms",
+        "source_reaction_domain",
+        "no_temperature_bound"
+      ]
+    },
+    {
+      "case_id": "paired-1mtorr-100-gudmundsson_2000",
+      "reasons": [
+        "species",
+        "electron",
+        "energy",
+        "neutral_pressure",
+        "oxygen_atoms",
+        "source_reaction_domain",
+        "no_temperature_bound"
+      ]
+    },
+    {
+      "case_id": "paired-1mtorr-500-explicit_h",
+      "reasons": [
+        "species",
+        "electron",
+        "energy",
+        "neutral_pressure",
+        "oxygen_atoms",
+        "source_reaction_domain",
+        "no_temperature_bound"
+      ]
+    },
+    {
+      "case_id": "paired-1mtorr-500-gudmundsson_2000",
+      "reasons": [
+        "species",
+        "electron",
+        "energy",
+        "neutral_pressure",
+        "oxygen_atoms",
+        "source_reaction_domain",
+        "no_temperature_bound"
+      ]
+    },
+    {
+      "case_id": "paired-1mtorr-1500-explicit_h",
+      "reasons": [
+        "species",
+        "electron",
+        "energy",
+        "neutral_pressure",
+        "oxygen_atoms",
+        "source_reaction_domain",
+        "no_temperature_bound"
+      ]
+    },
+    {
+      "case_id": "paired-1mtorr-1500-gudmundsson_2000",
+      "reasons": [
+        "species",
+        "electron",
+        "energy",
+        "neutral_pressure",
+        "oxygen_atoms",
+        "source_reaction_domain",
+        "no_temperature_bound"
+      ]
+    }
+  ],
+  "maximum_event_recalculation_relative_error": 2.7368174545813777e-14,
+  "maximum_budget_recalculation_relative_error": 1.3490149888107866e-14,
+  "maximum_wall_rate_recalculation_relative_error": 3.546646586192309e-16,
+  "numerical_successes_outside_transport_ordering": [],
+  "source_hash_verification": {
+    "mode": "recorded_sources",
+    "files": {
+      "backend/app/oxygen_study.py": "backend/app/oxygen_study.py",
+      "backend/app/oxygen_transport.py": "backend/app/oxygen_transport.py",
+      "backend/app/oxygen.py": "backend/app/oxygen.py",
+      "backend/app/data/oxygen-gudmundsson-2001.json": "backend/app/data/oxygen-gudmundsson-2001.json",
+      "backend/app/plasma_models.py": "backend/app/plasma_models.py",
+      "scripts/oxygen_transport_study.py": "scripts/oxygen_transport_study.py",
+      "scripts/oxygen_parameter_study.py": "scripts/oxygen_parameter_study.py",
+      "scripts/check_oxygen_study_results.py": "scripts/check_oxygen_study_results.py"
+    }
+  },
+  "interpretation": "Independent numerical accounting under the declared reduced closure; not physical validation"
+}
