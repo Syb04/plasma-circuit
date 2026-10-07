@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -49,7 +49,7 @@ class CircuitDocument(BaseModel):
 
 
 class Analysis(BaseModel):
-    kind: Literal["op", "dc", "ac", "transient", "ccp", "global"]
+    kind: Literal["op", "dc", "ac", "transient", "ccp", "global", "global_transient", "radial"]
     settings: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -77,3 +77,39 @@ class CreateRun(EmployeeRequest):
     circuit_id: str
     expected_revision: int = Field(ge=1)
     analysis: Analysis
+
+
+class StudyAxis(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    path: str = Field(min_length=1, max_length=200)
+    values: list[Annotated[float, Field(strict=True, allow_inf_nan=False)]] = Field(min_length=1, max_length=100)
+
+
+class CreateStudy(CreateRun):
+    name: str = Field(default="Parameter study", min_length=1, max_length=200)
+    axes: list[StudyAxis] = Field(min_length=1, max_length=2)
+
+
+class CompareRuns(BaseModel):
+    run_ids: list[str] = Field(min_length=2, max_length=4)
+    phase_align: bool = True
+
+
+class CreateBenchmark(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    material: str = Field(min_length=1, max_length=200)
+    measurement_definition: str = Field(min_length=1, max_length=5000)
+    frequency_hz: float = Field(gt=0, allow_inf_nan=False)
+    pressure_pa: float = Field(gt=0, allow_inf_nan=False)
+    provenance: str | dict[str, Any]
+    uncertainty: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+    format: Literal["csv", "json"] = "json"
+    data: str | dict[str, Any] | list[dict[str, Any]]
+
+
+class CompareBenchmark(BaseModel):
+    run_id: str
+
+
+class ImportPackage(EmployeeRequest):
+    package: dict[str, Any]

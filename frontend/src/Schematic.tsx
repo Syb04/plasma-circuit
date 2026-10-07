@@ -18,6 +18,7 @@ function Symbol({kind}: {kind:string}) {
     case 'Q': return <><circle cx="40" cy="30" r="24"/><path d="M0 30h28M28 14v32M28 22l29-17h23M28 38l29 17h23m-28-9 5 9-10-1"/></>;
     case 'JUNCTION': return <circle cx="40" cy="30" r="5" fill="currentColor"/>;
     case 'EDD': return <><rect x="17" y="6" width="46" height="48" rx="7"/><path d="M0 30h17M63 30h17"/><text x="40" y="25" textAnchor="middle" className="symbol-text">I(V)</text><text x="40" y="42" textAnchor="middle" className="symbol-text">Q(V)</text></>;
+    case 'PLASMA': return <><rect x="16" y="7" width="48" height="46" rx="8"/><path d="M0 30h16m48 0h16M25 18v24M55 18v24M33 21l5 8-4 8 8-5 5 8"/><circle cx="47" cy="22" r="2"/></>;
     case 'S': case 'W': return <><path d="M0 30h24m0 0 30-17m2 17h24"/><circle cx="24" cy="30" r="2"/><circle cx="56" cy="30" r="2"/></>;
     default: return <><path d="M0 30H17M63 30H80"/><rect x="17" y="8" width="46" height="44" rx="5"/><text x="40" y="36" textAnchor="middle" className="symbol-text">{kind}</text></>;
   }
@@ -30,7 +31,7 @@ function ComponentNode({data, selected}: NodeProps<CircuitNode>) {
   const valueUnit = ({R:'Ω', C:'F', L:'H', V:'V', I:'A'} as Record<string,string>)[c.kind];
   const waveform=c.parameters.waveform && typeof c.parameters.waveform==='object' && !Array.isArray(c.parameters.waveform) ? c.parameters.waveform as Record<string,Json> : null;
   const sourceCaption=waveform?.kind==='sin'?`${engineering(Number(waveform.amplitude??0),valueUnit)}pk · ${engineering(Number(waveform.frequency??0),'Hz')}`:waveform?.kind==='pulse'?'PULSE':waveform?.kind==='pwl'?'PWL':typeof c.parameters.dc==='number'?engineering(c.parameters.dc,valueUnit):'';
-  const caption = typeof c.parameters.value === 'number' ? engineering(c.parameters.value,valueUnit) : ['V','I'].includes(c.kind) ? sourceCaption : (c.kind === 'EDD' ? `${Array.isArray(c.parameters.branches) ? c.parameters.branches.length : 1} 枝` : String(c.parameters.model ?? ''));
+  const caption = typeof c.parameters.value === 'number' ? engineering(c.parameters.value,valueUnit) : ['V','I'].includes(c.kind) ? sourceCaption : c.kind==='PLASMA'?`${c.parameters.gas??'Ar'} · nₑ ${engineering(Number(c.parameters.electron_density_m3??1e16))}` : (c.kind === 'EDD' ? `${Array.isArray(c.parameters.branches) ? c.parameters.branches.length : 1} 枝` : String(c.parameters.model ?? ''));
   const rotation = ((c.rotation % 360) + 360) % 360;
   return <div className={`circuit-node ${selected ? 'selected' : ''} ${c.kind==='JUNCTION'?'junction':''}`}>
     <div className="node-body" style={{transform:`rotate(${rotation}deg)`}}>
@@ -103,24 +104,24 @@ function Editor(props:Props) {
 }
 export default function Schematic(props:Props) {return <ReactFlowProvider><Editor {...props}/></ReactFlowProvider>;}
 
-export function PlasmaDiagram({gas, global, prescribedPower=false}:{gas:string;global:boolean;prescribedPower?:boolean}) {
+export function PlasmaDiagram({gas, global, prescribedPower=false,kind='ccp'}:{gas:string;global:boolean;prescribedPower?:boolean;kind?:string}) {
   if(prescribedPower)return <div className="plasma-diagram">
-    <div className="diagram-eyebrow">PRESCRIBED POWER · STEADY 0D</div>
-    <h2>{gas} 文献反応モデル</h2><p>Gudmundsson 2001 の反応・壁損失・電子エネルギー収支</p>
-    <svg viewBox="0 0 660 260" role="img" aria-label="指定吸収電子電力を入力し、酸素の粒子収支と電子エネルギー収支から定常密度・電子温度を求める0D反応モデルの概念図">
-      <rect x="20" y="70" width="145" height="90" rx="9" fill="var(--bg)" stroke="var(--border)"/><text x="92" y="105" textAnchor="middle">吸収電子電力</text><text x="92" y="133" textAnchor="middle" className="diagram-title">Pabs [W]</text>
+    <div className="diagram-eyebrow">PRESCRIBED POWER · {kind==='global_transient'?'TIME-DEPENDENT':'STEADY'} 0D</div>
+    <h2>{gas} 0D反応モデル</h2><p>反応・壁損失・粒子エネルギー収支{kind==='global_transient'&&'・ガス温度の時間発展'}</p>
+    <svg viewBox="0 0 660 260" role="img" aria-label={`${gas}の粒子収支・電子エネルギー収支${kind==='global_transient'?'・ガス温度を時間積分する':'から定常状態を求める'}指定総吸収プラズマ電力0Dモデルの概念図`}>
+      <rect x="20" y="70" width="145" height="90" rx="9" fill="var(--bg)" stroke="var(--border)"/><text x="92" y="105" textAnchor="middle">総吸収プラズマ電力</text><text x="92" y="133" textAnchor="middle" className="diagram-title">Pabs [W]</text>
       <path d="M171 115h56m-7-6 7 6-7 6" stroke="var(--text-muted)" strokeWidth="2" fill="none"/>
-      <rect x="235" y="48" width="198" height="133" rx="9" fill="var(--surface-2)" stroke="var(--border)"/><text x="334" y="80" textAnchor="middle" className="diagram-title">O₂ REACTION MODEL</text><text x="334" y="108" textAnchor="middle">粒子収支</text><text x="334" y="137" textAnchor="middle">電子エネルギー収支</text><text x="334" y="161" textAnchor="middle" className="diagram-small">定常状態まで収束</text>
+      <rect x="235" y="48" width="198" height="133" rx="9" fill="var(--surface-2)" stroke="var(--border)"/><text x="334" y="80" textAnchor="middle" className="diagram-title">{gas} REACTION MODEL</text><text x="334" y="108" textAnchor="middle">粒子収支</text><text x="334" y="137" textAnchor="middle">電子エネルギー収支</text><text x="334" y="161" textAnchor="middle" className="diagram-small">{kind==='global_transient'?'マクロ時間を積分':'定常状態まで収束'}</text>
       <path d="M440 115h48m-7-6 7 6-7 6" stroke="var(--text-muted)" strokeWidth="2" fill="none"/>
       <rect x="495" y="70" width="145" height="90" rx="9" fill="var(--bg)" stroke="var(--border)"/><text x="568" y="105" textAnchor="middle">各粒子の密度</text><text x="568" y="133" textAnchor="middle">電子温度 Tₑ</text>
       <rect x="238" y="210" width="192" height="38" rx="8" fill="var(--bg)" stroke="var(--border)"/><text x="334" y="234" textAnchor="middle">反応データ・壁損失</text><path d="M334 205v-17m-5 6 5-6 5 6" stroke="var(--text-muted)" strokeWidth="1.5" fill="none"/>
     </svg>
-    <div className="model-notice"><strong>吸収電子電力による0D反応計算</strong><p>入力した吸収電子電力から定常的な粒子密度・電子温度を求めます。SUS壁を扱う文献条件での反応モデル確認用です。指定CCP装置条件やSi電極に対する妥当性検証は別途必要です。</p></div>
+    <div className="model-notice"><strong>総吸収プラズマ電力による0D反応計算</strong><p>入力した総吸収プラズマ電力から粒子密度・電子温度を求めます。材料別の係数・表面状態と出典を確認してください。</p></div>
     <div className="model-status"><span className="status-dot amber"/>文献反応モデル・装置への適用確認は未完了</div>
   </div>;
   return <div className="plasma-diagram">
     <div className="diagram-eyebrow">BUILT-IN CCP MODEL</div>
-    <h2>{gas} 容量結合プラズマ</h2><p>非対称電極・2シース・バルクの等価モデル</p>
+    <h2>{gas} {kind==='radial'?'径方向・分布回路':'容量結合プラズマ'}</h2><p>非対称電極・2シース・バルクの等価モデル</p>
     <svg viewBox="0 0 660 260" role="img" aria-label="RF電源、駆動側シース、プラズマバルク、接地側シースからなるCCPモデルの概念図">
       <defs><linearGradient id="plasmaFill"><stop stopColor="var(--surface)"/><stop offset="1" stopColor="var(--surface-2)"/></linearGradient></defs>
       <path d="M70 128V65H208M465 65H575V196H70v-38" stroke="var(--text-muted)" strokeWidth="2" fill="none"/>
@@ -136,7 +137,7 @@ export function PlasmaDiagram({gas, global, prescribedPower=false}:{gas:string;g
       <path d="M575 196v17m-14 0h28m-20 7h12m-8 7h4" stroke="var(--text-muted)" strokeWidth="2" fill="none"/>
       {global && <><rect x="245" y="207" width="185" height="40" rx="8" fill="var(--bg)" stroke="var(--border)"/><text x="337" y="231" textAnchor="middle">粒子・電子エネルギー収支</text><path d="M313 136v65m-5-6 5 6 5-6M361 201v-59m-5 6 5-6 5 6" stroke="var(--text-muted)" strokeWidth="1.5" fill="none"/></>}
     </svg>
-    <div className="model-notice"><strong>専用テンプレートによる計算</strong><p>右の条件から内部の等価回路を生成します。任意の回路図とグローバルモデルの連成は、この版の対象外です。</p></div>
+    <div className="model-notice"><strong>専用テンプレートによる計算</strong><p>右の条件から2シース・バルクの等価回路を生成します。外部RLC・2周波数駆動を詳細条件で設定できます。回路図でPLASMA素子に接続して計算することもできます。</p></div>
     <div className="model-status"><span className="status-dot amber"/>研究用モデル・実験値との妥当性検証は未完了</div>
   </div>;
 }

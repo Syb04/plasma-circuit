@@ -1,24 +1,32 @@
 # 検証状況
 
-確認日：2026-10-07。
+確認日：2026-10-07。最新の全機能検証は[シミュレーター拡張レポート](../reports/simulator-extensions/report.md)、機械可読の記録は[検証manifest](../reports/simulator-extensions/verification.json)と[実API結果](../reports/simulator-extensions/api-validation.json)に保存した。
 
 ## 確認できた結果
 
 | 対象 | 結果 | 確認範囲 |
 | --- | --- | --- |
-| 反応エンジン・O₂データ・探索モデル・壁輸送・プラズマ入力 | 83件合格、実ソルバー2件は今回のコマンドでは除外 | 反応次数・SI単位・電荷／元素保存、壁生成物、エネルギーの符号、温度範囲、粒子専用データの誤使用防止、探索用収支、輸送式と適用条件 |
-| 既存Ar・CCPの実ソルバーテスト | 担当エージェントによる実行で2件合格 | ngspiceによる数値計算、周期定常性、電流・電力・Ar収支。実験的な妥当性とは別 |
-| フロントエンド | `npm run build`成功 | TypeScript型検査・本番ビルド。出力サイズに関する警告あり |
-| Warm Clay UI・Docker画面 | 両モード・OS追従・選択保存を確認 | 回路図、既存波形、ツールチップ、モバイル。実行時エラー0、DB更新0 |
+| 最終Dockerバックエンド全体 | 391 passed、失敗0、警告1、176.22 s、終了コード0 | 通常回路・EDD、実ngspice CCP/global、反応・輸送・表面・加熱・IEDF・径方向、実ODE、保存・API・研究・参照・パッケージ、不正なハッシュ方式の型の拒否 |
+| 実キューAPI計算 | 5/5 succeeded、5/5 converged、`passed=true` | 固定CCP＋IEDF＋精細化、外部RF、O₂指定総吸収500 W、Arパルス・ガス熱、径方向精細化 |
+| 最終配備APIの入力拒否 | 2/2期待どおり422、`passed=true`、health ok | list／dict型の `hash_algorithm` を拒否。物理計算5ケースとは別の[実HTTP証跡](../reports/simulator-extensions/api-package-errors.json) |
+| 最終フロントエンド | `npm run build`成功 | TypeScript型検査・本番ビルド、O₂電力モード保存の修正。既存のVite chunk-size advisoryあり |
+| 拡張機能ブラウザ受入確認 | 11チェック合格、`completed=true`、runtime error 0 | モックなし。2軸研究、8ケース停止・再開、比較・合成参照CSV・パッケージ・条件表示・モバイル・既存実物理run 3種類の表示 |
+| 従来ブラウザスモーク（O₂含む） | 4チェック合格、`completed=true`、runtime error 0 | 実EDD・手配線分圧回路・O₂指定電力の3run、Q–V・CSV・保存再読込・履歴・モバイル |
+| 既存Warm Clayテーマ確認 | 過去の確認結果を保持 | ライト／ダーク・OS追従・選択保存、既存回路図・波形・モバイル。今回の拡張機能のブラウザ検証とは別 |
 
-83件の確認コマンド：
+バックエンド確認コマンド：
 
 ```bash
-cd backend
-../.venv/bin/python -m pytest tests/test_reaction_network.py tests/test_oxygen_data.py tests/test_plasma.py tests/test_oxygen_study.py tests/test_oxygen_transport.py -q -k 'not real_solver'
+docker compose -f compose.yaml -f compose.cloud.yaml run --rm --no-deps api timeout 300s python -X faulthandler -m pytest -q -o faulthandler_timeout=120
 ```
 
-一次・二体・三体反応、定数係数、符号付き電子エネルギー、壁生成物を扱えるようにした。文献からO₂の11種・49反応と励起16項を記録し、電荷保存に疑義があるk49を除く48反応を粒子計算用に取り込んだ。その他の原文との変更点にも根拠と未確認事項を記録した。
+警告1件はStarletteの非推奨anyio使用に関するもの。今回の `faulthandler_timeout=120` ではスタックダンプはなく、全テストが完走し終了コード0となった。
+
+APIの5ケースはworkflow/APIのみのビルド更新前に実行し、物理ソルバーのソースは同じである。ブラウザ2検査はパッケージの数値ハッシュ修正後のイメージで完走した。その後の不正 `hash_algorithm` 型の入力拒否修正は、最終配備イメージの実HTTP 2件で確認し、最終バックエンド全テストの対象として分ける。各イメージ、ビルド資産、40ソースファイルのハッシュは[manifest](../reports/simulator-extensions/verification.json)を参照。
+
+**機能の実装、ジョブ完了、数値収束、適用範囲、実験validationを区別する。** 3つの実APIケース（固定CCP、外部RF、径方向）は数値収束したが、軸方向バルク長／Drude skin depthのscreenにより `model_domain_valid=false`。一様軸方向電流近似の電磁的適用範囲警告を、精細化合格で取り消さない。
+
+一次・二体・三体反応、定数係数、符号付き電子エネルギー、壁生成物を扱う。文献からO₂の11種・49反応と励起16項を記録し、電荷保存に疑義があるk49を除く48反応を取り込んだ。O₂縮約エネルギー閉包をWebの共通実行入口に接続したが、全反応の完全なエネルギー移送を完成したものではない。
 
 ## O₂の物理バリデーション
 
@@ -37,8 +45,12 @@ cd backend
 
 ## アプリ全体の確認
 
-ソース上ではCF₄を初期プリセットと新規ガス候補から除外した。保存済みのCF₄条件の読み込みは維持する。
+単独Ar/O₂を対象とし、CF₄を初期プリセットと新規ガス候補から除外する。保存済みCF₄条件の読込互換性は維持するが、CF₄の採用・標準化学モデルは保留。
 
-指定電力0D結果の表示準備は進んだが、O₂の計算実行への接続・独立プリセットは未完了。API・workerの最新ソースのDocker更新と、ブラウザから保存・実行・結果表示までの通し確認も未完了。
+O₂はCCPプリセットからglobal解析を選択して縮約モデルを実行でき、指定総吸収電力モードの保存・キュー実行・結果取得を実APIとブラウザで確認した。RF連成の実ngspice・縮約電力閉包もバックエンドテストに含む。パッケージの数値ハッシュと入力拒否を修正した最終イメージで、全391件が合格した。
 
-フロントエンドはWarm Clayへ更新してDockerへ反映済み。OS追従・ライト／ダークの保存・両モードの回路図と既存波形を、DB更新を伴わないブラウザ確認で通過した。詳細は[UIテーマの確認結果](../reports/ui-theme/report.md)を参照。
+2端子PLASMAによる外部回路、2周波数と周期包絡、RF測定、出典付き断面積／EEDF積分、独立表面と二次電子、縮約移動シース加熱の有効抵抗逆作用、Ar/O₂のBDF時間発展とガス熱、IEDF、径方向分布回路、数値精細化、研究・再試行・比較・参照・解析パッケージを実装した。機能ごとの証跡と今回の実APIの到達範囲は[完成機能マトリクス](../reports/simulator-extensions/report.md#完成した機能と検証範囲)を参照。実APIの5ケースが全機能の通し確認を意味するわけではない。
+
+時間発展0Dは既に粒子を含む準中性状態からの積分で、着火や係数範囲外の消滅を解かない。輸入EEDFの積分はBoltzmann方程式の解ではない。IEDFは固定幅・一様電場、径方向回路は一様密度入力で、自己無撞着な空間輸送・PIC・完全電磁界ではない。表面係数をSiの材料名から自動生成しない。詳しい式・出典・限界は[モデル仕様](plasma-models.md)、操作は[解析ワークフロー](analysis-workflows.md)を参照。
+
+ブラウザ証跡は[拡張機能11チェック](../reports/feature-ui/verification.json)と[従来スモーク4チェック](../reports/browser-smoke/verification.json)に保存した。既存APIのCCP＋IEDF、Ar時間発展0D、径方向の3runを通常／ダーク表示で確認した。参照CSVは非実験fixtureで、パッケージは整合性確認と再計算要求までを確認した。既存テーマについては[過去のUIテーマ確認](../reports/ui-theme/report.md)を保持する。

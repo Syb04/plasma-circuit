@@ -66,6 +66,58 @@ class SimulationRun(Base):
     result_compressed: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
 
 
+class Study(Base):
+    __tablename__ = "studies"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    name: Mapped[str] = mapped_column(String(200))
+    circuit_id: Mapped[str] = mapped_column(ForeignKey("circuits.id"), index=True)
+    circuit_revision: Mapped[int] = mapped_column(Integer)
+    employee_id: Mapped[str] = mapped_column(String(80))
+    snapshot: Mapped[dict[str, Any]] = mapped_column(JSON)
+    analysis: Mapped[dict[str, Any]] = mapped_column(JSON)
+    axes: Mapped[list[dict[str, Any]]] = mapped_column(JSON)
+    cancel_requested: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class StudyCase(Base):
+    __tablename__ = "study_cases"
+    __table_args__ = (UniqueConstraint("study_id", "case_index"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    study_id: Mapped[str] = mapped_column(ForeignKey("studies.id"), index=True)
+    case_index: Mapped[int] = mapped_column(Integer)
+    coordinates: Mapped[dict[str, Any]] = mapped_column(JSON)
+
+
+class StudyAttempt(Base):
+    __tablename__ = "study_attempts"
+    __table_args__ = (UniqueConstraint("case_id", "number"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    case_id: Mapped[str] = mapped_column(ForeignKey("study_cases.id"), index=True)
+    number: Mapped[int] = mapped_column(Integer)
+    run_id: Mapped[str] = mapped_column(ForeignKey("simulation_runs.id"), unique=True)
+    employee_id: Mapped[str] = mapped_column(String(80))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Benchmark(Base):
+    __tablename__ = "benchmarks"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    name: Mapped[str] = mapped_column(String(200))
+    reference: Mapped[dict[str, Any]] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class PackageImport(Base):
+    __tablename__ = "package_imports"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    circuit_id: Mapped[str] = mapped_column(ForeignKey("circuits.id"), index=True)
+    employee_id: Mapped[str] = mapped_column(String(80))
+    original_run_id: Mapped[str] = mapped_column(String(100))
+    package: Mapped[dict[str, Any]] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
 engine = None
 SessionLocal = None
 _engine_pid = None

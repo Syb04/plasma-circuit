@@ -1,14 +1,15 @@
 # Implementation contract
 
-The initial product is a Japanese UI for browser circuit editing, real PySpice/ngspice calculation, EDDs, CCP/global-model runs, and PostgreSQL persistence. No authentication; a non-empty employee ID is required for every save/run. Preserve leading zeros. Do not claim a physics model has been validated when it has not.
+The product has a Japanese UI for circuit editing, real PySpice/ngspice calculations, EDDs, CCP/global models, research workflows, and PostgreSQL persistence. It has no authentication. Circuit save, run creation, study creation/resume, and package import require a nonempty employee ID; trim surrounding whitespace and preserve leading zeros. Employee IDs record attribution and confer no access control. Reference registration and cancellation endpoints do not require an employee ID.
 
-## Circuit document (JSON)
+Model availability, numerical convergence, model-domain checks, reference agreement, and experimental validation are separate facts. A `succeeded` job may contain `converged=false`. No imported dataset, successful solve, or small reference error automatically establishes a validated plasma model.
+
+## Circuit document JSON
 
 ```json
 {
   "schema_version": 1,
-  "name": "RC example",
-  "description": "",
+  "name": "RC example", "description": "",
   "components": [
     {"id":"v1","kind":"V","label":"V1","ports":["p","n"],"parameters":{"dc":5},"position":{"x":0,"y":0},"rotation":0},
     {"id":"r1","kind":"R","label":"R1","ports":["p","n"],"parameters":{"value":1000},"position":{"x":200,"y":0},"rotation":0},
@@ -22,56 +23,120 @@ The initial product is a Japanese UI for browser circuit editing, real PySpice/n
 }
 ```
 
-Electrical connections are unions of explicit port endpoints, never inferred from pixel crossings. GND endpoints belong to net `0`. A JUNCTION has port `p`. Several wires may share a port. Positions/rotation are display data. IDs must be stable and unique. R/C/L use `value` in SI. V/I use `dc`, `ac_magnitude`, `ac_phase`, and optional `waveform={kind:"sin"|"pulse"|"pwl",...}`. Catalog entries provide actual defaults/ports for every supported kind. Kind K has no ports and references inductors in parameters. Control-current references identify a voltage-source component. Components can contain `model` inside parameters; X has user-defined ports and a subcircuit model.
+Connections are unions of explicit port endpoints, never inferred from pixel crossings. GND endpoints belong to net `0`; JUNCTION has port `p`. Several wires may share a port. Positions/rotation are display data. Component IDs are stable and unique, begin with a letter, and contain letters, digits, or underscores. R/C/L use SI `value`. V/I use `dc`, `ac_magnitude`, `ac_phase` and optional `waveform={kind:"sin"|"pulse"|"pwl",...}`. Voltage sources also accept `waveform.kind="rf"` with the periodic drive settings below. K has no ports and references inductors; control-current references identify a voltage-source component. X has user-defined ports and a subcircuit model. Catalog entries provide ports and defaults. Schema bounds are 500 components, 2000 wires, and 100 models.
 
-EDD parameters contain `branches:[{positive:"p1",negative:"n1",current:"V1/R",charge:"C0*V1"}]`, `parameters:{R:1000,C0:1e-9}`, and optional `intermediates:{...}`. Each branch has its own terminal pair. `Vk` is positive-minus-negative voltage; `Ik` is the conductive current expression of branch k. Total terminal current is Ik+dQk/dt. A Q expression may depend on other branch voltages and conductive currents. Expressions are a supported mathematical language, never arbitrary Python execution. Persist the exact model definitions in every run snapshot.
+EDD parameters contain `branches:[{positive:"p1",negative:"n1",current:"V1/R",charge:"C0*V1"}]`, `parameters:{R:1000,C0:1e-9}`, and optional `intermediates:{...}`. Each branch has a terminal pair. `Vk` is positive-minus-negative voltage; `Ik` is conductive current, and total current is `Ik+dQk/dt`. Charge may depend on other branch voltages and conductive currents. Expressions use a restricted mathematical language, never arbitrary Python execution. Persist exact definitions in run snapshots.
 
-## Analysis JSON
+## Analysis JSON and dispatch
 
-`{"kind":"op"|"dc"|"ac"|"transient"|"ccp"|"global", "settings":{...}}`
+```json
+{"kind":"ccp","settings":{"gas":"Ar","frequency_hz":40000000,"rf_peak_voltage":250}}
+```
 
-- transient: `time_step`, `stop_time`, optional `max_step`, `start_time`, `initial_conditions`.
-- ac: `start_frequency`, `stop_frequency`, `points`, `variation` (`dec`/`lin`/`oct`).
-- dc: `source` component ID, `start`, `stop`, `step`.
-- ccp/global: `gas` (Ar/O2/CF4, single gas), `frequency_hz:40000000`, `rf_peak_voltage:250`, `pressure_pa:1.333223684`, `gap_m:0.05`, `gas_temperature_k:300`, `cathode_diameter_m:0.3`, `area_ratio:5`, `electron_density_m3`, `electron_temperature_ev` for fixed CCP; global initial density/temperature settings. Model implementation specifies defaults for additional volume/wall-loss/chemistry settings and records assumptions. The CCP builtin preset is a parameterized template; it must not silently ignore a user-edited schematic. If the template is separate from arbitrary-circuit plasma coupling, say so explicitly in UI/result metadata.
+`kind` accepts `op`, `dc`, `ac`, `transient`, `ccp`, `global`, `global_transient`, and `radial`. Settings are JSON data and each solver validates its own finite values and limits.
+
+| Kind | Settings |
+| --- | --- |
+| `op` | Operating point |
+| `dc` | Source component ID `source`, `start`, `stop`, `step` |
+| `ac` | `start_frequency`, `stop_frequency`, `points`, `variation=dec/lin/oct` |
+| `transient` | `time_step`, `stop_time`, optional `max_step`, `start_time`, `initial_conditions`, `use_initial_condition` |
+| `ccp` | Fixed `electron_density_m3`, `electron_temperature_ev` and RF/geometry settings |
+| `global` | Ar RF-coupled particle/electron balance; O₂ reduced chemistry or explicit `reaction_model` with `initial_species_densities_m3` |
+| `global_transient` | Ar/O₂ actual BDF density/electron-energy/gas-heat integration |
+| `radial` | Annular linear RF circuit with prescribed uniform density |
+
+`simulation.execute_simulation(document,analysis)->dict` is the worker's shared entry point. It connects transport, surfaces and heating during RF/chemistry iterations, attaches RF/IEDF diagnostics where applicable, and runs optional numerical refinement. `engine.execute_circuit` handles ordinary analyses; `engine.build_netlist` and `engine.simulate_netlist` are shared with plasma stamping. `plasma.execute_plasma` handles core `ccp/global`; direct calls do not perform all common-entry extensions.
+
+### Plasma topology and voltage
+
+The supported product gases and presets are single Ar/O₂. CF₄ adoption and a built-in CF₄ chemistry model are deferred; the core fixed-CCP parser and saved-document compatibility retain CF₄. No mixed-gas or inferred molecular chemistry model is provided.
+
+- Empty dedicated template: `document.parameters.builtin_ccp_template=1`, empty components/wires. Without `external_circuit`, impose electrode RF voltage and solve the zero-mean terminal-current DC bias. Reject added schematic elements.
+- Empty template plus `settings.external_circuit`: construct the source/R/L/DC-block/shunt-C/PLASMA network. `rf_peak_voltage` is the ideal-source peak, not electrode amplitude.
+- Ordinary schematic with exactly one `PLASMA` and ports `["p","n"]`: p is driven, n is return. Stamp the two sheaths and bulk in the real circuit. Analysis settings override identical PLASMA component settings; explicit schematic voltage-source waveform overrides analysis drive settings. `external_circuit` is invalid on this path.
+- An isolated powered DC cluster requires a charge-holding block capacitor and uses periodic capacitor-charge shooting. Explicit DC-fed topology permits nonzero mean current. Multiple plasma loads are not supported.
+
+Baseline RF/geometry inputs are `frequency_hz=40e6`, `rf_peak_voltage=250`, `pressure_pa=1.333223684`, `gap_m=.05`, `gas_temperature_k=300`, `cathode_diameter_m=.3`, `area_ratio=5`, `electron_density_m3=1e16`, `electron_temperature_ev=3`, `momentum_collision_frequency_hz=1e7`, `wall_edge_factor=.5`. Momentum frequency is ν in s⁻¹, without a 2π factor and without a verified gas-specific default source. Independently supplied `plasma_volume_m3`, `wall_loss_area_m2`, and geometry assumptions are recorded.
+
+`external_circuit` allows `source_resistance_ohm` (omitted=50), `series_inductance_h`, `shunt_capacitance_f`, `dc_block_capacitance_f`, `dc_voltage_v`, `voltage_definition="source"`, `reference_impedance_ohm`. Zero R/L/C omits that element. Unknown external keys are rejected. Use `rf_source_id` to select among multiple voltage sources; `rf_source_port={component_id,port}` selects source p or the load side of its unique series output resistor. `source_reference_impedance_ohm` is a positive real source-plane Z₀, default 50 Ω.
+
+Periodic RF drive settings include `second_frequency_hz`, `second_rf_peak_voltage`, `second_phase_deg`, `fundamental_frequency_hz`, `pulse_frequency_hz`, `pulse_duty_cycle`, `pulse_off_fraction`. All active frequencies must be integer multiples of the common fundamental. RF off fraction scales voltage amplitude. `rf` sources use an eight-common-period smoothstep; schematic `sin` sources preserve their explicit waveform. Periodic CCP sources must use `sin` without damping or `rf`.
+
+RF cycles are 16–120, fastest-carrier `points_per_cycle` 64–512; global iterations 3–40. Ordinary requested points and retained internal RF vectors are bounded at 250000. Ordinary plotted result samples are bounded at 20000; the CCP wrapper retains the final two common periods for integration/results. Record sampling behavior rather than promising unbounded raw data.
+
+### Optional physics and time integration
+
+- `electron_transport`: `mode=explicit_nu` or `cross_section_eedf`; imported cross sections require energy eV, σ m², target/process and source. EEDF is a normalized energy PDF in eV⁻¹, Maxwellian or tabulated. Integrate rates and target collision frequencies without extrapolating cross sections. Do not claim a Boltzmann solve or automatically replace chemistry fits with transport-EEDF rates.
+- `surface_parameters`: complete `cathode/anode/wall` entries with `material`, `state`, `temperature_k`, `gamma_o`, `gamma_metastable`, `secondary_electron_yield`, optional provenance/ranges. No material name fills missing coefficients. Local electrode secondary yields are used in the RF stamp; neutral wall probabilities feed the declared oxygen closure.
+- `electron_heating`: `mode=bulk_drude` or `moving_wall_maxwellian`, optional `reflection_probability`, `edge_electron_density_m3`, budget tolerance and `max_rf_iterations` (2–24). The common-entry moving-wall path iterates a dissipative equivalent RF resistance and checks its measured power against the estimate. Keep reversible pressure work, capacitor work, ion acceleration and secondary transfer distinct.
+- O₂ steady: `chemistry_model=oxygen_reduced` (also `oxygen`/`gudmundsson_2001` aliases). Common dispatch supplies the reduced selection when `gas=O2` and omitted. `power_mode=prescribed_absorbed` requires total `absorbed_power_w` and produces no RF waveform; default `rf_coupled` maps the actual electron/conductive/secondary ledger and RF ion acceleration. Reduced energy closure does not supply all 48 reaction energies. O₂ k20 requires exclusive `1<Te<4.5 eV`. `transport_mode=explicit_h/gudmundsson_2000` has independent model-domain diagnostics.
+- Macro: `global_transient`, Ar/O₂; `power_mode=prescribed_absorbed/rf_coupled`, `absorbed_power_w`, `stop_time_s` (≤10), `output_points` (3–5001), `macro_relative_tolerance` (1e-9–1e-3), `macro_max_step_s`, populated initial state settings and gas heat inputs. RF mode refreshes actual carrier averages at `rf_update_interval_s` and pulse boundaries, then holds them. The configured refresh interval spans at least 10 common carrier periods, combined intervals ≤200; pulse/final splits may be shorter and need a separate time-scale check. Macro pulse off fraction scales averaged **power**; maximum 500 pulse periods. In schematic RF mode derive carrier frequencies from sources. Without explicit macro pulse controls, a unique source envelope inherits its OFF amplitude squared as a declared quadratic power approximation; it is not an off-state RF solve. Conflicting source envelopes require explicit macro controls. Strip source envelopes from carrier solves and apply the macro power envelope once. Initial pressure establishes inventory, subsequent pressure follows evolving neutrals and Tg. Domain termination returns partial history and honest diagnostics. No ignition claim.
+- `iedf.enabled=true`: attaches trajectory results to RF CCP/global with a sheath waveform over the full common beat/pulse period. Controls include species, entrance densities, particle count, bins, RF/transit steps, seed, explicit thickness and constant charge-exchange cross section. Fixed-width, uniform-field reduced trajectories; sampling/convergence is recorded separately under `result.iedf` and IEDF nonconvergence also propagates to the parent result.
+- Radial: `radial_cells`, `radial_feed=center/edge`, feed footprint, sheet R/L, mean sheath drops, ion entrance density and optional `operating_point`. Solve peak phasors and KCL/power balances. Density is prescribed uniform; no radial particle/chemistry transport or complete electromagnetic field solution.
+- `numerical_validation`: `enabled`, `relative_tolerance`, optional selected `metrics`, `refine_points/refine_cycles`. Compare additional RF point/cycle, radial mesh or ODE tolerance runs while retaining baseline output. Errors, unconverged variants and absence of a refinement candidate are not passes. This is numerical validation, never physical validation.
+
+See [plasma models](plasma-models.md), [electron/surface models](electron-surface-models.md), [ion/radial models](ion-radial-models.md) and [workflow examples](analysis-workflows.md) for equations and import structures.
 
 ## Simulation result JSON
 
 ```json
 {
- "kind":"transient", "converged":true,
- "summary":{"key":1.0},
- "axis":{"name":"time","unit":"s","values":[0,1e-9]},
- "signals":[{"name":"V(out)","unit":"V","values":[0,1]}],
- "tables":[], "logs":[], "netlist":"...",
- "solver":{"pyspice":"1.5","ngspice":"..."},
- "model_metadata":{}, "diagnostics":{}
+  "kind":"transient", "converged":true,
+  "summary":{"key":1.0},
+  "axis":{"name":"time","unit":"s","values":[0,1e-9]},
+  "signals":[{"name":"V(out)","unit":"V","values":[0,1]}],
+  "tables":[], "logs":[], "netlist":"...",
+  "solver":{"pyspice":"1.5","ngspice":"..."},
+  "model_metadata":{}, "diagnostics":{}
 }
 ```
 
-All values must be finite and JSON-serializable. OP can have an empty axis/signals and numerical tables/summary. AC signals expose magnitude/phase (separate named signals) rather than raw complex values. Results are bounded; plotting decimation must be stated. CSV export uses original saved result samples. Solver failures are errors, not manufactured results. `engine.execute_circuit(document:dict,analysis:dict)->dict`; `engine.build_netlist(document,analysis)->str`; `engine.simulate_netlist(netlist,analysis)->dict` is shared with the plasma module. `plasma.execute_plasma(document,analysis)->dict` handles ccp/global.
+Numeric values must be finite and JSON-serializable; genuinely unavailable moments/ratios may be null. OP and prescribed-power steady output may have empty axis/signals and numerical tables/summary. AC exposes magnitude/phase rather than raw complex values. Macro and radial results use their own axis and solver information. CSV exports saved samples/tables; browser-only plotting decimation does not change them. Solver failures are errors, not manufactured successful results.
+
+Optional `rf_diagnostics` contains `frequency_hz`, `cycles_used`, peak-phasor convention, `measurement_planes`, quality and assumptions. Each plane names voltage/current signals, real/imag fundamental Z, phase, RMS, mean/DC/fundamental power, power factor, THD and harmonic records. Directional powers appear only with explicit positive real Z₀. Use adaptive-time integration over integer common periods; disclose truncated harmonic resolution. Positive current enters the measured load. Large-signal `V1/I1` differs from small-signal AC.
+
+`model_metadata` records input settings, geometry, selected models, versions, sources, imported data and assumptions. `diagnostics` holds numerical residuals, applicability warnings, iteration history, macro termination and optional refinement. `iedf` is a nested result with energy axis, PDFs, species tables and its own convergence.
 
 ## HTTP API
 
-- GET `/api/health`
-- GET `/api/catalog`: `{components:[...],analyses:[...]}`; component entries `{kind,label,category,ports,parameters,...}`
-- GET `/api/presets`: `{presets:[{id,name,description,document,analysis}]}`
-- GET `/api/circuits`: `{circuits:[{id,name,revision,created_by,updated_by,created_at,updated_at}]}`
-- POST `/api/circuits`: `{employee_id,document}` -> saved detail `{id,revision,document,...}`
-- GET `/api/circuits/{id}`: saved detail
-- PUT `/api/circuits/{id}`: `{employee_id,expected_revision,document}` -> saved detail; stale revision returns 409
-- POST `/api/runs`: `{employee_id,circuit_id,expected_revision,analysis}` -> `{id,status,...}`. Snapshot exact saved circuit revision and employee ID before queueing.
-- GET `/api/runs?circuit_id=...`: `{runs:[...]}`
-- GET `/api/runs/{id}`: `{id,status,circuit_id,circuit_revision,employee_id,analysis,created_at,started_at,finished_at,error,result}` (result only available after success)
-- POST `/api/runs/{id}/cancel`: marks cancel request and stops queued/running work
-- GET `/api/runs/{id}/export.csv`
+All paths use `/api`. PostgreSQL is durable; Redis queues solver work. Run snapshots and prior circuit revisions are immutable.
 
-Statuses: queued/running/succeeded/failed/canceled/timed_out. PostgreSQL is the durable source of truth. Redis is the job queue. A worker runs solver work in a separate process with timeout/point/resource bounds. Worker crashes/timeouts/cancellation must leave an honest terminal status. Preserve circuit revisions and immutable run snapshots. Store compressed result bytes in PostgreSQL. API returns Japanese-readable error details with solver logs where available. Frontend save before run (including latest unsaved edits); employee ID can be remembered locally but remains editable. No access-control claims based on employee IDs.
+| Method/path | Request / response |
+| --- | --- |
+| GET `/health` | Service health |
+| GET `/catalog` | `{components:[...],analyses:[...]}` with actual supported defaults/ports |
+| GET `/presets` | `{presets:[{id,name,description,document,analysis}]}` |
+| GET `/circuits` | `{circuits:[{id,name,revision,created_by,updated_by,created_at,updated_at}]}` |
+| POST `/circuits` | `{employee_id,document}` → saved circuit detail |
+| GET `/circuits/{id}` | Saved detail with document |
+| PUT `/circuits/{id}` | `{employee_id,expected_revision,document}` → detail; stale revision 409 |
+| POST `/runs` | `{employee_id,circuit_id,expected_revision,analysis}` → queued run; snapshot saved revision before enqueue |
+| GET `/runs?circuit_id=...` | Run list |
+| GET `/runs/{id}` | Status/timestamps/error, analysis, snapshot, runtime config, result when succeeded |
+| POST `/runs/{id}/cancel` | Cancel queued/running work |
+| GET `/runs/{id}/export.csv` | Saved result samples or summary/tables; completed result required |
+| POST `/studies` | Run-creation fields plus `name`, `axes:[{path,values}]`; durable cases before enqueue |
+| GET `/studies?circuit_id=...` | Study list/counts |
+| GET `/studies/{id}` | Snapshot, analysis, coordinates, latest case status/run and all attempts |
+| POST `/studies/{id}/cancel` | Cancel pending cases and record study cancellation |
+| POST `/studies/{id}/resume` | `{employee_id}` → new runs for failed/timed-out/canceled cases; no eligible cases 409 |
+| GET `/studies/{id}/export.csv` | Latest attempt per case: index, run ID, attempt, status/error, SI coordinates and summaries |
+| POST `/compare` | `{run_ids:[...],phase_align:true}` → 2–4 distinct runs, flattened input differences and waveforms/alignment status |
+| POST `/benchmarks` | Reference metadata and CSV/JSON metric data → registered reference |
+| GET `/benchmarks`, `/benchmarks/{id}` | Reference list/detail |
+| POST `/benchmarks/{id}/compare` | `{run_id}` → metric errors, uncertainty checks, missing metrics and warnings; completed run required |
+| GET `/runs/{id}/package` | Analysis package including original status/error |
+| POST `/packages/import` | `{employee_id,package}` → new circuit, analysis/provenance, verification and `requires_recalculation=true`, `result=null` |
 
-## Ownership
+Run states are `queued/running/succeeded/failed/canceled/timed_out`. Studies derive `queued/running/succeeded/partial_failed/canceled` from latest attempts and cancellation. A queue failure stays a durable failed case. Resume uses the previous attempt's input snapshot and creates a new run/attempt with current runtime provenance, preserving failures and diagnostics.
 
-- root: schemas.py, presets.py, requirements/build/compose, integration, README/spec, verification scripts.
-- engine_impl: engine.py, expressions.py, catalog.py, engine/expression tests.
-- global_impl: plasma.py, plasma_models.py, plasma tests and plasma-model documentation.
-- api_impl: api.py, database.py, worker.py, API tests.
-- frontend_impl: entire frontend except container files coordinated with root.
+Studies accept one or two distinct numeric selector axes and at most 100 Cartesian-product cases. API coordinates are SI values. Paths are whitelisted numeric settings, supported existing numeric component parameters, or the six source-waveform selectors below; they cannot rewrite arbitrary expressions/models or nested objects. Integer settings require integer values. UI provides a subset and converts its displayed mTorr/MHz units to SI.
+
+Source selectors use `document.components.<id>.parameters.waveform.<field>`. For `sin` on V/I sources, fields are `frequency` and `amplitude`. For `rf` on V sources, fields are `frequency_hz`, `rf_peak_voltage`, `second_frequency_hz`, and `second_rf_peak_voltage`. Each selected field must already exist as a number; missing fields, booleans, numeric strings, unsupported source/waveform kinds, and other waveform fields are rejected. In authored PLASMA schematics for `ccp/global/global_transient`, ignored analysis RF-drive selectors such as `analysis.settings.frequency_hz` and `analysis.settings.rf_peak_voltage` are rejected with guidance to select the existing source waveform path. Empty dedicated templates retain supported analysis-setting axes. Radial analysis uses independent settings and is not subject to this authored-PLASMA source restriction.
+
+Reference creation requires `name`, `material`, `measurement_definition`, positive finite `frequency_hz` and `pressure_pa`, nonempty `provenance`, `format=csv/json`, `data`, optional nonnegative `uncertainty`. CSV needs `metric,value,unit`; per-row `uncertainty` is optional. JSON accepts a metrics list or `{metrics:[...]}`. References are limited to 1 MiB and 1–200 distinct metrics. Supported units are explicitly converted to canonical units. Missing metrics or incompatible dimensions are reported; no inferred measurement-definition conversion occurs. Zero reference values have null relative error. Agreement is metric-specific and does not set experimental-validation status.
+
+Packages use `format=plasma-circuit-analysis`, `format_version=1`, `hash_algorithm=sha256-json-binary64-v1`, input document/analysis/revision, runtime provenance, historical result/status/error, content SHA-256 hashes and a package SHA-256. The declared algorithm sorts object keys and hashes finite JSON numbers by their binary64 value, so browser changes in equivalent numeric spelling preserve integrity; booleans remain a separate type. Packages without `hash_algorithm`, or with `null`, use the legacy JSON-serialization digest; other algorithm values are rejected. Import size limit is 32 MiB. Verify schema and all hashes, save a new circuit revision and package provenance, and require recalculation. Imported historical results do not create succeeded runs. `hashes_verified=true` and `authenticity_verified=false` explicitly distinguish integrity from issuer authentication.
+
+The worker performs calculations in a separate process with runtime/point/resource bounds. Crashes, timeouts and cancellation must retain honest terminal status. Result bytes are compressed in PostgreSQL. Save-before-run includes the current editor content; employee ID may be remembered locally but remains editable. Validation evidence belongs in [validation status](validation-status.md), with current counts and browser checks stated only when actually verified.

@@ -1,0 +1,1691 @@
+{
+  "passed": true,
+  "base_url": "http://localhost:8080",
+  "employee_id": "feature-validation",
+  "cases": [
+    {
+      "name": "ccp_iedf_refinement",
+      "circuit_id": "867a5467-91e8-4dc4-b994-e9cf70a68e4c",
+      "run_id": "001af305-0a3c-4a52-9509-f688dbdacda4",
+      "status": "succeeded",
+      "converged": true,
+      "summary": {
+        "dc_self_bias_v": -213.25398820773788,
+        "electron_density_m3": 1e+16,
+        "electron_temperature_ev": 3.0,
+        "electron_heating_w": 9.197808526717795,
+        "electron_bulk_w": 9.197808526717795,
+        "sheath_heating_w": 0.0,
+        "electrode_absorbed_power_w": 56.502537402453925,
+        "ion_acceleration_power_w": 56.29727123436353,
+        "secondary_electron_acceleration_power_w": 0.0,
+        "conductive_sheath_power_w": 46.86247558075208,
+        "rf_current_rms_a": 19.142086355007518,
+        "bulk_resistance_ohm": 0.02510185533031684,
+        "bulk_inductance_h": 2.510185533031684e-09,
+        "neutral_density_m3": 3.2188332786743194e+20
+      },
+      "diagnostics": {
+        "dc_root_evaluations": 12,
+        "mean_electrode_current_a": -6.77684450896384e-07,
+        "dc_current_tolerance_a": 0.0015242511925032387,
+        "dc_equilibrium_required": true,
+        "periodic_current_relative_error": 0.000965209740072003,
+        "periodic_sheath_voltage_relative_error": 0.00019664193739108452,
+        "periodic_sheath_charge_relative_error": 0.00012251176460230026,
+        "port_minus_bulk_and_conductive_sheath_w": 0.44225329498404875,
+        "rf_power_balance_relative_error": 0.007827140431481605,
+        "convergence_limits": {
+          "periodic_relative_error": 0.02,
+          "rf_power_balance_relative_error": 0.01
+        },
+        "sheath_collapse_fraction": 0.0,
+        "retained_cycles": 2,
+        "simulated_cycles": 24,
+        "electromagnetics_validity": {
+          "debye_length_m": 0.00012875965235341127,
+          "electron_plasma_frequency_rad_s": 5641460227.340954,
+          "electron_momentum_collision_frequency_s": 10000000.0,
+          "drude_skin_depth_m": 0.05322535004373465,
+          "homogeneous_bulk_wavelength_m": 16.78326873903139,
+          "effective_radial_wavelength_m": 6.145697372362239,
+          "effective_radial_attenuation_length_m": 45.1338601589024,
+          "bulk_wave_number_real_m_inv": 0.37437196560925756,
+          "bulk_wave_number_imag_m_inv": -18.788039894116462,
+          "effective_radial_wave_number_real_m_inv": 1.0223714131183295,
+          "effective_radial_wave_number_imag_m_inv": -0.02215631449380373,
+          "ratios": {
+            "debye_to_bulk_length": 0.00266181647843534,
+            "bulk_length_to_skin_depth": 0.9088310575755655,
+            "vacuum_phase_over_radius_rad": 0.12575070131709817,
+            "effective_radial_phase_over_radius_rad": 0.15335571196774941,
+            "radial_cell_complex_phase": 0.004618245326433721,
+            "mean_sheath_fraction_of_gap": 0.032542976598459325
+          },
+          "checks": {
+            "bulk_quasineutral_screen": true,
+            "axial_uniform_current_screen": false,
+            "electroquasistatic_screen": true,
+            "radial_mesh_screen": true,
+            "nonoverlapping_mean_sheaths": true
+          },
+          "model_domain_valid": false,
+          "domain_warnings": [
+            "Bulk length exceeds 0.3 Drude skin depths; axial uniform-current branches omit significant electromagnetic penetration structure."
+          ],
+          "threshold_basis": "Explicit engineering screening choices (0.1 Debye ratio, 0.3 skin/vacuum phase, 0.2 cell phase), not empirically validated cutoffs.",
+          "assumptions": [
+            "Debye length uses supplied global ne and Maxwellian Te.",
+            "Skin depth and bulk wavelength use a homogeneous unmagnetized collisional Drude plasma with exp(j omega t).",
+            "Effective radial wavelength is from the distributed sheet/axial circuit, including user sheet impedance; it is not a full Maxwell eigenmode.",
+            "All density and collision coefficients are prescribed; none is fitted to force a requested distribution."
+          ]
+        },
+        "iedf_converged": true,
+        "numerical_validation": {
+          "passed": true,
+          "relative_tolerance": 0.05,
+          "cases": [
+            {
+              "name": "rf_time_step",
+              "settings_changed": {
+                "points_per_cycle": 512
+              },
+              "solver_converged": true,
+              "passed": true,
+              "metrics": {
+                "dc_self_bias_v": {
+                  "available": true,
+                  "baseline": -213.25398820773788,
+                  "refined": -212.68079048195654,
+                  "absolute_floor": 0.001,
+                  "relative_error": 0.002687864037614012,
+                  "passed": true
+                },
+                "electron_density_m3": {
+                  "available": true,
+                  "baseline": 1e+16,
+                  "refined": 1e+16,
+                  "absolute_floor": 1e-06,
+                  "relative_error": 0.0,
+                  "passed": true
+                },
+                "electron_temperature_ev": {
+                  "available": true,
+                  "baseline": 3.0,
+                  "refined": 3.0,
+                  "absolute_floor": 1e-06,
+                  "relative_error": 0.0,
+                  "passed": true
+                },
+                "electron_heating_w": {
+                  "available": true,
+                  "baseline": 9.197808526717795,
+                  "refined": 9.379116924619336,
+                  "absolute_floor": 1e-06,
+                  "relative_error": 0.019331073421808235,
+                  "passed": true
+                },
+                "electrode_absorbed_power_w": {
+                  "available": true,
+                  "baseline": 56.502537402453925,
+                  "refined": 56.261773961543895,
+                  "absolute_floor": 1e-06,
+                  "relative_error": 0.004261108473680214,
+                  "passed": true
+                },
+                "electrode.mean_power_w": {
+                  "available": true,
+                  "baseline": 56.50253740245339,
+                  "refined": 56.26177396154339,
+                  "absolute_floor": 1e-06,
+                  "relative_error": 0.004261108473679751,
+                  "passed": true
+                },
+                "electrode.voltage_rms_v": {
+                  "available": true,
+                  "baseline": 276.99746453298684,
+                  "refined": 276.55583910065786,
+                  "absolute_floor": 0.001,
+                  "relative_error": 0.0015943302335765042,
+                  "passed": true
+                },
+                "electrode.current_rms_a": {
+                  "available": true,
+                  "baseline": 19.142086355007383,
+                  "refined": 19.329831304758027,
+                  "absolute_floor": 1e-06,
+                  "relative_error": 0.00971270503040714,
+                  "passed": true
+                },
+                "electrode.phase_deg": {
+                  "available": true,
+                  "baseline": -88.68375730373465,
+                  "refined": -88.69048004577631,
+                  "absolute_floor": 1e-06,
+                  "relative_error": 7.580004120160547e-05,
+                  "passed": true
+                },
+                "electrode.impedance_real_ohm": {
+                  "available": true,
+                  "baseline": 0.2918387958043601,
+                  "refined": 0.29009518641419496,
+                  "absolute_floor": 0.001,
+                  "relative_error": 0.0059745634070324915,
+                  "passed": true
+                },
+                "electrode.impedance_imag_ohm": {
+                  "available": true,
+                  "baseline": -12.70144915263812,
+                  "refined": -12.690402719917314,
+                  "absolute_floor": 0.001,
+                  "relative_error": 0.0008696986137610077,
+                  "passed": true
+                }
+              }
+            }
+          ],
+          "baseline_solver_converged": true,
+          "complete": true,
+          "physical_validation": false,
+          "note": "基準結果を保持し、刻み・周期・メッシュの変更で主要指標を比較する。"
+        }
+      },
+      "rf_diagnostics": {
+        "frequency_hz": 40000000.0,
+        "cycles_used": 2,
+        "voltage_definition": "peak-phasor",
+        "measurement_planes": [
+          {
+            "name": "electrode",
+            "voltage_signal": "V(cathode)",
+            "current_signal": "I(electrode)",
+            "reference_impedance_ohm": null,
+            "impedance_ohm": {
+              "real": 0.2918387958043601,
+              "imag": -12.70144915263812
+            },
+            "phase_deg": -88.68375730373465,
+            "voltage_rms_v": 276.99746453298684,
+            "current_rms_a": 19.142086355007383,
+            "mean_voltage_v": -213.25487390594347,
+            "mean_current_a": -6.776844480508819e-07,
+            "mean_power_w": 56.50253740245339,
+            "dc_power_w": 0.00014451951151710972,
+            "fundamental_power_w": 56.500983134916574,
+            "power_factor": 0.01065621284744686,
+            "current_thd": 0.9444571715696001,
+            "harmonics": [
+              {
+                "order": 1,
+                "frequency_hz": 40000000.0,
+                "voltage_peak_v": 249.99963290454417,
+                "current_peak_a": 19.677570990972473,
+                "voltage_phase_deg": -90.0000309143895,
+                "current_phase_deg": -1.3162736106548414,
+                "power_w": 56.500983134916574
+              },
+              {
+                "order": 2,
+                "frequency_hz": 80000000.0,
+                "voltage_peak_v": 0.0026763381487184563,
+                "current_peak_a": 7.873387645665212,
+                "voltage_phase_deg": 163.66937679496962,
+                "current_phase_deg": -93.72432320880269,
+                "power_w": -0.0022994711521467505
+              },
+              {
+                "order": 3,
+                "frequency_hz": 120000000.0,
+                "voltage_peak_v": 0.015216845925912206,
+                "current_peak_a": 4.312283638658727,
+                "voltage_phase_deg": 80.14163329281432,
+                "current_phase_deg": 171.63207150788213,
+                "power_w": -0.0008533836747446283
+              },
+              {
+                "order": 4,
+                "frequency_hz": 160000000.0,
+                "voltage_peak_v": 0.0037893354646399134,
+                "current_peak_a": 2.543639124023081,
+                "voltage_phase_deg": -156.2998725734575,
+                "current_phase_deg": -82.492970114542,
+                "power_w": 0.001343998510852015
+              },
+              {
+                "order": 5,
+                "frequency_hz": 200000000.0,
+                "voltage_peak_v": 0.0064128817174115265,
+                "current_peak_a": 13.465924821813948,
+                "voltage_phase_deg": -140.35284667575272,
+                "current_phase_deg": 175.02366910833737,
+                "power_w": 0.030731212026212033
+              },
+              {
+                "order": 6,
+                "frequency_hz": 240000000.0,
+                "voltage_peak_v": 0.036662322934233126,
+                "current_peak_a": 8.63920528800595,
+                "voltage_phase_deg": 157.5962848620888,
+                "current_phase_deg": -93.04579851954753,
+                "power_w": -0.05249352221319641
+              },
+              {
+                "order": 7,
+                "frequency_hz": 280000000.0,
+                "voltage_peak_v": 0.009251848139561107,
+                "current_peak_a": 1.5090782707307775,
+                "voltage_phase_deg": -20.531822856281504,
+                "current_phase_deg": -0.7870688098411218,
+                "power_w": 0.006570454185699375
+              },
+              {
+                "order": 8,
+                "frequency_hz": 320000000.0,
+                "voltage_peak_v": 0.032446629800725844,
+                "current_peak_a": 0.16211679281304503,
+                "voltage_phase_deg": -38.76131425553606,
+                "current_phase_deg": 82.48339433894415,
+                "power_w": -0.0013642032483233207
+              },
+              {
+                "order": 9,
+                "frequency_hz": 360000000.0,
+                "voltage_peak_v": 0.07256373446420245,
+                "current_peak_a": 0.16289444185246407,
+                "voltage_phase_deg": -122.9399794799094,
+                "current_phase_deg": 174.7313030699227,
+                "power_w": 0.0027446466335655554
+              },
+              {
+                "order": 10,
+                "frequency_hz": 400000000.0,
+                "voltage_peak_v": 0.08346484019646759,
+                "current_peak_a": 0.1009264422205059,
+                "voltage_phase_deg": 0.28257749238047003,
+                "current_phase_deg": 75.23879492140915,
+                "power_w": 0.0010932296886494053
+              },
+              {
+                "order": 11,
+                "frequency_hz": 440000000.0,
+                "voltage_peak_v": 0.1932520383052225,
+                "current_peak_a": 0.1468676962934205,
+                "voltage_phase_deg": 63.28518878919972,
+                "current_phase_deg": 172.32634165943864,
+                "power_w": -0.004629852474132749
+              },
+              {
+                "order": 12,
+                "frequency_hz": 480000000.0,
+                "voltage_peak_v": 0.1221758090895323,
+                "current_peak_a": 0.05657860998362661,
+                "voltage_phase_deg": -176.72705902154235,
+                "current_phase_deg": -94.7255874904135,
+                "power_w": 0.00048093173249545896
+              }
+            ],
+            "truncated_harmonic_power_residual_w": 0.02008570801037024
+          },
+          {
+            "name": "source",
+            "voltage_signal": "V(source_port)",
+            "current_signal": "I(source_port)",
+            "reference_impedance_ohm": 50.0,
+            "impedance_ohm": {
+              "real": 0.2918387958043601,
+              "imag": -12.70144915263812
+            },
+            "phase_deg": -88.68375730373465,
+            "voltage_rms_v": 276.99746453298684,
+            "current_rms_a": 19.142086355007383,
+            "mean_voltage_v": -213.25487390594347,
+            "mean_current_a": -6.776844480508819e-07,
+            "mean_power_w": 56.50253740245339,
+            "dc_power_w": 0.00014451951151710972,
+            "fundamental_power_w": 56.500983134916574,
+            "power_factor": 0.01065621284744686,
+            "current_thd": 0.9444571715696001,
+            "harmonics": [
+              {
+                "order": 1,
+                "frequency_hz": 40000000.0,
+                "voltage_peak_v": 249.99963290454417,
+                "current_peak_a": 19.677570990972473,
+                "voltage_phase_deg": -90.0000309143895,
+                "current_phase_deg": -1.3162736106548414,
+                "power_w": 56.500983134916574
+              },
+              {
+                "order": 2,
+                "frequency_hz": 80000000.0,
+                "voltage_peak_v": 0.0026763381487184563,
+                "current_peak_a": 7.873387645665212,
+                "voltage_phase_deg": 163.66937679496962,
+                "current_phase_deg": -93.72432320880269,
+                "power_w": -0.0022994711521467505
+              },
+              {
+                "order": 3,
+                "frequency_hz": 120000000.0,
+                "voltage_peak_v": 0.015216845925912206,
+                "current_peak_a": 4.312283638658727,
+                "voltage_phase_deg": 80.14163329281432,
+                "current_phase_deg": 171.63207150788213,
+                "power_w": -0.0008533836747446283
+              },
+              {
+                "order": 4,
+                "frequency_hz": 160000000.0,
+                "voltage_peak_v": 0.0037893354646399134,
+                "current_peak_a": 2.543639124023081,
+                "voltage_phase_deg": -156.2998725734575,
+                "current_phase_deg": -82.492970114542,
+                "power_w": 0.001343998510852015
+              },
+              {
+                "order": 5,
+                "frequency_hz": 200000000.0,
+                "voltage_peak_v": 0.0064128817174115265,
+                "current_peak_a": 13.465924821813948,
+                "voltage_phase_deg": -140.35284667575272,
+                "current_phase_deg": 175.02366910833737,
+                "power_w": 0.030731212026212033
+              },
+              {
+                "order": 6,
+                "frequency_hz": 240000000.0,
+                "voltage_peak_v": 0.036662322934233126,
+                "current_peak_a": 8.63920528800595,
+                "voltage_phase_deg": 157.5962848620888,
+                "current_phase_deg": -93.04579851954753,
+                "power_w": -0.05249352221319641
+              },
+              {
+                "order": 7,
+                "frequency_hz": 280000000.0,
+                "voltage_peak_v": 0.009251848139561107,
+                "current_peak_a": 1.5090782707307775,
+                "voltage_phase_deg": -20.531822856281504,
+                "current_phase_deg": -0.7870688098411218,
+                "power_w": 0.006570454185699375
+              },
+              {
+                "order": 8,
+                "frequency_hz": 320000000.0,
+                "voltage_peak_v": 0.032446629800725844,
+                "current_peak_a": 0.16211679281304503,
+                "voltage_phase_deg": -38.76131425553606,
+                "current_phase_deg": 82.48339433894415,
+                "power_w": -0.0013642032483233207
+              },
+              {
+                "order": 9,
+                "frequency_hz": 360000000.0,
+                "voltage_peak_v": 0.07256373446420245,
+                "current_peak_a": 0.16289444185246407,
+                "voltage_phase_deg": -122.9399794799094,
+                "current_phase_deg": 174.7313030699227,
+                "power_w": 0.0027446466335655554
+              },
+              {
+                "order": 10,
+                "frequency_hz": 400000000.0,
+                "voltage_peak_v": 0.08346484019646759,
+                "current_peak_a": 0.1009264422205059,
+                "voltage_phase_deg": 0.28257749238047003,
+                "current_phase_deg": 75.23879492140915,
+                "power_w": 0.0010932296886494053
+              },
+              {
+                "order": 11,
+                "frequency_hz": 440000000.0,
+                "voltage_peak_v": 0.1932520383052225,
+                "current_peak_a": 0.1468676962934205,
+                "voltage_phase_deg": 63.28518878919972,
+                "current_phase_deg": 172.32634165943864,
+                "power_w": -0.004629852474132749
+              },
+              {
+                "order": 12,
+                "frequency_hz": 480000000.0,
+                "voltage_peak_v": 0.1221758090895323,
+                "current_peak_a": 0.05657860998362661,
+                "voltage_phase_deg": -176.72705902154235,
+                "current_phase_deg": -94.7255874904135,
+                "power_w": 0.00048093173249545896
+              }
+            ],
+            "truncated_harmonic_power_residual_w": 0.02008570801037024,
+            "forward_power_w": 4764.744342288779,
+            "reflected_power_w": 4708.241949405838,
+            "directional_power_balance_residual_w": -4.547473508864641e-13,
+            "fundamental_forward_power_w": 2604.5425333532344,
+            "fundamental_reflected_power_w": 2548.0415502183173
+          }
+        ],
+        "quality": {
+          "integer_cycles": true,
+          "requested_harmonics": 12,
+          "resolved_harmonics": 12,
+          "maximum_sample_step_s": 9.765624999994943e-11,
+          "harmonic_resolution_limited": false
+        },
+        "assumptions": [
+          "定常波形の整数基本周期を、保存された可変刻み上で積分する。",
+          "複素Zは大信号周期波形の基本波V1/I1。DC動作点の小信号ACとは異なる。",
+          "進行・反射電力は指定した実数Z0の測定面で、DC成分を除いた全波形から計算する。"
+        ]
+      },
+      "solver": {
+        "pyspice": "1.5",
+        "ngspice": "39"
+      },
+      "signals": [
+        "V(cathode)",
+        "V(plasma_cathode)",
+        "V(plasma_anode)",
+        "V(sheath_cathode)",
+        "V(sheath_anode)",
+        "V(metal_minus_plasma_cathode)",
+        "V(metal_minus_plasma_anode)",
+        "I(electrode)",
+        "I(bulk)",
+        "Q(sheath_cathode)",
+        "Q(sheath_anode)",
+        "P(electron_bulk)",
+        "P(sheath_heating)",
+        "V(source_port)",
+        "I(source_port)"
+      ]
+    },
+    {
+      "name": "external_rf",
+      "circuit_id": "615d8f14-9894-4aa4-b983-05136d039fbf",
+      "run_id": "70d4c5b2-7e08-47c7-beeb-f992517655f5",
+      "status": "succeeded",
+      "converged": true,
+      "summary": {
+        "dc_self_bias_v": -15.999181638165881,
+        "electron_density_m3": 1e+16,
+        "electron_temperature_ev": 3.0,
+        "electron_heating_w": 0.27328918950236764,
+        "electron_bulk_w": 0.27328918950236764,
+        "sheath_heating_w": 0.0,
+        "electrode_absorbed_power_w": 4.869821587555599,
+        "ion_acceleration_power_w": 16.209947856105966,
+        "secondary_electron_acceleration_power_w": 0.0,
+        "conductive_sheath_power_w": 4.596116818385014,
+        "rf_current_rms_a": 3.2995773611416297,
+        "bulk_resistance_ohm": 0.02510185533031684,
+        "bulk_inductance_h": 2.510185533031684e-09,
+        "neutral_density_m3": 3.2188332786743194e+20
+      },
+      "diagnostics": {
+        "dc_root_evaluations": 23,
+        "mean_electrode_current_a": 1.2811485823784614e-09,
+        "dc_current_tolerance_a": 0.0015242511925032387,
+        "dc_equilibrium_required": true,
+        "periodic_current_relative_error": 5.725695685087418e-10,
+        "periodic_sheath_voltage_relative_error": 2.5152162964838632e-09,
+        "periodic_sheath_charge_relative_error": 2.1868485991169126e-08,
+        "port_minus_bulk_and_conductive_sheath_w": 0.00041557966821681447,
+        "rf_power_balance_relative_error": 8.533776047951978e-05,
+        "convergence_limits": {
+          "periodic_relative_error": 0.02,
+          "rf_power_balance_relative_error": 0.01
+        },
+        "sheath_collapse_fraction": 0.0,
+        "retained_cycles": 2,
+        "simulated_cycles": 32,
+        "node_map": {
+          "rf_source.p": "n1",
+          "rf_source.n": "0",
+          "plasma.p": "n2",
+          "plasma.n": "0",
+          "gnd.g": "0",
+          "source_r.p": "n1",
+          "source_r.n": "n3",
+          "match_l.p": "n3",
+          "match_l.n": "n4",
+          "dc_block.p": "n4",
+          "dc_block.n": "n2",
+          "match_c.p": "n2",
+          "match_c.n": "0"
+        },
+        "plasma_component_id": "plasma",
+        "dc_block_initial_bias_v": -54.913816948672164,
+        "source_port_absorbed_power_w": 4.871019039939755,
+        "fundamental_frequency_hz": 40000000.0,
+        "electromagnetics_validity": {
+          "debye_length_m": 0.00012875965235341127,
+          "electron_plasma_frequency_rad_s": 5641460227.340954,
+          "electron_momentum_collision_frequency_s": 10000000.0,
+          "drude_skin_depth_m": 0.05322535004373465,
+          "homogeneous_bulk_wavelength_m": 16.78326873903139,
+          "effective_radial_wavelength_m": 6.145697372362239,
+          "effective_radial_attenuation_length_m": 45.1338601589024,
+          "bulk_wave_number_real_m_inv": 0.37437196560925756,
+          "bulk_wave_number_imag_m_inv": -18.788039894116462,
+          "effective_radial_wave_number_real_m_inv": 1.0223714131183295,
+          "effective_radial_wave_number_imag_m_inv": -0.02215631449380373,
+          "ratios": {
+            "debye_to_bulk_length": 0.00266181647843534,
+            "bulk_length_to_skin_depth": 0.9088310575755655,
+            "vacuum_phase_over_radius_rad": 0.12575070131709817,
+            "effective_radial_phase_over_radius_rad": 0.15335571196774941,
+            "radial_cell_complex_phase": 0.004618245326433721,
+            "mean_sheath_fraction_of_gap": 0.032542976598459325
+          },
+          "checks": {
+            "bulk_quasineutral_screen": true,
+            "axial_uniform_current_screen": false,
+            "electroquasistatic_screen": true,
+            "radial_mesh_screen": true,
+            "nonoverlapping_mean_sheaths": true
+          },
+          "model_domain_valid": false,
+          "domain_warnings": [
+            "Bulk length exceeds 0.3 Drude skin depths; axial uniform-current branches omit significant electromagnetic penetration structure."
+          ],
+          "threshold_basis": "Explicit engineering screening choices (0.1 Debye ratio, 0.3 skin/vacuum phase, 0.2 cell phase), not empirically validated cutoffs.",
+          "assumptions": [
+            "Debye length uses supplied global ne and Maxwellian Te.",
+            "Skin depth and bulk wavelength use a homogeneous unmagnetized collisional Drude plasma with exp(j omega t).",
+            "Effective radial wavelength is from the distributed sheet/axial circuit, including user sheet impedance; it is not a full Maxwell eigenmode.",
+            "All density and collision coefficients are prescribed; none is fitted to force a requested distribution."
+          ]
+        }
+      },
+      "rf_diagnostics": {
+        "frequency_hz": 40000000.0,
+        "cycles_used": 2,
+        "voltage_definition": "peak-phasor",
+        "measurement_planes": [
+          {
+            "name": "electrode",
+            "voltage_signal": "V(cathode)",
+            "current_signal": "I(electrode)",
+            "reference_impedance_ohm": null,
+            "impedance_ohm": {
+              "real": 0.45005844045748533,
+              "imag": -5.433984460809076
+            },
+            "phase_deg": -85.26540258460625,
+            "voltage_rms_v": 24.13586222005971,
+            "current_rms_a": 3.299577361141602,
+            "mean_voltage_v": -15.999181638165911,
+            "mean_current_a": 1.2811471265405819e-09,
+            "mean_power_w": 4.869821587555662,
+            "dc_power_w": -2.0497305582737098e-08,
+            "fundamental_power_w": 4.899709519298851,
+            "power_factor": 0.061149360192530734,
+            "current_thd": 0.005907533924301381,
+            "harmonics": [
+              {
+                "order": 1,
+                "frequency_hz": 40000000.0,
+                "voltage_peak_v": 25.44301456592702,
+                "current_peak_a": 4.666225354371616,
+                "voltage_phase_deg": 167.27880143997558,
+                "current_phase_deg": -107.45579597541816,
+                "power_w": 4.899709519298851
+              },
+              {
+                "order": 2,
+                "frequency_hz": 80000000.0,
+                "voltage_peak_v": 2.4021742795621437,
+                "current_peak_a": 0.027555137689636716,
+                "voltage_phase_deg": 142.15224402292156,
+                "current_phase_deg": -63.48390715114241,
+                "power_w": -0.029838130024514232
+              },
+              {
+                "order": 3,
+                "frequency_hz": 120000000.0,
+                "voltage_peak_v": 0.11539817303390149,
+                "current_peak_a": 0.0007479893177620426,
+                "voltage_phase_deg": -121.29418889275377,
+                "current_phase_deg": 43.51885509376898,
+                "power_w": -4.165104676504003e-05
+              },
+              {
+                "order": 4,
+                "frequency_hz": 160000000.0,
+                "voltage_peak_v": 0.036126443437300766,
+                "current_peak_a": 0.0001609849657685052,
+                "voltage_phase_deg": 56.68603514631234,
+                "current_phase_deg": -96.56281883015396,
+                "power_w": -2.59667365665148e-06
+              },
+              {
+                "order": 5,
+                "frequency_hz": 200000000.0,
+                "voltage_peak_v": 0.010592839154105355,
+                "current_peak_a": 7.13426619125913e-05,
+                "voltage_phase_deg": -115.5335039016517,
+                "current_phase_deg": 128.95881078858352,
+                "power_w": -1.6271895713522383e-07
+              },
+              {
+                "order": 6,
+                "frequency_hz": 240000000.0,
+                "voltage_peak_v": 0.0031774085293283377,
+                "current_peak_a": 2.6291532623565576e-05,
+                "voltage_phase_deg": 93.43554180514188,
+                "current_phase_deg": -2.7923725367524654,
+                "power_w": -4.531306252470266e-09
+              },
+              {
+                "order": 7,
+                "frequency_hz": 280000000.0,
+                "voltage_peak_v": 0.0013104701535838804,
+                "current_peak_a": 2.0212904732610866e-05,
+                "voltage_phase_deg": -62.74555790733415,
+                "current_phase_deg": -173.36003255743756,
+                "power_w": -4.662994433125132e-09
+              },
+              {
+                "order": 8,
+                "frequency_hz": 320000000.0,
+                "voltage_peak_v": 0.0006438300631856876,
+                "current_peak_a": 1.1027854033601566e-05,
+                "voltage_phase_deg": 142.59241151871024,
+                "current_phase_deg": 85.73286084992338,
+                "power_w": 1.940778458486698e-09
+              },
+              {
+                "order": 9,
+                "frequency_hz": 360000000.0,
+                "voltage_peak_v": 0.00010095096937099407,
+                "current_peak_a": 9.908545797713187e-06,
+                "voltage_phase_deg": -84.81735780241141,
+                "current_phase_deg": 161.62599691869164,
+                "power_w": -1.9988317402960073e-10
+              },
+              {
+                "order": 10,
+                "frequency_hz": 400000000.0,
+                "voltage_peak_v": 0.0002498430562986971,
+                "current_peak_a": 1.207936493748804e-05,
+                "voltage_phase_deg": 178.11340838462627,
+                "current_phase_deg": 137.3310969081405,
+                "power_w": 1.1425892380221882e-09
+              },
+              {
+                "order": 11,
+                "frequency_hz": 440000000.0,
+                "voltage_peak_v": 0.00020362620322924899,
+                "current_peak_a": 1.2974752581907778e-05,
+                "voltage_phase_deg": 177.61365894014827,
+                "current_phase_deg": 147.0538833841235,
+                "power_w": 1.1375118562544262e-09
+              },
+              {
+                "order": 12,
+                "frequency_hz": 480000000.0,
+                "voltage_peak_v": 0.0002781072917643907,
+                "current_peak_a": 1.586634042657541e-05,
+                "voltage_phase_deg": 179.97880510235942,
+                "current_phase_deg": 146.65399224720827,
+                "power_w": 1.8434940394328997e-09
+              }
+            ],
+            "truncated_harmonic_power_residual_w": -5.367452180493615e-06
+          },
+          {
+            "name": "source",
+            "voltage_signal": "V(source_port)",
+            "current_signal": "I(source_port)",
+            "reference_impedance_ohm": 50.0,
+            "impedance_ohm": {
+              "real": 0.43811512932196767,
+              "imag": 15.798469481135259
+            },
+            "phase_deg": 88.411509669783,
+            "voltage_rms_v": 52.87388545270272,
+            "current_rms_a": 3.344682105373632,
+            "mean_voltage_v": -4.57361586152783e-08,
+            "mean_current_a": 1.0574391077258207e-09,
+            "mean_power_w": 4.871019039939641,
+            "dc_power_w": -4.8363202756946493e-17,
+            "fundamental_power_w": 4.900887027143661,
+            "power_factor": 0.02754379356019378,
+            "current_thd": 0.007309080542604934,
+            "harmonics": [
+              {
+                "order": 1,
+                "frequency_hz": 40000000.0,
+                "voltage_peak_v": 74.75498583122089,
+                "current_peak_a": 4.729968169679384,
+                "voltage_phase_deg": -18.980341392406945,
+                "current_phase_deg": -107.39185106218994,
+                "power_w": 4.900887027143661
+              },
+              {
+                "order": 2,
+                "frequency_hz": 80000000.0,
+                "voltage_peak_v": 1.7273718564467673,
+                "current_peak_a": 0.034546057210171614,
+                "voltage_phase_deg": 98.1323952799902,
+                "current_phase_deg": -81.86723556836564,
+                "power_w": -0.02983694348740591
+              },
+              {
+                "order": 3,
+                "frequency_hz": 120000000.0,
+                "voltage_peak_v": 0.06442564661376131,
+                "current_peak_a": 0.0012886688086871446,
+                "voltage_phase_deg": -177.31804843319074,
+                "current_phase_deg": 2.774906293731547,
+                "power_w": -4.1511606004508506e-05
+              },
+              {
+                "order": 4,
+                "frequency_hz": 160000000.0,
+                "voltage_peak_v": 0.01625958704379081,
+                "current_peak_a": 0.00032542943398192696,
+                "voltage_phase_deg": -6.676902108514831,
+                "current_phase_deg": 172.83266520750547,
+                "power_w": -2.645577183363543e-06
+              },
+              {
+                "order": 5,
+                "frequency_hz": 200000000.0,
+                "voltage_peak_v": 0.0037877864921882394,
+                "current_peak_a": 7.575756237001434e-05,
+                "voltage_phase_deg": 176.15793237532336,
+                "current_phase_deg": -1.2003746927704815,
+                "power_w": -1.433242623572105e-07
+              },
+              {
+                "order": 6,
+                "frequency_hz": 240000000.0,
+                "voltage_peak_v": 0.0011696085666159104,
+                "current_peak_a": 2.2235455142482557e-05,
+                "voltage_phase_deg": 17.966987867215444,
+                "current_phase_deg": -172.16322777554873,
+                "power_w": -1.2800673865916056e-08
+              },
+              {
+                "order": 7,
+                "frequency_hz": 280000000.0,
+                "voltage_peak_v": 0.00025737394072883666,
+                "current_peak_a": 1.0033287286461337e-05,
+                "voltage_phase_deg": -92.112857021466,
+                "current_phase_deg": 87.17820623788094,
+                "power_w": -1.2910545084117932e-09
+              },
+              {
+                "order": 8,
+                "frequency_hz": 320000000.0,
+                "voltage_peak_v": 0.00040402917475636696,
+                "current_peak_a": 7.961023787241818e-06,
+                "voltage_phase_deg": 17.434217980528043,
+                "current_phase_deg": 156.71178591268034,
+                "power_w": -1.218853503974834e-09
+              },
+              {
+                "order": 9,
+                "frequency_hz": 360000000.0,
+                "voltage_peak_v": 0.00038857433089264096,
+                "current_peak_a": 1.0025600651897621e-05,
+                "voltage_phase_deg": -5.001370345456746,
+                "current_phase_deg": 136.23160458141948,
+                "power_w": -1.5187321611225109e-09
+              },
+              {
+                "order": 10,
+                "frequency_hz": 400000000.0,
+                "voltage_peak_v": 0.0004929679995196491,
+                "current_peak_a": 1.1425315128208763e-05,
+                "voltage_phase_deg": 1.2846161689927675,
+                "current_phase_deg": 143.95210649209028,
+                "power_w": -2.2392098432994802e-09
+              },
+              {
+                "order": 11,
+                "frequency_hz": 440000000.0,
+                "voltage_peak_v": 0.0005985880507023896,
+                "current_peak_a": 1.3699961213403138e-05,
+                "voltage_phase_deg": -1.1083218631699974,
+                "current_phase_deg": 144.98957664724796,
+                "power_w": -3.4032292177506832e-09
+              },
+              {
+                "order": 12,
+                "frequency_hz": 480000000.0,
+                "voltage_peak_v": 0.0007085529211047773,
+                "current_peak_a": 1.58284390507725e-05,
+                "voltage_phase_deg": -1.2408052564114762,
+                "current_phase_deg": 147.01883120688908,
+                "power_w": -4.768968235798108e-09
+              }
+            ],
+            "truncated_harmonic_power_residual_w": 1.3284031558313814e-05,
+            "forward_power_w": 156.24997815937985,
+            "reflected_power_w": 151.37895911944022,
+            "directional_power_balance_residual_w": -1.5987211554602254e-14,
+            "fundamental_forward_power_w": 156.24995631876277,
+            "fundamental_reflected_power_w": 151.34906929161912
+          }
+        ],
+        "quality": {
+          "integer_cycles": true,
+          "requested_harmonics": 12,
+          "resolved_harmonics": 12,
+          "maximum_sample_step_s": 9.765624999994943e-11,
+          "harmonic_resolution_limited": false
+        },
+        "assumptions": [
+          "定常波形の整数基本周期を、保存された可変刻み上で積分する。",
+          "複素Zは大信号周期波形の基本波V1/I1。DC動作点の小信号ACとは異なる。",
+          "進行・反射電力は指定した実数Z0の測定面で、DC成分を除いた全波形から計算する。"
+        ]
+      },
+      "solver": {
+        "pyspice": "1.5",
+        "ngspice": "39"
+      },
+      "signals": [
+        "V(cathode)",
+        "V(plasma_cathode)",
+        "V(plasma_anode)",
+        "V(sheath_cathode)",
+        "V(sheath_anode)",
+        "V(metal_minus_plasma_cathode)",
+        "V(metal_minus_plasma_anode)",
+        "I(electrode)",
+        "I(bulk)",
+        "Q(sheath_cathode)",
+        "Q(sheath_anode)",
+        "P(electron_bulk)",
+        "P(sheath_heating)",
+        "V(source_port)",
+        "I(source_port)"
+      ]
+    },
+    {
+      "name": "oxygen_absorbed",
+      "circuit_id": "ec8b345a-c740-40df-b399-e9e6ab841781",
+      "run_id": "57fe4157-97ff-498e-8d44-9e82b364fc48",
+      "status": "succeeded",
+      "converged": true,
+      "summary": {
+        "electron_density_m3": 8.572558407021154e+16,
+        "electron_temperature_ev": 3.5385270780260014,
+        "electronegativity": 0.19600590326505232,
+        "total_plasma_absorbed_power_w": 500.0,
+        "reduced_energy_loss_w": 500.00000000000006,
+        "gas_temperature_k": 600.0,
+        "residence_time_s": 0.03511113755222454
+      },
+      "diagnostics": {
+        "oxygen_balances": {
+          "checks": {
+            "species": true,
+            "electron": true,
+            "energy": true,
+            "neutral_pressure": true,
+            "oxygen_atoms": true,
+            "charge": true,
+            "positive_densities": true,
+            "temperature_range": true,
+            "source_reaction_domain": true,
+            "positive_pumping": true,
+            "nonnegative_sheath": true,
+            "no_density_bound": true,
+            "no_temperature_bound": true,
+            "finite_transport": true,
+            "finite": true
+          },
+          "species_relative": {
+            "O2": -1.6035557402318076e-14,
+            "O2_a": 2.853696187683578e-15,
+            "O": -3.1424865830584876e-15,
+            "O_1D": -3.089784393027109e-15,
+            "O3": 4.329393867070461e-15,
+            "O-": 1.044531682277583e-14,
+            "O2-": 2.9551920021740342e-15,
+            "O3-": -4.6412247011953515e-15,
+            "O+": 2.8174442663891792e-15,
+            "O2+": 1.7658611587834478e-15,
+            "e": 1.1772418575771477e-15
+          },
+          "energy_relative": 1.1368683772161603e-16,
+          "neutral_pressure_relative": -6.108051675201186e-16,
+          "oxygen_atoms_relative": -1.2981824731619293e-13,
+          "charge_relative": 4.40427159819792e-17,
+          "max_relative": 1.2981824731619293e-13,
+          "tolerance": 1e-06,
+          "oxygen_atom_in_m3_s": 8.117648341323852e+21,
+          "oxygen_atom_out_m3_s": 8.117648341324906e+21
+        },
+        "oxygen_solution": {
+          "success": true,
+          "status": "converged_numerically",
+          "source_domain_valid": true,
+          "transport_domain_valid": null,
+          "transport": {
+            "mode": "explicit_h",
+            "closure_version": "explicit-h-0.1",
+            "axial_edge_factor": 0.2,
+            "radial_edge_factor": 0.2,
+            "ion_mean_free_path_m": null,
+            "ion_temperature_k": 600.0,
+            "alpha": 0.19600590326505232,
+            "alpha_ominus": 0.18968415955329498,
+            "domain_valid": null,
+            "domain_warnings": [],
+            "wall_rates_s": {
+              "k50": 36469.780412182765,
+              "k51": 25788.029037838758
+            },
+            "normalization": "explicit effective edge-to-bulk positive-ion factors"
+          },
+          "inputs": {
+            "absorbed_power_w": 500.0,
+            "pressure_pa": 1.3332236842105263,
+            "axial_edge_factor": 0.2,
+            "radial_edge_factor": 0.2,
+            "diffusion_o_m2_s": 1.2,
+            "diffusion_o2_m2_s": 0.84,
+            "electron_momentum_nu_s": {
+              "O": 10000000.0,
+              "O2": 10000000.0
+            },
+            "gas_temperature_k": 600.0,
+            "radius_m": 0.152,
+            "length_m": 0.076,
+            "flow_sccm": 50.0,
+            "gamma_o": 0.17,
+            "gamma_meta": 0.007,
+            "transport_mode": "explicit_h",
+            "ion_temperature_k": null,
+            "ion_momentum_cross_sections_m2": {
+              "O": 7.5e-19,
+              "O2": 7.5e-19
+            }
+          },
+          "temperature_ev": 3.5385270780260014,
+          "electron_density_m3": 8.572558407021154e+16,
+          "densities_m3": {
+            "O2": 1.0898782680870919e+20,
+            "O2_a": 1.3953755699488805e+19,
+            "O": 3.374763704005209e+19,
+            "O_1D": 3.684133849999641e+18,
+            "O3": 5.683105354661473e+17,
+            "O-": 1.6260785366573408e+16,
+            "O2-": 415688547337003.3,
+            "O3-": 126246624695579.66,
+            "O+": 4.066569889835291e+16,
+            "O2+": 6.186260571046462e+16,
+            "e": 8.572558407021154e+16
+          },
+          "electronegativity": 0.19600590326505232,
+          "pumping_rate_s": 28.480991210056736,
+          "residence_time_s": 0.03511113755222454,
+          "feed_molecules_s": 2.238983426498703e+19,
+          "volume_m3": 0.005516335106808931,
+          "neutral_density_target_m3": 1.6094166393371597e+20,
+          "plasma_potential_v": 20.68738495964409,
+          "loss_w": {
+            "ionization": 48.17349312136227,
+            "excitation": 371.05991147863153,
+            "elastic": 0.4136695788749595,
+            "electron_wall": 19.25468046732378,
+            "ion_wall": 61.09824535380752,
+            "total": 500.00000000000006
+          },
+          "residuals": {
+            "checks": {
+              "species": true,
+              "electron": true,
+              "energy": true,
+              "neutral_pressure": true,
+              "oxygen_atoms": true,
+              "charge": true,
+              "positive_densities": true,
+              "temperature_range": true,
+              "source_reaction_domain": true,
+              "positive_pumping": true,
+              "nonnegative_sheath": true,
+              "no_density_bound": true,
+              "no_temperature_bound": true,
+              "finite_transport": true,
+              "finite": true
+            },
+            "species_relative": {
+              "O2": -1.6035557402318076e-14,
+              "O2_a": 2.853696187683578e-15,
+              "O": -3.1424865830584876e-15,
+              "O_1D": -3.089784393027109e-15,
+              "O3": 4.329393867070461e-15,
+              "O-": 1.044531682277583e-14,
+              "O2-": 2.9551920021740342e-15,
+              "O3-": -4.6412247011953515e-15,
+              "O+": 2.8174442663891792e-15,
+              "O2+": 1.7658611587834478e-15,
+              "e": 1.1772418575771477e-15
+            },
+            "energy_relative": 1.1368683772161603e-16,
+            "neutral_pressure_relative": -6.108051675201186e-16,
+            "oxygen_atoms_relative": -1.2981824731619293e-13,
+            "charge_relative": 4.40427159819792e-17,
+            "max_relative": 1.2981824731619293e-13,
+            "tolerance": 1e-06,
+            "oxygen_atom_in_m3_s": 8.117648341323852e+21,
+            "oxygen_atom_out_m3_s": 8.117648341324906e+21
+          },
+          "particle_production_loss_m3_s": {
+            "O2": {
+              "production": 2.90334618447807e+22,
+              "loss": 2.9033461844781165e+22,
+              "net": -465567744.0
+            },
+            "O2_a": {
+              "production": 6.61400750418384e+21,
+              "loss": 6.614007504183821e+21,
+              "net": 18874368.0
+            },
+            "O": {
+              "production": 4.27106765462685e+22,
+              "loss": 4.271067654626863e+22,
+              "net": -134217728.0
+            },
+            "O_1D": {
+              "production": 1.6968433175570074e+22,
+              "loss": 1.6968433175570126e+22,
+              "net": -52428800.0
+            },
+            "O3": {
+              "production": 6.660479708101063e+20,
+              "loss": 6.660479708101035e+20,
+              "net": 2883584.0
+            },
+            "O-": {
+              "production": 4.140971569736012e+20,
+              "loss": 4.140971569735969e+20,
+              "net": 4325376.0
+            },
+            "O2-": {
+              "production": 1.247431638041806e+19,
+              "loss": 1.2474316380418023e+19,
+              "net": 36864.0
+            },
+            "O3-": {
+              "production": 3.5301027325352745e+18,
+              "loss": 3.530102732535291e+18,
+              "net": -16384.0
+            },
+            "O+": {
+              "production": 1.6747774059954417e+21,
+              "loss": 1.674777405995437e+21,
+              "net": 4718592.0
+            },
+            "O2+": {
+              "production": 3.562825972305979e+21,
+              "loss": 3.5628259723059727e+21,
+              "net": 6291456.0
+            },
+            "e": {
+              "production": 5.344234032714645e+21,
+              "loss": 5.344234032714639e+21,
+              "net": 6291456.0
+            }
+          },
+          "reaction_event_rates_m3_s": {
+            "k1": 2.991841913462525e+21,
+            "k2": 1.1667057614596559e+21,
+            "k3": 2.371075446090829e+20,
+            "k4": 1.3508328535266747e+21,
+            "k5": 1.0669547164999929e+20,
+            "k6": 1.2624626094216959e+20,
+            "k7": 5.575195129969401e+19,
+            "k8": 5.837702110761291e+21,
+            "k9": 1.1641022907808758e+20,
+            "k10": 1.0225744838501298e+19,
+            "k11": 5.4205344696211644e+19,
+            "k12": 6.2678880566689595e+19,
+            "k13": 9.463739813281346e+21,
+            "k14": 6.815653175680649e+21,
+            "k15": 1.2045772259515825e+22,
+            "k16": 1.0070795770117291e+21,
+            "k17": 2.595134629340542e+20,
+            "k18": 6.61400750418384e+21,
+            "k19": 5.0814176063086625e+20,
+            "k20": 1.4278334809455675e+20,
+            "k21": 3.5973005372650815e+21,
+            "k22": 1.3692365667301238e+21,
+            "k23": 1.764860243009328e+18,
+            "k24": 3.6367317336588554e+18,
+            "k25": 2.390624125133483e+18,
+            "k26": 1627270981689870.5,
+            "k27": 2.2911358467282627e+17,
+            "k28": 1.1074087249299888e+17,
+            "k29": 3.283404770997383e+18,
+            "k30": 2.069708312989333e+19,
+            "k31": 9.743750517218044e+18,
+            "k32": 6265770978507088.0,
+            "k33": 3.529720486018656e+18,
+            "k34": 1.6341764589817472e+17,
+            "k35": 2.7123396617362437e+20,
+            "k36": 3.4632839189671685e+18,
+            "k37": 9.640468186394758e+17,
+            "k38": 9.037938924745084e+17,
+            "k39": 1.1044930374892404e+18,
+            "k40": 5.5776898393206637e+17,
+            "k41": 6.681881356810595e+16,
+            "k42": 2.9858152147136323e+18,
+            "k43": 3.4449360324574046e+20,
+            "k44": 6.578637264671206e+20,
+            "k45": 180849853564749.84,
+            "k46": 31530569521165.26,
+            "k47": 31530569521165.26,
+            "k48": 6.888110730234059e+20
+          },
+          "wall_rates_s": {
+            "k50": 36469.780412182765,
+            "k51": 25788.029037838758,
+            "k52": 963.9009430426511,
+            "k53": 963.9009430426511,
+            "k54": 42.54934579792047
+          },
+          "electron_wall_loss_m3_s": 3.078383781548705e+21,
+          "optimizer": {
+            "method": "bounded log least_squares with physical multistarts",
+            "attempts": [
+              {
+                "nfev": 9,
+                "optimizer_success": true,
+                "optimizer_status": 1,
+                "max_relative": 1.2981824731619293e-13,
+                "numerical_success": true
+              }
+            ],
+            "message": "`gtol` termination condition is satisfied.",
+            "total_nfev": 9
+          },
+          "metadata": {
+            "model_version": "oxygen-explicit-input-study-0.2",
+            "validation_status": "exploratory_not_literature_validated",
+            "success_definition": "numerical particle, reduced energy, pressure, atom and charge closure only",
+            "source_values": {
+              "chemistry_reference": "https://doi.org/10.1088/0022-3727/34/7/312",
+              "excitation_reference": "https://doi.org/10.1088/0022-3727/33/11/311",
+              "implemented_reaction_count": 48,
+              "excitation_term_count": 16,
+              "source_corrections": [
+                {
+                  "reaction": "k24",
+                  "printed_products": {
+                    "O2": 1
+                  },
+                  "implemented_products": {
+                    "O2": 2
+                  },
+                  "basis": "Both reactants contain two oxygen atoms; add product multiplicity 2 to conserve oxygen.",
+                  "status": "conservation_normalization_not_author_erratum"
+                },
+                {
+                  "reaction": "k26",
+                  "printed_units": "m^3/s",
+                  "implemented_units": "m^6/s",
+                  "basis": "Three reactant densities require coefficient m^6/s; numerical value preserved.",
+                  "status": "dimensional_normalization_not_author_erratum"
+                },
+                {
+                  "reaction": "k44",
+                  "printed_coefficient": "6.9e-40*(300/Tg)^(-1.25)*[O2] m^3/s",
+                  "basis": "Move the printed [O2] density factor into explicit three-body mass action; do not double-count.",
+                  "status": "equivalent_mass_action_normalization"
+                },
+                {
+                  "reaction": "k45",
+                  "printed_products": {
+                    "O3": 1,
+                    "O": 1
+                  },
+                  "printed_coefficient": "3.82e-40*[O] m^3/s",
+                  "implemented_products": {
+                    "O3": 1,
+                    "O": 1,
+                    "e": 1
+                  },
+                  "basis": "Add emitted electron for charge conservation; separate printed [O] factor into third reactant.",
+                  "status": "conservation_and_mass_action_normalization_not_author_erratum"
+                }
+              ],
+              "omitted_reactions": [
+                {
+                  "reaction": "k49",
+                  "printed_reactants": {
+                    "O2+": 1,
+                    "O_1D": 1
+                  },
+                  "printed_products": {
+                    "O2_a": 1,
+                    "O": 1
+                  },
+                  "reason": "Printed reaction destroys one positive charge without an electron. Replacing O2+ with neutral O2 would conserve charge but is an unverified interpretation, so the solver excludes k49.",
+                  "effect": "Full 49-reaction reproduction not achieved; no success assertion permitted."
+                }
+              ],
+              "wall_return_reactions": [
+                {
+                  "id": "k50",
+                  "reactants": {
+                    "O+": 1
+                  },
+                  "products": {
+                    "O": 1
+                  },
+                  "charge_sink": "wall circuit",
+                  "units": "s^-1",
+                  "formula": "uB_Oplus*Aeff/V",
+                  "source": "Table 2 p.1103"
+                },
+                {
+                  "id": "k51",
+                  "reactants": {
+                    "O2+": 1
+                  },
+                  "products": {
+                    "O2": 1
+                  },
+                  "charge_sink": "wall circuit",
+                  "units": "s^-1",
+                  "formula": "uB_O2plus*Aeff/V",
+                  "source": "Table 2 p.1103"
+                },
+                {
+                  "id": "k52",
+                  "reactants": {
+                    "O": 1
+                  },
+                  "products": {
+                    "O2": 0.5
+                  },
+                  "gamma": 0.17,
+                  "gamma_uncertainty": 0.02,
+                  "units": "s^-1",
+                  "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                  "source": "Table 2 p.1103; section 2.2 p.1104; gamma measured stainless steel at 300 K"
+                },
+                {
+                  "id": "k53",
+                  "reactants": {
+                    "O_1D": 1
+                  },
+                  "products": {
+                    "O2": 0.5
+                  },
+                  "gamma": 0.17,
+                  "units": "s^-1",
+                  "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                  "source": "Table 2 p.1103; assumes same probability as atomic O"
+                },
+                {
+                  "id": "k54",
+                  "reactants": {
+                    "O2_a": 1
+                  },
+                  "products": {
+                    "O2": 1
+                  },
+                  "gamma": 0.007,
+                  "units": "s^-1",
+                  "formula": "1/(Lambda^2/D+2*V*(2-gamma)/(A*v*gamma))",
+                  "source": "Table 2 p.1103; section 2.2 p.1104; quenching measured on Fe surface"
+                }
+              ],
+              "published_conditions": {
+                "radius_m": 0.152,
+                "length_m": 0.076,
+                "absorbed_power_w": 500.0,
+                "flow_sccm": 50.0,
+                "gas_temperature_k": 600.0,
+                "wall_material": "stainless steel",
+                "pressure_range_mtorr": [
+                  1.0,
+                  100.0
+                ],
+                "usual_global_model_range_mtorr": [
+                  1.0,
+                  20.0
+                ],
+                "figure2_powers_w": [
+                  100.0,
+                  500.0,
+                  1500.0
+                ],
+                "source": "Section 3 p.1104; figure 1–3 captions; table 3"
+              }
+            },
+            "supplementary_values": {
+              "ionization_energies_ev": {
+                "O": {
+                  "value": 13.618055,
+                  "uncertainty_ev": 7e-06,
+                  "source": "NIST Atomic Spectra Database, neutral oxygen ground-state ionization energy",
+                  "url": "https://physics.nist.gov/cgi-bin/ASD/ie.pl?at_num_out=1&biblio=1&e_out=0&el_name_out=1&ion_charge_out=1&spectra=oxygen&unc_out=1&units=1"
+                },
+                "O2": {
+                  "value": 12.0697,
+                  "uncertainty_ev": 0.0002,
+                  "source": "NIST Chemistry WebBook SRD69, evaluated molecular oxygen ionization energy",
+                  "url": "https://webbook.nist.gov/cgi/cbook.cgi?ID=C7782447&Mask=262"
+                },
+                "role": "Supplementary physical threshold values, not numerical values explicitly verified in the 2001/2000 paper. Rate-fit activation parameters are not thresholds.",
+                "checked_date": "2026-10-07"
+              },
+              "flow_standard_temperature_k": 273.15,
+              "flow_standard_pressure_pa": 101325.0
+            },
+            "case_inputs_and_assumptions": {
+              "absorbed_power_w": 500.0,
+              "pressure_pa": 1.3332236842105263,
+              "axial_edge_factor": 0.2,
+              "radial_edge_factor": 0.2,
+              "diffusion_o_m2_s": 1.2,
+              "diffusion_o2_m2_s": 0.84,
+              "electron_momentum_nu_s": {
+                "O": 10000000.0,
+                "O2": 10000000.0
+              },
+              "gas_temperature_k": 600.0,
+              "radius_m": 0.152,
+              "length_m": 0.076,
+              "flow_sccm": 50.0,
+              "gamma_o": 0.17,
+              "gamma_meta": 0.007,
+              "transport_mode": "explicit_h",
+              "ion_temperature_k": null,
+              "ion_momentum_cross_sections_m2": {
+                "O": 7.5e-19,
+                "O2": 7.5e-19
+              }
+            },
+            "closures": {
+              "absorbed_power": "total plasma absorbed power: collisional + electron-wall + ion-wall",
+              "energy": "source eq.(3) reduced ground-target collisional budget; not all 48 reaction energies",
+              "ionization": "ground O2 k1 and ground O k4 with supplementary NIST thresholds",
+              "excitation": "all 16 source-26 terms once; no additional per-particle excitation charge",
+              "elastic": "3*me/mi*Te*ne*nu_i; supplied nu_i are per-electron s^-1 frequencies, not m^3/s",
+              "wall_energy": "electron: 2Te; ion: phi+Te/2; each applied once to ion-balanced wall flux",
+              "sheath": "phi=Te*log(ne*sqrt(eTe/(2*pi*me))*A/(V*sum_i(kwi*ni)))",
+              "pressure": "sum of five neutral densities = p/(kB*Tg); ion pressure neglected",
+              "flow": "pure O2 feed; common unknown neutral pumping rate; charged pumping zero",
+              "negative_ion_wall_loss_s": 0.0,
+              "hL_hR": "explicit inputs; source electronegative edge closure not solved",
+              "surface": "explicit gammaO (also O_1D), gammaMeta; source gammaO .17+/- .02 measured on stainless steel at 300K; gammaMeta .007 measured on Fe and adopted in the paper's SUS case; neither is a Si coefficient",
+              "zero_elastic": false
+            },
+            "unresolved_energy_channels": [
+              "Excited-target ionization k17/k19 has no additional reaction-resolved energy term in the reduced source budget.",
+              "Electron detachment k7, superelastic k21, attachment k3/k20 and additional dissociation k22/k43 lack a full supplied energy-transfer table.",
+              "New electrons from heavy-particle detachment do not have a supplied birth-energy distribution."
+            ],
+            "individual_reaction_domains": {
+              "k20": {
+                "temperature_ev": [
+                  1.0,
+                  4.5
+                ],
+                "endpoints": "exclusive",
+                "source": "https://cden.ucsd.edu/internal/Publications/Archive/SFR/Plasma/GudPatelKouzJPD01.pdf",
+                "location": "section 3.4, p.1107"
+              }
+            },
+            "solver_temperature_domain_ev": [
+              1.0,
+              4.5
+            ],
+            "general_table_temperature_domain_ev": [
+              1.0,
+              7.0
+            ],
+            "transport": {
+              "mode": "explicit_h",
+              "source_approximation": null,
+              "ion_temperature_rule": "Ti unused by explicit_h transport",
+              "source_domain_valid_definition": "reaction-fit domain only; transport_domain_valid is separate",
+              "domain_success_rule": "numerical balance may pass outside transport regime; warnings do not establish physical applicability"
+            },
+            "no_parameter_calibration": true,
+            "literature_reproduction_success": false
+          },
+          "per_reaction_range_warnings": []
+        },
+        "global_iterations": [],
+        "power_mode": "prescribed_absorbed"
+      },
+      "rf_diagnostics": null,
+      "solver": {
+        "global": "scipy.optimize.least_squares"
+      },
+      "signals": []
+    },
+    {
+      "name": "argon_pulse_gas_heat",
+      "circuit_id": "5fbc35b4-c4a0-416d-9110-ccb8cd049c80",
+      "run_id": "8a66ce44-9820-41ff-9f39-933825ae64c8",
+      "status": "succeeded",
+      "converged": true,
+      "summary": {
+        "electron_density_m3": 7.596907679875784e+16,
+        "electron_temperature_ev": 3.269847309454241,
+        "gas_temperature_k": 300.02244885380964,
+        "pressure_pa": 1.33305022989323,
+        "integrated_time_s": 1e-05,
+        "total_absorbed_energy_j": 0.0037499999999999955,
+        "electron_energy_change_j": 0.00018551163835656554,
+        "gas_energy_change_j": 5.288951583291758e-07
+      },
+      "diagnostics": {
+        "termination": "completed_requested_time",
+        "integration_success": true,
+        "solver_evaluations": 481,
+        "jacobian_evaluations": 3,
+        "lu_decompositions": 33,
+        "electron_energy_residual_j": 3.3068166260807885e-18,
+        "gas_energy_residual_j": 3.3327570100904515e-18,
+        "total_energy_residual_j": 7.779150587583494e-18,
+        "max_atom_source_relative_error": 3.3104072560440986e-16,
+        "max_negative_density_correction_in_scaled_state": 0.0,
+        "event_localization_boundary_trials": 0,
+        "rf_refreshes": [],
+        "pulse": {
+          "frequency_hz": 100000.0,
+          "duty_cycle": 0.5,
+          "off_fraction": 0.5
+        }
+      },
+      "rf_diagnostics": null,
+      "solver": {
+        "global": "scipy.integrate.solve_ivp",
+        "method": "BDF",
+        "relative_tolerance": 1e-06
+      },
+      "signals": [
+        "n(Ar)",
+        "n(Ar+)",
+        "n(e)",
+        "Te",
+        "Tg",
+        "P(total_absorbed)",
+        "P(total_plasma_power_source)",
+        "P(electron_loss)",
+        "P(gas_heating)",
+        "P(ion_acceleration)",
+        "P(electron_retarding_sheath_work)",
+        "P(gas_sink)",
+        "pressure"
+      ]
+    },
+    {
+      "name": "radial_refinement",
+      "circuit_id": "21f11f1b-52ad-4f7b-8a32-2a7de4c6f518",
+      "run_id": "33565de4-be94-40ca-af83-377004f05960",
+      "status": "succeeded",
+      "converged": true,
+      "summary": {
+        "electron_absorbed_power_w": 0.006868666136986272,
+        "electrode_loss_power_w": 0.0017739665601640225,
+        "rf_input_power_w": 0.008642632697122288,
+        "rf_feed_current_peak_a": 0.7521050458775898,
+        "electrode_voltage_nonuniformity": 0.004259401697680929,
+        "electrode_voltage_range_over_mean": 0.026019766977505,
+        "absorbed_power_nonuniformity": 0.008473980951702586,
+        "absorbed_power_range_over_mean": 0.051511376091678836,
+        "electron_density_m3": 1e+16,
+        "electron_temperature_ev": 3.0,
+        "debye_length_m": 0.00012875965235341127,
+        "drude_skin_depth_m": 0.05322535004373465,
+        "effective_radial_wavelength_m": 6.145697372362239
+      },
+      "diagnostics": {
+        "nodal_kcl_relative_residual": 1.5123198009423525e-13,
+        "feed_minus_total_axial_current_relative_residual": 3.229931867592848e-13,
+        "input_minus_bulk_and_electrode_power_w": -2.8006676838776556e-14,
+        "power_balance_relative_error": 3.240526101266701e-12,
+        "nodal_matrix_condition_number": 653.3595791758396,
+        "annular_edges_m": [
+          0.0,
+          0.01,
+          0.022727272727272728,
+          0.035454545454545454,
+          0.04818181818181818,
+          0.060909090909090906,
+          0.07363636363636362,
+          0.08636363636363635,
+          0.09909090909090908,
+          0.1118181818181818,
+          0.12454545454545453,
+          0.13727272727272727,
+          0.15
+        ],
+        "validity": {
+          "debye_length_m": 0.00012875965235341127,
+          "electron_plasma_frequency_rad_s": 5641460227.340954,
+          "electron_momentum_collision_frequency_s": 10000000.0,
+          "drude_skin_depth_m": 0.05322535004373465,
+          "homogeneous_bulk_wavelength_m": 16.78326873903139,
+          "effective_radial_wavelength_m": 6.145697372362239,
+          "effective_radial_attenuation_length_m": 45.1338601589024,
+          "bulk_wave_number_real_m_inv": 0.37437196560925756,
+          "bulk_wave_number_imag_m_inv": -18.788039894116462,
+          "effective_radial_wave_number_real_m_inv": 1.0223714131183295,
+          "effective_radial_wave_number_imag_m_inv": -0.02215631449380373,
+          "ratios": {
+            "debye_to_bulk_length": 0.00266181647843534,
+            "bulk_length_to_skin_depth": 0.9088310575755655,
+            "vacuum_phase_over_radius_rad": 0.12575070131709817,
+            "effective_radial_phase_over_radius_rad": 0.15335571196774941,
+            "radial_cell_complex_phase": 0.013015055010858667,
+            "mean_sheath_fraction_of_gap": 0.032542976598459325,
+            "max_rf_to_mean_cathode_sheath_voltage": 0.05041271561455279,
+            "max_rf_to_mean_anode_sheath_voltage": 0.018408121018122326
+          },
+          "checks": {
+            "bulk_quasineutral_screen": true,
+            "axial_uniform_current_screen": false,
+            "electroquasistatic_screen": true,
+            "radial_mesh_screen": true,
+            "nonoverlapping_mean_sheaths": true,
+            "small_signal_sheath_screen": true
+          },
+          "model_domain_valid": false,
+          "domain_warnings": [
+            "Bulk length exceeds 0.3 Drude skin depths; axial uniform-current branches omit significant electromagnetic penetration structure."
+          ],
+          "threshold_basis": "Explicit engineering screening choices (0.1 Debye ratio, 0.3 skin/vacuum phase, 0.2 cell phase), not empirically validated cutoffs.",
+          "assumptions": [
+            "Debye length uses supplied global ne and Maxwellian Te.",
+            "Skin depth and bulk wavelength use a homogeneous unmagnetized collisional Drude plasma with exp(j omega t).",
+            "Effective radial wavelength is from the distributed sheet/axial circuit, including user sheet impedance; it is not a full Maxwell eigenmode.",
+            "All density and collision coefficients are prescribed; none is fitted to force a requested distribution."
+          ]
+        },
+        "model_domain_valid": false,
+        "domain_warnings": [
+          "Bulk length exceeds 0.3 Drude skin depths; axial uniform-current branches omit significant electromagnetic penetration structure."
+        ],
+        "numerical_validation": {
+          "passed": true,
+          "relative_tolerance": 0.1,
+          "cases": [
+            {
+              "name": "radial_mesh",
+              "settings_changed": {
+                "radial_cells": 24
+              },
+              "solver_converged": true,
+              "passed": true,
+              "metrics": {
+                "electron_absorbed_power_w": {
+                  "available": true,
+                  "baseline": 0.006868666136986272,
+                  "refined": 0.00686805589660317,
+                  "absolute_floor": 1e-06,
+                  "relative_error": 8.884408863842537e-05,
+                  "passed": true
+                },
+                "electrode_voltage_nonuniformity": {
+                  "available": true,
+                  "baseline": 0.004259401697680929,
+                  "refined": 0.0043075314938236554,
+                  "absolute_floor": 1e-06,
+                  "relative_error": 0.01117340551351447,
+                  "passed": true
+                },
+                "absorbed_power_nonuniformity": {
+                  "available": true,
+                  "baseline": 0.008473980951702586,
+                  "refined": 0.008568301773234187,
+                  "absolute_floor": 1e-06,
+                  "relative_error": 0.011008111528732876,
+                  "passed": true
+                },
+                "electron_density_m3": {
+                  "available": true,
+                  "baseline": 1e+16,
+                  "refined": 1e+16,
+                  "absolute_floor": 1e-06,
+                  "relative_error": 0.0,
+                  "passed": true
+                },
+                "electron_temperature_ev": {
+                  "available": true,
+                  "baseline": 3.0,
+                  "refined": 3.0,
+                  "absolute_floor": 1e-06,
+                  "relative_error": 0.0,
+                  "passed": true
+                }
+              }
+            }
+          ],
+          "baseline_solver_converged": true,
+          "complete": true,
+          "physical_validation": false,
+          "note": "基準結果を保持し、刻み・周期・メッシュの変更で主要指標を比較する。"
+        }
+      },
+      "rf_diagnostics": null,
+      "solver": {
+        "name": "complex nodal KCL",
+        "phasor_convention": "peak amplitude, exp(j omega t)"
+      },
+      "signals": [
+        "V(electrode) amplitude",
+        "V(electrode) phase",
+        "V(cathode sheath) amplitude",
+        "V(anode sheath) amplitude",
+        "V(bulk) amplitude",
+        "electron absorbed power density",
+        "prescribed global electron density"
+      ]
+    }
+  ]
+}

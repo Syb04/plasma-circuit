@@ -1,0 +1,94 @@
+{
+  "recorded_at_utc": "2026-10-07T23:04:48.980286+00:00",
+  "backend_tests": {
+    "passed": 391,
+    "failed": 0,
+    "warnings": 1,
+    "duration_seconds": 176.22,
+    "command": "docker compose -f compose.yaml -f compose.cloud.yaml run --rm --no-deps api timeout 300s python -X faulthandler -m pytest -q -o faulthandler_timeout=120",
+    "note": "Final image suite completed with exit code 0, including cross-language package hashing and malformed-algorithm regressions."
+  },
+  "frontend_build": {
+    "passed": true,
+    "command": "npm run build",
+    "js_asset": "index-CNFsynoX.js",
+    "css_asset": "index-D7JUZkyy.css",
+    "note": "Vite emitted its existing chunk-size advisory."
+  },
+  "docker_images": {
+    "api_worker": "sha256:4de7f9d0065ad36993ee9eaf9a76d88f6180f47166eb0bbc0b74497fd825e7f1",
+    "frontend": "sha256:d0a9afa8cc27bc945db69f61d1a639b6c0776982f71c7c5789ee128d13b8323b"
+  },
+  "live_api_checks": {
+    "passed": true,
+    "cases": 5,
+    "evidence": "api-validation.json",
+    "note": "Executed real queued jobs before the final workflow/API-only build; physical solver source is unchanged in the final tested image."
+  },
+  "physical_validation_complete": false,
+  "source_sha256": {
+    "backend/app/__init__.py": "77942a3b6e6ff660cbfdcfe846ebe2d021974d1387cebe083df331ddc6c7234f",
+    "backend/app/analysis_package.py": "5d2fc28465380460a64f4c67764a0f41f35146cc91d8a836eca55c96ac576bc6",
+    "backend/app/api.py": "e0be1ee3fc794d976881ef64004e075203bf5de196c0d310d55a67be4bb5255e",
+    "backend/app/benchmarks.py": "65124c91f2e0d3694a9169399203afa4ac1c2178771c65acd5d937bca5d8b262",
+    "backend/app/catalog.py": "9eb29c95f77b871dfcc4b02951289f477c7bf823c00412e8276755301d476045",
+    "backend/app/database.py": "44f750b83121c8801f1d8687519b506a20623d4940eb6c711db354a7c96a7529",
+    "backend/app/electron_heating.py": "1749bcf04f1c288b08eee2a24e847235136a59e74e7f42438ac9ea46cbd9ae84",
+    "backend/app/electron_transport.py": "afb7b3e622e46198bdb25c208be26fca7d57f3ffba4f2dd58ed0f18d1e2db6aa",
+    "backend/app/engine.py": "c7e7c41bc0dc61c283d6204fed34e8b99b58bdffb65aca2fd98bcbfcd4145dc8",
+    "backend/app/expressions.py": "f98fe00adb27c5f5f62f27254d7226d2b593f2e815f5f062310f0d3641ac6094",
+    "backend/app/external_rf.py": "4110bde879802b5ffe96ee29f52dc9e5bbe81dba9651cafe3e679adbd357180f",
+    "backend/app/global_dynamics.py": "1cdf2262040911b1276903f139e1411ea6582fd224ce247702ef8c9d85a5dba8",
+    "backend/app/ion_transport.py": "8663129097652b0fcb053eb8c9e2351d4a9244f36b668bbec3ab7ea45f6a2e80",
+    "backend/app/oxygen.py": "5c023d08a857bfedbb5e41b6fcb22395eb71a11b29a28b8fd6eb16f57a89227e",
+    "backend/app/oxygen_adapter.py": "452442c46e5e7370edf00737f5414c26c4858129770b8be320bb885b68339c45",
+    "backend/app/oxygen_study.py": "3349cafbaa03efd09e65dbfca8c3aaa6b50c394bf962f6389e10788c74945ffc",
+    "backend/app/oxygen_transport.py": "4cd70a3c5c0d4f036abc827f21b395f351a2f829b643c8ee69fb6ccb6d247395",
+    "backend/app/plasma.py": "37257c36b4a9b41a04b9aea69d48808ebbd448d90427391ac896bf02a013047b",
+    "backend/app/plasma_models.py": "aa42ef301e51e1b5cdc0affa4aad9bbac3d88d77f794476ca3b76d9839bc6834",
+    "backend/app/presets.py": "bd77978eb17ea721bb00a46b636ffa703b26128277b4cd21abd1fabc8cadfa99",
+    "backend/app/radial_model.py": "81e3446f39329071b6fc09e81962534aa83a09afbae41d8fcebc9299c5aa7cbf",
+    "backend/app/rf_analysis.py": "258360c425de2de9795a7464c1cce4f186a10c9bc10bb5f2204a49557e48a539",
+    "backend/app/schemas.py": "a32065e8e63c98479736e1c6383668943821136ba8cf8ee7f53054fb47c39979",
+    "backend/app/simulation.py": "7fdbb78db949db2e22244404c81491b78ffd310e26898398750b2578f81b05c8",
+    "backend/app/studies.py": "41382f655a0c5bc0ed2b3a949b8a01d3c19ba7efa36fb3c0d468314ba6bacf53",
+    "backend/app/surface_models.py": "8bf96a66bb4fc56321824bc9d5d168e9b69d0b0ca1266bf4a92767b92e46c16d",
+    "backend/app/validation.py": "4613f3c50d62b7d850bdda70fa46db130d739592a8c6e72d2fa4fb8f5e880e52",
+    "backend/app/worker.py": "d4cbfc987fbb212a54279132492cc7b2331844d7dc8498bb7d369c8244a07960",
+    "frontend/src/App.tsx": "155782d52b4df9d88bb318a3813af645a1385b2a5bb0101694732bf2d6129f51",
+    "frontend/src/Editors.tsx": "8558a6a3aae7abfef8f7ccac230bc5e9181fdc60ac7d2f8add9413b048aa14f6",
+    "frontend/src/Inspector.tsx": "96a9e7cd450a703ec85406edf443e3d7f15791a4eaf1dc3e212e6d602674a170",
+    "frontend/src/PlasmaControls.tsx": "8a1b4b47a961e904dac318f0662ea0fcb711a1e4ee4d803afc17a0bbf8ef369d",
+    "frontend/src/Research.tsx": "a4441ed1c9b153ec3ae614415ed6bc655bd83d0009d8b225f0d9278480a3273e",
+    "frontend/src/Results.tsx": "efa79fe15950446edd7727b8992d20ba6071a3b2b43a3d593bcea5a9c892be24",
+    "frontend/src/Schematic.tsx": "8646764c04d8e3f03750e3d49afbce356ad5fdc104e43a088e755450ec668529",
+    "frontend/src/main.tsx": "8acc601edbac867352c9f2bde6a6ca1d764f26ca42e4eec0f2191170d5b5e6e4",
+    "frontend/src/styles.css": "da4c42fdfb123c165c8b5a7ec000722d4d572b29b1160c1e588888d3651f15ca",
+    "frontend/src/theme.css": "ba5d64b075f328bb67e8b966771d4e98cf8a4d8dc2728510ca4fedf96c6334f2",
+    "frontend/src/theme.ts": "c2f5a14b2abadb30826e8570d4fdde6a78a8724fe10cd9221263b999a82d13d3",
+    "frontend/src/types.ts": "5087a6faa7efde8139d03d023c24c07a1384b065168613c755d418a6524aaa86"
+  },
+  "live_api_error_checks": {
+    "passed": true,
+    "checks": 2,
+    "evidence": "api-package-errors.json",
+    "image": "sha256:4de7f9d0065ad36993ee9eaf9a76d88f6180f47166eb0bbc0b74497fd825e7f1"
+  },
+  "browser_checks": {
+    "extensions": {
+      "completed": true,
+      "checks": 11,
+      "evidence": "../feature-ui/verification.json",
+      "browser_runtime_errors": [],
+      "canceled_and_resumed_cases": 8,
+      "real_physics_results_rendered": 3
+    },
+    "ordinary_and_oxygen": {
+      "completed": true,
+      "checks": 4,
+      "evidence": "../browser-smoke/verification.json",
+      "browser_runtime_errors": []
+    },
+    "note": "Normal browser paths ran on backend image 107490c4606ee648528ee4ccca7553b01c91aa75f2df047f2c8aa1cf60eb7fa1. The final image adds only rejection of malformed hash_algorithm types, separately checked over HTTP."
+  }
+}

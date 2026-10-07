@@ -54,4 +54,14 @@ def get_presets() -> dict:
         doc = document(name, description, [], [], {"builtin_ccp_template": 1.0})
         settings = {**CCP_SETTINGS, "gas": gas}
         presets.append({"id": f"ccp-{gas.lower()}", "name": name, "description": description, "document": doc, "analysis": {"kind": "ccp", "settings": settings}})
+    from .external_rf import template_document
+    from .plasma import CCPSettings
+    external_settings = {**CCP_SETTINGS, "cycles": 80, "points_per_cycle": 256}
+    external_document = template_document(CCPSettings.parse(external_settings), {
+        "source_resistance_ohm": 50, "series_inductance_h": 1e-7,
+        "dc_block_capacitance_f": 1e-9, "shunt_capacitance_f": 1e-11})
+    external_document.update(name="Ar CCP — 外部RF・整合・DCブロック",
+                             description="250 VpeakのRF電源、50 Ω出力抵抗、100 nH直列整合、1 nF DCブロック、10 pF寄生容量。電極電圧・自己バイアスを回路から計算します。")
+    presets.append({"id": "ccp-external-rf", "name": external_document["name"], "description": external_document["description"],
+                    "document": external_document, "analysis": {"kind": "ccp", "settings": external_settings}})
     return {"presets": deepcopy(presets)}

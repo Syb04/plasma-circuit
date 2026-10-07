@@ -48,6 +48,7 @@ COMPONENTS = [
     _entry("P", "多導体伝送線 (CPL)", "伝送線", ["p1", "n1", "p2", "n2"], {"model": "CPLDEFAULT"}, "初期値は 1 導体です。複数導体では入力導体群・入力基準・出力導体群・出力基準の順に端子を追加し、R/L/G/C 行列の次元を合わせてください。"),
     _entry("X", "サブ回路", "モデル", ["p", "n"], {"model": "SUBCKT", "arguments": {}}, "文書の models に .subckt 定義を登録し端子順を一致させます。"),
     _entry("EDD", "Equation-defined device", "モデル", ["p1", "n1"], {"branches": [{"positive": "p1", "negative": "n1", "current": "V1/R", "charge": "C0*V1"}], "parameters": {"R": 1000, "C0": 1e-9}, "intermediates": {}}, "各枝の総電流は I + dQ/dt。Ik は導電電流です。"),
+    _entry("PLASMA", "CCP プラズマ", "モデル", ["p", "n"], {"electron_density_m3": 1e16, "electron_temperature_ev": 3}, "pは駆動電極、nは帰還電極。外部RF回路と非線形シース・Drudeバルクを同時解析します。"),
     _entry("GND", "GND", "接続", ["g"], {}),
     _entry("JUNCTION", "接続点", "接続", ["p"], {}),
 ]

@@ -43,10 +43,10 @@ def runtime_config() -> dict[str, Any]:
             versions[package] = "unavailable"
     # Include source fingerprints without importing heavyweight numerical modules.
     fingerprints = {}
-    for name in ("engine.py", "expressions.py", "plasma.py", "plasma_models.py"):
-        path = Path(__file__).with_name(name)
-        if path.exists():
-            fingerprints[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    source_root = Path(__file__).parent
+    for path in sorted(source_root.rglob("*")):
+        if path.is_file() and (path.suffix == ".py" or "data" in path.relative_to(source_root).parts):
+            fingerprints[path.relative_to(source_root).as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
     return {"job_timeout_seconds": job_timeout(), "packages": versions, "implementation_sha256": fingerprints}
 
 
@@ -78,12 +78,8 @@ def execute_run(run_id: str) -> None:
         analysis = db.json_copy(run.analysis)
         session.commit()
     try:
-        if analysis["kind"] in {"ccp", "global"}:
-            from .plasma import execute_plasma
-            result = execute_plasma(document, analysis)
-        else:
-            from .engine import execute_circuit
-            result = execute_circuit(document, analysis)
+        from .simulation import execute_simulation
+        result = execute_simulation(document, analysis)
         compressed = db.compress_result(result)
         with db.session() as session:
             run = session.get(db.SimulationRun, run_id, with_for_update=True)

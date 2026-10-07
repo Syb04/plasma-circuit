@@ -1,0 +1,23 @@
+{
+  "base_url": "http://localhost:8080",
+  "api_mocked": false,
+  "completed": true,
+  "checks": [
+    "employee validation, edited EDD snapshot, real run, charge/branch voltage, Q–V, CSV",
+    "palette, terminal drag wiring, saved divider numeric value, reopening circuit analysis/history",
+    "Ar/O2 presets, prescribed-power O2 global settings, steady tables without RF waveforms, CSV",
+    "responsive layout and no browser runtime errors"
+  ],
+  "run_ids": [
+    "4d8d3f98-902c-4116-a6b9-59775838d515",
+    "813b5a81-c1ac-48bc-a899-92ea09d8d23d",
+    "01a7db08-0c12-4f70-a22e-ed57050491e7"
+  ],
+  "browser_runtime_errors": [],
+  "last_run": {
+    "id": "01a7db08-0c12-4f70-a22e-ed57050491e7",
+    "status": "succeeded",
+    "error": null,
+    "converged": true
+  }
+}

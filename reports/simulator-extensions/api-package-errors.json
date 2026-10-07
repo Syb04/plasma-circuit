@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "input_type": "list",
+      "http_status": 422,
+      "detail": "Unsupported analysis package hash algorithm"
+    },
+    {
+      "input_type": "dict",
+      "http_status": 422,
+      "detail": "Unsupported analysis package hash algorithm"
+    }
+  ],
+  "health": {
+    "status": "ok",
+    "database": "ok",
+    "queue": "ok",
+    "pyspice": "1.5"
+  }
+}

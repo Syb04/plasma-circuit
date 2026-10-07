@@ -1,0 +1,41 @@
+{
+  "base_url": "http://localhost:8080",
+  "api_mocked": false,
+  "solver_results_mocked": false,
+  "employee_id": "feature-validation",
+  "completed": true,
+  "checks": [
+    "UI-created two-axis study runs real EDD component and source-waveform cases; immutable inputs and CSV",
+    "UI cancel/resume uses real case status and preserves attempts",
+    "Real saved waveform comparison and input differences",
+    "Mixed operating-point/transient comparison handles absent axis",
+    "CSV upload and real benchmark comparison; explicitly synthetic reference",
+    "Real exported package upload/import verifies hashes and requires recalculation",
+    "Analysis controls expose only supported power/heating/IEDF/radial inputs",
+    "Mobile layout has no horizontal overflow",
+    "Existing real solver result rendered: radial",
+    "Existing real solver result rendered: global_transient",
+    "Existing real solver result rendered: iedf"
+  ],
+  "browser_runtime_errors": [],
+  "last_polled_state": {
+    "path": "/runs/001af305-0a3c-4a52-9509-f688dbdacda4",
+    "id": "001af305-0a3c-4a52-9509-f688dbdacda4",
+    "status": "succeeded",
+    "error": null,
+    "counts": null,
+    "converged": true,
+    "cases": []
+  },
+  "study_id": "7eb21f69-cf98-4fa5-9db9-365f0eebf26f",
+  "cancel_resume_study_id": "cc42581b-19d2-4306-bef9-6ece52d6cf74",
+  "canceled_cases": 8,
+  "benchmark_id": "98f32278-9abc-4741-836d-1124cbee0446",
+  "reference_is_experimental": false,
+  "imported_circuit_id": "78762bea-d348-49b4-b9e7-9c0ffe4f577f",
+  "existing_physics_runs_rendered": {
+    "radial": "33565de4-be94-40ca-af83-377004f05960",
+    "global_transient": "8a66ce44-9820-41ff-9f39-933825ae64c8",
+    "iedf": "001af305-0a3c-4a52-9509-f688dbdacda4"
+  }
+}

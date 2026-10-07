@@ -19,8 +19,9 @@ from sqlalchemy import select, text, update
 from sqlalchemy.orm import Session
 
 from . import database as db
-from . import worker
-from .schemas import CreateRun, SaveCircuit, UpdateCircuit
+from . import worker, studies, benchmarks, analysis_package
+from .schemas import (CompareBenchmark, CompareRuns, CreateBenchmark, CreateRun, CreateStudy,
+                      EmployeeRequest, ImportPackage, SaveCircuit, UpdateCircuit)
 
 logger = logging.getLogger(__name__)
 
@@ -291,3 +292,214 @@ def export_csv(run_id: str, session: Session = Depends(get_session)):
                     else:
                         writer.writerow(row if isinstance(row, list) else [row])
     return Response(content="\ufeff" + output.getvalue(), media_type="text/csv; charset=utf-8", headers={"Content-Disposition": f'attachment; filename="simulation-{run_id}.csv"'})
+
+
+def require_study(study_id: str, session: Session, lock: bool = False) -> db.Study:
+    study = session.get(db.Study, study_id, with_for_update=lock)
+    if study is None:
+        raise HTTPException(404, "Study not found")
+    return study
+
+
+def reconcile_study(study: db.Study, session: Session) -> None:
+    for _, attempts in studies.case_records(session, study.id):
+        if attempts:
+            reconcile(attempts[-1][1], session)
+
+
+@app.post("/api/studies", status_code=202)
+def create_study(request: CreateStudy, session: Session = Depends(get_session)):
+    # The lock serializes snapshotting with the revision CAS used by circuit saves.
+    circuit = session.get(db.Circuit, request.circuit_id, with_for_update=True)
+    if circuit is None:
+        raise HTTPException(404, "Circuit not found")
+    if circuit.revision != request.expected_revision:
+        raise HTTPException(409, "Circuit revision changed; reload the circuit before creating a study")
+    axes, analysis = finite_json([a.model_dump() for a in request.axes]), finite_json(request.analysis.model_dump())
+    try:
+        cases = studies.expand_cases(circuit.document, analysis, axes)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    study = db.Study(name=request.name, circuit_id=circuit.id, circuit_revision=circuit.revision,
+                     employee_id=request.employee_id, snapshot=db.json_copy(circuit.document), analysis=analysis, axes=axes)
+    session.add(study)
+    session.flush()
+    runtime = worker.runtime_config()
+    runs = []
+    for index, (coordinates, document, case_analysis) in enumerate(cases):
+        case = db.StudyCase(study_id=study.id, case_index=index, coordinates=coordinates)
+        session.add(case)
+        session.flush()
+        runs.append(studies.new_attempt(session, study, case, 1, request.employee_id, document, case_analysis, runtime))
+    # Every case exists before any queue submission. Queue failures are case
+    # failures retained in history, not partial database batches.
+    session.commit()
+    studies.enqueue_cases([run.id for run in runs])
+    session.expire_all()
+    return studies.response(session.get(db.Study, study.id), session)
+
+
+@app.get("/api/studies")
+def list_studies(circuit_id: str | None = None, session: Session = Depends(get_session)):
+    query = select(db.Study).order_by(db.Study.created_at.desc()).limit(100)
+    if circuit_id:
+        query = query.where(db.Study.circuit_id == circuit_id)
+    result = []
+    for study in session.scalars(query).all():
+        reconcile_study(study, session)
+        result.append(studies.response(study, session, detail=False))
+    return {"studies": result}
+
+
+@app.get("/api/studies/{study_id}")
+def get_study(study_id: str, session: Session = Depends(get_session)):
+    study = require_study(study_id, session)
+    reconcile_study(study, session)
+    return studies.response(study, session)
+
+
+@app.post("/api/studies/{study_id}/cancel")
+def cancel_study(study_id: str, session: Session = Depends(get_session)):
+    study = require_study(study_id, session, lock=True)
+    study.cancel_requested = True
+    session.commit()
+    ids = [attempts[-1][1].id for _, attempts in studies.case_records(session, study.id) if attempts and attempts[-1][1].status not in worker.TERMINAL_STATUSES]
+    for run_id in ids:
+        cancel_run(run_id, session)
+    return studies.response(study, session)
+
+
+@app.post("/api/studies/{study_id}/resume", status_code=202)
+def resume_study(study_id: str, request: EmployeeRequest, session: Session = Depends(get_session)):
+    study = require_study(study_id, session, lock=True)
+    # Each retry is a new run, preserving original failures and their diagnostics.
+    runtime, run_ids = worker.runtime_config(), []
+    for case, attempts in studies.case_records(session, study.id):
+        if not attempts:
+            continue
+        last_attempt, previous = attempts[-1]
+        if previous.status not in {"failed", "timed_out", "canceled"}:
+            continue
+        new_run = studies.new_attempt(session, study, case, last_attempt.number + 1, request.employee_id,
+                                      db.json_copy(previous.snapshot), db.json_copy(previous.analysis), runtime)
+        run_ids.append(new_run.id)
+    if not run_ids:
+        raise HTTPException(409, "No failed, timed-out, or canceled cases are available to retry")
+    study.cancel_requested = False
+    session.commit()
+    studies.enqueue_cases(run_ids)
+    session.expire_all()
+    return studies.response(session.get(db.Study, study_id), session)
+
+
+@app.get("/api/studies/{study_id}/export.csv")
+def export_study_csv(study_id: str, session: Session = Depends(get_session)):
+    study = require_study(study_id, session)
+    reconcile_study(study, session)
+    records, summary_keys = [], set()
+    for case, attempts in studies.case_records(session, study.id):
+        attempt, run = attempts[-1]
+        result = db.decompress_result(run.result_compressed) or {}
+        summary = {key: value for key, value in result.get("summary", {}).items() if isinstance(value, (int, float, str, bool)) or value is None}
+        summary_keys.update(summary)
+        records.append((case, attempt, run, summary))
+    output = io.StringIO(newline="")
+    writer = csv.writer(output)
+    axis_paths, summary_keys = [axis["path"] for axis in study.axes], sorted(summary_keys)
+    writer.writerow(["case_index", "run_id", "attempt", "status", "error", *axis_paths, *summary_keys])
+    for case, attempt, run, summary in records:
+        writer.writerow([case.case_index, run.id, attempt.number, run.status, run.error or "",
+                         *(case.coordinates[path] for path in axis_paths), *(summary.get(key, "") for key in summary_keys)])
+    return Response(content="\ufeff" + output.getvalue(), media_type="text/csv; charset=utf-8",
+                    headers={"Content-Disposition": f'attachment; filename="study-{study_id}.csv"'})
+
+
+@app.post("/api/compare")
+def compare(request: CompareRuns, session: Session = Depends(get_session)):
+    if len(set(request.run_ids)) != len(request.run_ids):
+        raise HTTPException(422, "Select distinct runs")
+    records = []
+    for run_id in request.run_ids:
+        run = session.get(db.SimulationRun, run_id)
+        if run is None:
+            raise HTTPException(404, f"Run not found: {run_id}")
+        records.append(run_response(reconcile(run, session)))
+    return benchmarks.compare_runs(records, request.phase_align)
+
+
+def benchmark_response(reference: db.Benchmark) -> dict:
+    return {**reference.reference, "id": reference.id, "created_at": reference.created_at.isoformat()}
+
+
+@app.post("/api/benchmarks", status_code=201)
+def create_benchmark(request: CreateBenchmark, session: Session = Depends(get_session)):
+    try:
+        parsed = benchmarks.parse_reference(finite_json(request.model_dump()))
+    except (ValueError, TypeError, KeyError, AttributeError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    reference = db.Benchmark(name=request.name, reference=parsed)
+    session.add(reference)
+    session.commit()
+    return benchmark_response(reference)
+
+
+@app.get("/api/benchmarks")
+def list_benchmarks(session: Session = Depends(get_session)):
+    references = session.scalars(select(db.Benchmark).order_by(db.Benchmark.created_at.desc()).limit(100)).all()
+    return {"benchmarks": [benchmark_response(reference) for reference in references]}
+
+
+@app.get("/api/benchmarks/{benchmark_id}")
+def get_benchmark(benchmark_id: str, session: Session = Depends(get_session)):
+    reference = session.get(db.Benchmark, benchmark_id)
+    if reference is None:
+        raise HTTPException(404, "Reference not found")
+    return benchmark_response(reference)
+
+
+@app.post("/api/benchmarks/{benchmark_id}/compare")
+def compare_benchmark(benchmark_id: str, request: CompareBenchmark, session: Session = Depends(get_session)):
+    reference = session.get(db.Benchmark, benchmark_id)
+    run = session.get(db.SimulationRun, request.run_id)
+    if reference is None or run is None:
+        raise HTTPException(404, "Reference or run not found")
+    reconcile(run, session)
+    if run.status != "succeeded" or run.result_compressed is None:
+        raise HTTPException(409, "A completed run is required for reference comparison")
+    return {"run_id": run.id, "benchmark_id": reference.id,
+            **benchmarks.compare_reference(db.decompress_result(run.result_compressed), reference.reference, run.analysis)}
+
+
+@app.get("/api/runs/{run_id}/package")
+def export_package(run_id: str, session: Session = Depends(get_session)):
+    run = session.get(db.SimulationRun, run_id)
+    if run is None:
+        raise HTTPException(404, "Run not found")
+    try:
+        return analysis_package.export_run(reconcile(run, session))
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
+
+
+@app.post("/api/packages/import", status_code=201)
+def import_package(request: ImportPackage, session: Session = Depends(get_session)):
+    try:
+        package = analysis_package.verify_package(request.package)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    document = db.json_copy(package["input"]["document"])
+    circuit = db.Circuit(name=document["name"], document=document,
+                         created_by=request.employee_id, updated_by=request.employee_id)
+    session.add(circuit)
+    session.flush()
+    session.add(db.CircuitRevision(circuit_id=circuit.id, revision=1, document=db.json_copy(document), employee_id=request.employee_id))
+    provenance = db.PackageImport(circuit_id=circuit.id, employee_id=request.employee_id,
+                                  original_run_id=package["original_run_id"], package=package)
+    session.add(provenance)
+    session.commit()
+    return {"circuit": circuit_response(circuit), "analysis": package["input"]["analysis"],
+            "provenance": {"id": provenance.id, "original_run_id": provenance.original_run_id,
+                           "original_status": package.get("original_status"), "hashes": package["hashes"],
+                           "runtime_config": package["runtime_config"]},
+            "verification": {"hashes_verified": True, "authenticity_verified": False},
+            "requires_recalculation": True, "result": None}

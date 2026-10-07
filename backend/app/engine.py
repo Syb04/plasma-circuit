@@ -221,6 +221,16 @@ def build_netlist(document: dict, analysis: dict | None = None) -> str:
             line = f"{prefix} {_number(params['value'], positive=True)}"
             if "initial" in params and kind in {"C", "L"}:
                 line += " IC=" + _number(params["initial"])
+        elif kind == "V" and str(params.get("waveform", {}).get("kind", "")).lower() == "rf":
+            if len(terminals) != 2:
+                raise CircuitError("RF電圧源は2端子で指定してください")
+            from .external_rf import RFDrive
+            drive = RFDrive.from_settings(params["waveform"])
+            internal = f"rf_{cid}_wave"
+            source_settings = {key: value for key, value in params.items() if key != "waveform"}
+            lines += [f"{name} {terminals[0]} {internal} {_source(source_settings)}",
+                      f"B_rf_{cid}_wave {internal} {terminals[1]} V={drive.expression()}"]
+            continue
         elif kind in {"V", "I"}:
             line = f"{prefix} {_source(params)}"
         elif kind in {"E", "G"}:
@@ -241,6 +251,26 @@ def build_netlist(document: dict, analysis: dict | None = None) -> str:
             if mode not in {"current", "voltage"}:
                 raise CircuitError("B 電源の mode は current / voltage を指定してください")
             line = f"{prefix} {'I' if mode == 'current' else 'V'}={{{expr}}}"
+        elif kind == "PLASMA":
+            if ports[cid] != ["p", "n"]:
+                raise CircuitError("PLASMAは駆動p・帰還nの2端子で指定してください")
+            from .plasma import CCPSettings, plasma_stamp
+            physical = (analysis or {}).get("settings", {}).get("plasma_settings", {})
+            plasma = CCPSettings.parse({**params, **physical})
+            p, n = terminals
+            pc, bulk, pa = (f"pl_{cid}_{tag}" for tag in ("pc", "bulk", "pa"))
+            metal = f"pl_{cid}_metal"
+            lines += [f"V_pl_{cid}_sense {p} {metal} 0", f"R_pl_{cid}_bulk {pc} {bulk} {plasma.resistance:.14g}"]
+            if plasma.sheath_heating_resistance_ohm:
+                heat = f"pl_{cid}_bulk_heat"
+                lines += [f"R_pl_{cid}_heat {bulk} {heat} {plasma.sheath_heating_resistance_ohm:.14g}", f"L_pl_{cid}_bulk {heat} {pa} {plasma.inductance:.14g}"]
+            else:
+                lines += [f"L_pl_{cid}_bulk {bulk} {pa} {plasma.inductance:.14g}"]
+            lines += plasma_stamp(plasma, metal, n, pc, bulk, pa, prefix=f"pl_{cid}_")
+            seed = plasma.electron_temperature_ev*math.log(math.sqrt(1.602176634e-19*plasma.electron_temperature_ev/(2*math.pi*9.1093837139e-31))/((1+plasma.electronegativity)*plasma.bohm_velocity))
+            lines += [f".nodeset v({pc})={seed:.14g} v({bulk})={seed:.14g} v({pa})={seed:.14g}",
+                      ".options reltol=1e-5 abstol=1e-10 vntol=1e-9 method=gear"]
+            continue
         elif kind == "EDD":
             branches = params.get("branches", [])
             if not 1 <= len(branches) <= 32:
@@ -261,6 +291,11 @@ def build_netlist(document: dict, analysis: dict | None = None) -> str:
             continue
         elif kind == "T":
             line = f"{prefix} Z0={_number(params['impedance'], positive=True)} TD={_number(params['delay'], positive=True)}"
+            if "initial" in params:
+                initial = params["initial"]
+                if not isinstance(initial, (list, tuple)) or len(initial) != 4:
+                    raise CircuitError("伝送線初期条件は[V1,I1,V2,I2]で指定してください")
+                line += " IC="+",".join(_number(value) for value in initial)
         else:
             model = _identifier(params.get("model", ""), "モデル名")
             references.add(model)

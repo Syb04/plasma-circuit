@@ -1,16 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Plus, SlidersHorizontal, FileCode2, Check, X } from 'lucide-react';
 import type { Analysis, AnalysisKind, CircuitDocument, Component, Json } from './types';
-import { analysisNames, clone, defaultSettings } from './types';
+import { analysisNames, clone, defaultSettings, isPlasmaAnalysis, isPrescribedPower } from './types';
+import { PlasmaControls } from './PlasmaControls';
 
-export function JsonEditor({value,onApply,label='JSON',rows=8}:{value:unknown;onApply:(value:unknown)=>void;label?:string;rows?:number}) {
-  const [text,setText]=useState(JSON.stringify(value,null,2));
-  const [error,setError]=useState('');
-  useEffect(()=>{setText(JSON.stringify(value,null,2));setError('');},[value]);
-  const dirty=text!==JSON.stringify(value,null,2);
-  function apply() {try {onApply(JSON.parse(text));setError('');} catch(e) {setError(e instanceof Error?e.message:String(e));}}
-  return <div className="json-editor"><label>{label}</label><textarea spellCheck={false} rows={rows} value={text} onChange={e=>setText(e.target.value)} aria-label={label}/>{error&&<p className="field-error">{error}</p>}<button className="button small secondary" disabled={!dirty} onClick={apply}><Check size={13}/>適用</button></div>;
-}
+import {JsonEditor} from './Editors';
+export {JsonEditor} from './Editors';
 const fieldNames: Record<string,string>={value:'値（SI）',dc:'DC値',ac_magnitude:'AC振幅',ac_phase:'AC位相（°）',model:'モデル名',gain:'利得',control_source:'制御電圧源ID',inductor1:'インダクタ1 ID',inductor2:'インダクタ2 ID',coupling:'結合係数'};
 function ParameterInput({value,onChange}:{value:Json;onChange:(value:Json)=>void}){
   const [text,setText]=useState(String(value??''));const emitted=useRef<Json>(value);
@@ -39,11 +34,21 @@ function EddEditor({component,onChange}:{component:Component;onChange:(component
     <p className="muted text-small">他の枝の V1, V2…、I1, I2…を参照できます。式はサポートされた数学構文で評価します。</p>
   </div>;
 }
+function SourceWaveform({component,onChange}:{component:Component;onChange:(component:Component)=>void}){
+  const original=component.parameters.waveform;
+  const waveform=original&&typeof original==='object'&&!Array.isArray(original)?original:{};
+  const kind=String(waveform.kind??'dc');
+  function update(key:string,value:Json){onChange({...component,parameters:{...component.parameters,waveform:{...waveform,[key]:value}}});}
+  const definitions:Record<string,Record<string,Json>>={dc:{},sin:{kind:'sin',offset:0,amplitude:250,frequency:40e6},rf:{kind:'rf',frequency_hz:40e6,rf_peak_voltage:250,second_rf_peak_voltage:0,second_phase_deg:0},pulse:{kind:'pulse',initial:0,pulsed:1,delay:0,rise:1e-9,fall:1e-9,width:1e-6,period:2e-6}};
+  const labels:Record<string,string>={offset:'オフセット（V）',amplitude:'ピーク振幅（V）',frequency:'周波数（Hz）',frequency_hz:'RF周波数（Hz）',rf_peak_voltage:'RFピーク電圧（V）',second_frequency_hz:'第2 RF周波数（Hz）',second_rf_peak_voltage:'第2 RFピーク電圧（V）',second_phase_deg:'第2 RF位相（°）',pulse_frequency_hz:'包絡パルス周波数（Hz）',pulse_duty_cycle:'包絡デューティ（0〜1）',pulse_off_fraction:'OFF時振幅比（0〜1）',initial:'初期値',pulsed:'ON値',delay:'遅延（s）',rise:'立上り（s）',fall:'立下り（s）',width:'ON幅（s）',period:'周期（s）'};
+  return <details className="advanced"><summary>電源波形・2周波数RF</summary><label>波形<select aria-label="波形" value={kind} onChange={e=>{const next=definitions[e.target.value];const parameters={...component.parameters};if(e.target.value==='dc')delete parameters.waveform;else parameters.waveform=next;onChange({...component,parameters});}}><option value="dc">DC</option><option value="sin">正弦波</option>{component.kind==='V'&&<option value="rf">RF・2周波数・パルス包絡</option>}<option value="pulse">パルス</option>{kind==='pwl'&&<option value="pwl">PWL（詳細JSON）</option>}</select></label>{kind!=='dc'&&kind!=='pwl'&&<>{kind==='rf'&&<p className="muted text-small">電圧は電源のピーク値です。第2振幅0で単一RF。パルス周波数は未指定で連続波になります。</p>}<div className="form-grid">{(kind==='rf'?['frequency_hz','rf_peak_voltage','second_frequency_hz','second_rf_peak_voltage','second_phase_deg','pulse_frequency_hz','pulse_duty_cycle','pulse_off_fraction']:Object.keys(definitions[kind]??{}).filter(k=>k!=='kind')).map(key=><label key={key}>{labels[key]??key}<input type="number" step="any" value={typeof waveform[key]==='number'?String(waveform[key]):''} onChange={e=>{if(e.target.value.trim()&&Number.isFinite(Number(e.target.value)))update(key,Number(e.target.value));}}/></label>)}</div></>}</details>;
+}
 export function ComponentInspector({component,components,onChange,onDelete}:{component:Component;components:Component[];onChange:(component:Component)=>void;onDelete:()=>void}) {
   const references=(key:string)=>components.filter(c=>c.id!==component.id&&(key==='control_source'?c.kind==='V':c.kind==='L'));
   return <div className="inspector-section"><div className="panel-heading"><SlidersHorizontal size={16}/><h3>部品の設定</h3><span className="kind-tag">{component.kind}</span></div><label>部品名<input value={component.label} onChange={e=>onChange({...component,label:e.target.value})}/></label>
-    {component.kind==='EDD'?<EddEditor component={component} onChange={onChange}/>:<>
+    {component.kind==='PLASMA'?<><div className="info-box">2端子CCPの非線形シース・バルク回路。電源・RLCに接続して通常の回路解析、CCP・グローバル解析で駆動できます。</div><label>ガス<select aria-label="ガス" value={String(component.parameters.gas??'Ar')} onChange={e=>onChange({...component,parameters:{...component.parameters,gas:e.target.value}})}><option value="Ar">Ar</option><option value="O2">O₂</option></select></label><div className="form-grid">{plasmaFields.filter(f=>!['frequency_hz','rf_peak_voltage'].includes(f.key)).map(field=><NumberField key={field.key} field={field} value={component.parameters[field.key]??defaultSettings.ccp[field.key]} onChange={v=>onChange({...component,parameters:{...component.parameters,[field.key]:v}})}/>)}</div><PlasmaControls kind="ccp" componentMode values={component.parameters} set={(key,value)=>onChange({...component,parameters:{...component.parameters,[key]:value}})}/><details className="advanced"><summary>PLASMA全パラメータ</summary><JsonEditor value={component.parameters} onApply={v=>{if(!v||typeof v!=='object'||Array.isArray(v))throw new Error('JSONオブジェクトを指定してください。');onChange({...component,parameters:v as Record<string,Json>});}}/></details></>:component.kind==='EDD'?<EddEditor component={component} onChange={onChange}/>:<>
       {Object.entries(component.parameters).filter(([,v])=>typeof v!=='object').map(([key,value])=><label key={key}>{fieldNames[key]??key}{['control_source','inductor1','inductor2'].includes(key)?<select value={String(value??'')} onChange={e=>onChange({...component,parameters:{...component.parameters,[key]:e.target.value}})}><option value="">参照する部品を選択</option>{value&&!references(key).some(c=>c.id===value)&&<option value={String(value)}>未解決: {String(value)}</option>}{references(key).map(c=><option key={c.id} value={c.id}>{c.label} ({c.id})</option>)}</select>:<ParameterInput value={value} onChange={next=>onChange({...component,parameters:{...component.parameters,[key]:next}})}/>}</label>)}
+      {['V','I'].includes(component.kind)&&<SourceWaveform component={component} onChange={onChange}/>}
       <details className="advanced"><summary>全パラメータ・波形設定</summary><JsonEditor value={component.parameters} onApply={v=>{if(!v||Array.isArray(v)||typeof v!=='object')throw new Error('JSONオブジェクトを指定してください。');onChange({...component,parameters:v as Record<string,Json>});}} label="parameters"/></details>
     </>}
     {(component.kind==='X'||component.kind==='B')&&<label>端子名（カンマ区切り）<input value={component.ports.join(',')} onChange={e=>{const ports=e.target.value.split(',').map(s=>s.trim()).filter(Boolean);if(ports.length&&new Set(ports).size===ports.length)onChange({...component,ports});}}/></label>}
@@ -66,7 +71,7 @@ const fields:Record<AnalysisKind,Field[]>={
   op:[],dc:[{key:'start',label:'開始値'},{key:'stop',label:'終了値'},{key:'step',label:'増分'}],
   ac:[{key:'start_frequency',label:'開始周波数',unit:'Hz',min:0},{key:'stop_frequency',label:'終了周波数',unit:'Hz',min:0},{key:'points',label:'ポイント数',min:1}],
   transient:[{key:'time_step',label:'出力時間刻み',unit:'µs',factor:1e-6,min:0},{key:'stop_time',label:'終了時間',unit:'ms',factor:0.001,min:0}],
-  ccp:plasmaFields,global:plasmaFields,
+  ccp:plasmaFields,global:plasmaFields,global_transient:plasmaFields,radial:plasmaFields,
 };
 function NumberField({field,value,onChange}:{field:Field;value:Json|undefined;onChange:(v:number)=>void}) {
   const scale=field.factor??1;
@@ -75,18 +80,22 @@ function NumberField({field,value,onChange}:{field:Field;value:Json|undefined;on
   const [text,setText]=useState(String(normalized));
   const emitted=useRef(normalized);
   useEffect(()=>{if(normalized!==emitted.current){setText(String(normalized));emitted.current=normalized;}},[normalized]);
-  return <label>{field.label}<div className="input-unit"><input type="number" step="any" min={field.min} value={text} onChange={e=>{setText(e.target.value);if(e.target.value.trim()&&Number.isFinite(Number(e.target.value))){emitted.current=Number(Number(e.target.value).toPrecision(10));onChange(Number(e.target.value)*scale);}}} onBlur={()=>{if(!text.trim())setText(String(normalized));}}/>{field.unit&&<span>{field.unit}</span>}</div></label>;
+  return <label>{field.label}<div className="input-unit"><input aria-label={field.label} type="number" step="any" min={field.min} value={text} onChange={e=>{setText(e.target.value);if(e.target.value.trim()&&Number.isFinite(Number(e.target.value))){emitted.current=Number(Number(e.target.value).toPrecision(10));onChange(Number(e.target.value)*scale);}}} onBlur={()=>{if(!text.trim())setText(String(normalized));}}/>{field.unit&&<span>{field.unit}</span>}</div></label>;
 }
 export function AnalysisPanel({analysis,onChange,document}:{analysis:Analysis;onChange:(a:Analysis)=>void;document:CircuitDocument}) {
-  const isPlasma=analysis.kind==='ccp'||analysis.kind==='global';
-  function setting(key:string,value:Json){onChange({...analysis,settings:{...analysis.settings,[key]:value}});}
+  const isPlasma=isPlasmaAnalysis(analysis.kind);
+  const sourceWaveformDrive=analysis.kind!=='radial'&&document.components.some(c=>c.kind==='PLASMA')&&!isPrescribedPower(analysis);
+  function setting(key:string,value:Json){const settings={...analysis.settings,[key]:value};if(key==='power_mode'){delete settings.electron_heating_model;if(value==='prescribed_absorbed'&&typeof settings.absorbed_power_w!=='number')settings.absorbed_power_w=500;if(value==='prescribed_absorbed'&&analysis.kind==='global'){const validation=settings.numerical_validation;settings.numerical_validation=validation&&typeof validation==='object'&&!Array.isArray(validation)?{...validation,enabled:false}:{enabled:false};}}if(key==='gas'&&value==='Ar'&&analysis.kind==='global'){settings.power_mode='rf_coupled';delete settings.electron_heating_model;}if(key==='transport_mode'&&value==='gudmundsson_2000'){settings.axial_edge_factor=null;settings.radial_edge_factor=null;}onChange({...analysis,settings});}
   const values={...defaultSettings[analysis.kind],...analysis.settings};
-  return <div className="inspector-section"><div className="panel-heading"><SlidersHorizontal size={16}/><h3>解析条件</h3></div><label>解析方法<select value={analysis.kind} onChange={e=>{const kind=e.target.value as AnalysisKind;const plasmaSwitch=isPlasma&&(kind==='ccp'||kind==='global');onChange({kind,settings:plasmaSwitch?{...clone(defaultSettings[kind]),...analysis.settings}:clone(defaultSettings[kind])});}}>{Object.entries(analysisNames).map(([kind,name])=><option key={kind} value={kind}>{name}</option>)}</select></label>
+  return <div className="inspector-section"><div className="panel-heading"><SlidersHorizontal size={16}/><h3>解析条件</h3></div><label>解析方法<select aria-label="解析方法" value={analysis.kind} onChange={e=>{const kind=e.target.value as AnalysisKind;const plasmaSwitch=isPlasma&&isPlasmaAnalysis(kind);const settings=plasmaSwitch?{...clone(defaultSettings[kind]),...analysis.settings}:clone(defaultSettings[kind]);if(kind==='global'&&settings.gas!=='O2'){settings.power_mode='rf_coupled';delete settings.electron_heating_model;}onChange({kind,settings});}}>{Object.entries(analysisNames).map(([kind,name])=><option key={kind} value={kind}>{name}</option>)}</select></label>
     {analysis.kind==='op'&&<p className="muted text-small">回路の定常的な電圧・電流を求めます。</p>}
-    {analysis.kind==='dc'&&<label>スイープする独立電源<select value={String(values.source??'')} onChange={e=>setting('source',e.target.value)}><option value="">電源を選択</option>{document.components.filter(c=>c.kind==='V'||c.kind==='I').map(c=><option key={c.id} value={c.id}>{c.label}</option>)}</select></label>}
-    {analysis.kind==='ac'&&<label>周波数刻み<select value={String(values.variation)} onChange={e=>setting('variation',e.target.value)}><option value="dec">対数・decade</option><option value="oct">対数・octave</option><option value="lin">線形</option></select></label>}
-    {isPlasma&&<><label>単一ガス<select value={String(values.gas)} onChange={e=>setting('gas',e.target.value)}><option value="Ar">Ar — アルゴン</option><option value="O2">O₂ — 酸素</option>{!['Ar','O2'].includes(String(values.gas))&&<option value={String(values.gas)} disabled>{String(values.gas)} — 保存済み条件（新規選択は保留）</option>}</select></label><div className="info-box">RF電圧は電極のピーク値です。DC成分はモデルで計算します。{analysis.kind==='global'&&' nₑ・Tₑは初期推定値です。'}</div>{analysis.kind==='global'&&String(values.gas)!=='Ar'&&<div className="warning-box">O₂のグローバル計算には検証可能な反応データが必要です。未実装の場合、理由を表示して停止します。</div>}</>}
-    <div className="form-grid">{fields[analysis.kind].map(field=><NumberField key={`${analysis.kind}-${field.key}`} field={field} value={values[field.key]} onChange={v=>setting(field.key,v)}/>)}</div>
+    {analysis.kind==='dc'&&<label>スイープする独立電源<select aria-label="スイープする独立電源" value={String(values.source??'')} onChange={e=>setting('source',e.target.value)}><option value="">電源を選択</option>{document.components.filter(c=>c.kind==='V'||c.kind==='I').map(c=><option key={c.id} value={c.id}>{c.label}</option>)}</select></label>}
+    {analysis.kind==='ac'&&<label>周波数刻み<select aria-label="周波数刻み" value={String(values.variation)} onChange={e=>setting('variation',e.target.value)}><option value="dec">対数・decade</option><option value="oct">対数・octave</option><option value="lin">線形</option></select></label>}
+    {isPlasma&&document.components.some(c=>c.kind==='PLASMA')&&<><label>RF電源<select aria-label="RF電源" value={String(values.rf_source_id??'')} onChange={e=>setting('rf_source_id',e.target.value)}><option value="">電圧源が1つなら自動選択</option>{document.components.filter(c=>c.kind==='V').map(c=><option key={c.id} value={c.id}>{c.label} ({c.id})</option>)}</select></label><NumberField field={{key:'source_reference_impedance_ohm',label:'電源基準インピーダンス',unit:'Ω'}} value={values.source_reference_impedance_ohm??50} onChange={v=>setting('source_reference_impedance_ohm',v)}/></>}
+    {isPlasma&&<><label>単一ガス<select aria-label="単一ガス" value={String(values.gas)} onChange={e=>setting('gas',e.target.value)}><option value="Ar">Ar — アルゴン</option><option value="O2">O₂ — 酸素</option>{!['Ar','O2'].includes(String(values.gas))&&<option value={String(values.gas)} disabled>{String(values.gas)} — 保存済み条件</option>}</select></label><div className="info-box">{isPrescribedPower(analysis)?'総吸収プラズマ電力を指定する0Dモデルです。':'RF電圧は電極ピーク値。外部回路を有効にすると電源側ピーク値です。'}{['global','global_transient'].includes(analysis.kind)&&' nₑ・Tₑは初期推定値です。'}</div></>}
+    {sourceWaveformDrive&&<p className="info-box">RF周波数・ピーク電圧・第2RF・パルス包絡は、回路図のRF電圧源を選択して「電源波形・2周波数RF」で設定します。</p>}
+    <div className="form-grid">{fields[analysis.kind].filter(field=>!(isPrescribedPower(analysis)||sourceWaveformDrive)||!['frequency_hz','rf_peak_voltage'].includes(field.key)).map(field=><NumberField key={`${analysis.kind}-${field.key}`} field={field} value={values[field.key]} onChange={v=>setting(field.key,v)}/>)}</div>
+    {isPlasma&&<PlasmaControls kind={analysis.kind} values={values} set={setting} componentMode={document.components.some(c=>c.kind==='PLASMA')}/>}
     <details className="advanced"><summary>詳細な解析条件</summary><p className="muted text-small">SI単位で指定します。設定値は計算履歴に保存されます。</p><JsonEditor label="settings" value={analysis.settings} rows={8} onApply={v=>{if(!v||Array.isArray(v)||typeof v!=='object')throw new Error('JSONオブジェクトを指定してください。');onChange({...analysis,settings:v as Record<string,Json>});}}/></details>
   </div>;
 }
