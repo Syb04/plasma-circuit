@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ctypes.util
+import hashlib
 import json
 
 import numpy as np
@@ -92,6 +93,78 @@ def test_all_catalog_native_elements_compile():
         assert netlist.endswith(".end\n"), kind
 
 
+def test_detailed_diode_preserves_named_models_and_avoids_model_name_collisions():
+    base = "DLOCAL_" + hashlib.sha256(b"d1").hexdigest()[:16]
+    document = graph([
+        ("d1", "D", {"p": "a", "n": "0"}, {"model_parameters": {"is": "1e-12", "N": 1.5, "BV": 75}}),
+        ("d2", "D", {"p": "a", "n": "0"}, {}),
+        ("d3", "D", {"p": "a", "n": "0"}, {"model": "CUSTOM"}),
+    ])
+    document["models"] = [{"name": base.lower(), "definition": f".model {base.lower()} D(IS=2e-14)"},
+                          {"name": "CUSTOM", "definition": ".model CUSTOM D(IS=3e-14)"}]
+    netlist = build_netlist(document)
+    assert f"d1 n1 0 {base}_1 AREA=1" in netlist
+    assert f".model {base}_1 D(IS=1e-12 N=1.5 BV=75)" in netlist
+    assert "d2 n1 0 DDEFAULT AREA=1" in netlist
+    assert "d3 n1 0 CUSTOM AREA=1" in netlist
+    assert ".model DDEFAULT D(Is=1e-14 N=1 Rs=0.1 Cjo=1e-12)" in netlist
+
+
+@pytest.mark.parametrize("parameters", [None, [], {"unknown": 1}, {"IS": 0}, {"IS": True},
+    {"N": -1}, {"RS": -1}, {"BV": 0}, {"IBV": 0}, {"CJO": -1}, {"VJ": 0},
+    {"TT": -1}, {"EG": 0}, {"FC": 1}, {"TNOM": -273.15}, {"IS": float("inf")},
+    {"N": "1e-"}, {"N": "1\n.include file"}, {"IS": 1e-14, "is": 1e-12}])
+def test_detailed_diode_rejects_invalid_parameters(parameters):
+    document = graph([("d1", "D", {"p": "a", "n": "0"}, {"model_parameters": parameters})])
+    with pytest.raises(CircuitError, match="ダイオード"):
+        build_netlist(document)
+
+
+@requires_solver
+def test_detailed_diodes_use_independent_saturation_current_and_ideality():
+    models = [{"IS": 1e-12, "N": 1}, {"IS": 2e-12, "N": 1}, {"IS": 1e-12, "N": 2}]
+    document = graph([part for index, parameters in enumerate(models, 1) for part in [
+        (f"v{index}", "V", {"p": f"a{index}", "n": "0"}, {"dc": 0.4}),
+        (f"d{index}", "D", {"p": f"a{index}", "n": "0"}, {"model_parameters": parameters}),
+    ]])
+    result = run(document)
+    thermal_voltage = 1.380649e-23 * 300.15 / 1.602176634e-19
+    currents = [-result["vectors"][f"i(v{index})"][0] for index in range(1, 4)]
+    for parameters, current in zip(models, currents):
+        expected = parameters["IS"] * np.expm1(0.4 / (parameters["N"] * thermal_voltage))
+        assert current == pytest.approx(expected, rel=1e-3)
+    assert currents[1] / currents[0] == pytest.approx(2, rel=1e-5)
+    assert currents[2] < currents[0] / 1000
+
+
+@requires_solver
+def test_detailed_diode_reverse_breakdown_and_area_scaling():
+    document = graph([
+        ("i1", "I", {"p": "a", "n": "0"}, {"dc": 1e-3}),
+        ("d1", "D", {"p": "a", "n": "0"}, {"model_parameters": {"IS": 1e-14, "BV": 6, "IBV": 1e-3}}),
+    ])
+    result = run(document)
+    assert result["vectors"][node_of(result, "d1.p")][0] == pytest.approx(-6, abs=0.003)
+    document["components"][0]["parameters"]["dc"] = -1e-3
+    document["components"][1]["parameters"] = {"area": 2, "model_parameters": {"IS": 1e-12, "N": 1.5, "RS": 20}}
+    forward = run(document)
+    thermal_voltage = 1.380649e-23 * 300.15 / 1.602176634e-19
+    expected = 1.5 * thermal_voltage * np.log1p(1e-3 / (2e-12)) + 1e-3 * 20 / 2
+    assert forward["vectors"][node_of(forward, "d1.p")][0] == pytest.approx(expected, rel=1e-3)
+
+
+@requires_solver
+@pytest.mark.parametrize("capacitance", [1e-11, 1e-10])
+def test_detailed_diode_junction_capacitance_matches_ac_admittance(capacitance):
+    document = graph([
+        ("v1", "V", {"p": "a", "n": "0"}, {"dc": -1, "ac_magnitude": 1}),
+        ("d1", "D", {"p": "a", "n": "0"}, {"model_parameters": {"IS": 1e-14, "CJO": capacitance, "VJ": 1, "M": 0.5}}),
+    ])
+    result = run(document, "ac", start_frequency=1e6, stop_frequency=2e6, points=2, variation="lin")
+    expected = 2 * np.pi * 1e6 * capacitance / np.sqrt(2)
+    assert -result["complex_vectors"]["i(v1)"]["imag"][0] == pytest.approx(expected, rel=1e-5)
+
+
 @requires_solver
 def test_resistor_divider_and_dc_sweep():
     document = graph([
@@ -116,6 +189,34 @@ def test_rc_transient_matches_analytic_response():
     ])
     result = run(document, "transient", time_step=1e-5, stop_time=0.005)
     assert value_at(result, node_of(result, "c1.p"), 0.001) == pytest.approx(1 - np.exp(-1), rel=1e-3)
+
+
+@requires_solver
+@pytest.mark.parametrize("waveform", [
+    {"kind": "sin", "offset": 0, "amplitude": 1, "frequency": 1000},
+    {"kind": "pulse", "initial": 0, "pulsed": 1, "rise": 1e-9, "fall": 1e-9, "width": 5e-4, "period": 1e-3},
+])
+def test_dc_initialization_notice_preserves_all_requested_analysis_results(waveform):
+    document = graph([
+        ("v1", "V", {"p": "a", "n": "0"}, {"dc": 5, "waveform": waveform}),
+        ("r1", "R", {"p": "a", "n": "0"}, {"value": 1000}),
+    ])
+    operating = run(document)
+    assert operating["vectors"][node_of(operating, "v1.p")][0] == pytest.approx(5)
+    ac = run(document, "ac", start_frequency=1000, stop_frequency=2000, points=2, variation="lin")
+    reference = json.loads(json.dumps(document))
+    del reference["components"][0]["parameters"]["waveform"]
+    plain_ac = run(reference, "ac", start_frequency=1000, stop_frequency=2000, points=2, variation="lin")
+    assert ac["x"] == pytest.approx(plain_ac["x"])
+    assert ac["vectors"][node_of(ac, "v1.p")] == pytest.approx(plain_ac["vectors"][node_of(plain_ac, "v1.p")])
+    dc = run(document, "dc", source="v1", start=1, stop=2, step=1)
+    assert dc["vectors"][node_of(dc, "v1.p")] == pytest.approx([1, 2])
+    transient = run(document, "transient", time_step=1e-6, stop_time=1e-3, max_step=1e-6)
+    node = node_of(transient, "v1.p")
+    assert value_at(transient, node, 2.5e-4) == pytest.approx(1, rel=1e-4)
+    expected = -1 if waveform["kind"] == "sin" else 0
+    assert value_at(transient, node, 7.5e-4) == pytest.approx(expected, abs=1e-4)
+    assert any("dc value used for op" in line for line in transient["logs"])
 
 
 @requires_solver

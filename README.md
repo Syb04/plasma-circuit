@@ -46,6 +46,7 @@ docker compose -f compose.yaml -f compose.cloud.yaml up --build -d
 | --- | --- |
 | 回路解析 | DC動作点、DCスイープ、AC小信号、過渡解析 |
 | 基本素子 | R/C/L、相互結合、独立・従属電源、数式電源、スイッチ、ダイオード、BJT、JFET、MESFET、伝送線、サブ回路、接地・接続点 |
+| 素子パラメータ | `4e7`・`1e-9` の指数入力、詳細ダイオードのIS/N/RS/BV/IBV・接合容量・走行時間・温度依存。通常のモデル名参照も使用可能 |
 | EDD | 複数枝の導電電流 `I(V)` と電荷 `Q(V)`、枝間依存、パラメータ、中間式。端子電流は `I + dQ/dt` |
 | CCP・外部回路 | 非線形シースI/QとバルクR/Lをngspiceで過渡計算。2端子 `PLASMA`、電源抵抗、整合RLC、DCブロック、DC給電、2周波数・パルス包絡 |
 | RF測定 | 電極側・電源側の大信号基本波Z、位相、RMS、平均電力、高調波、THD、指定実数Z₀での進行・反射電力 |
@@ -57,6 +58,8 @@ docker compose -f compose.yaml -f compose.cloud.yaml up --build -d
 | 保存 | 回路版、社員番号、実行時の回路・モデル・条件、ソルバー版・実装ハッシュ、圧縮した計算結果 |
 
 MOSFET、混合ガス、放電着火、PIC、自己無撞着な空間反応・粒子輸送、完全なBoltzmann/EEDF解は対象外です。回路図の配線交差は電気的接続を意味せず、明示的につないだ端子だけを接続します。
+
+素子の指数入力と詳細ダイオードの設定手順・各パラメータは[回路素子のパラメータ](docs/circuit-parameters.md)を参照してください。
 
 ### CCPの基準条件
 
@@ -129,6 +132,8 @@ python3 scripts/check_plasma_features.py --base-url http://localhost:8080
 ブラウザ確認にはPlaywrightとChromiumが必要です。上記の順でAPI確認を先に実行します。`--verify-existing-physics` は成功・数値収束したCCP＋IEDF、時間発展0D、径方向の3種類を必須として表示を確認します。[拡張機能の検証レポート](reports/simulator-extensions/report.md)に、最終Dockerテスト、実API結果、機能別の確認範囲、モデル適用範囲の警告を記録しています。最新のブラウザ確認状況もレポートを参照してください。
 
 保存済みモデルの一覧・検索・ページ送り・コピー保存は `python3 scripts/check_model_library.py --base-url http://localhost:8080` で確認できます。27件の検証モデル、コピー・別クライアント保存、実計算1件をDBに作成します。[一覧ページの検証記録](reports/model-library/report.md)を参照してください。
+
+指数入力・詳細ダイオードの保存と実計算は `python3 scripts/check_source_diode_ui.py --base-url http://localhost:8080` で確認できます。モデル1件と正弦波／パルスの実計算2件をDBに作成します。[今回の検証記録](reports/source-diode/report.md)を参照してください。
 
 研究スクリプトをDockerの外で実行する場合は、Python 3.12の仮想環境と計算・描画用の依存パッケージを準備します。以下はプロジェクトのルートで実行します。
 

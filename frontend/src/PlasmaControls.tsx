@@ -2,16 +2,14 @@ import {useEffect, useState} from 'react';
 import type {AnalysisKind, Json} from './types';
 import {JsonEditor} from './Editors';
 import {TimeInput} from './TimeInput';
+import {ScientificInput} from './ScientificInput';
 import {isPrescribedPower} from './types';
 
 type Values=Record<string,Json>;
 const object=(value:Json|undefined):Values=>value&&typeof value==='object'&&!Array.isArray(value)?value:{};
 function Numeric({label,value,onChange,unit,scale=1,fallback,min,max}:{label:string;value:Json|undefined;onChange:(value:number)=>void;unit?:string;scale?:number;fallback?:number;min?:number;max?:number}){
   const current=typeof value==='number'?value:fallback;
-  const normalized=current===undefined?'':String(Number((current/scale).toPrecision(10)));
-  const [text,setText]=useState(normalized);
-  useEffect(()=>setText(normalized),[normalized]);
-  return <label>{label}<div className="input-unit"><input aria-label={label} type="number" step="any" min={min} max={max} value={text} onChange={e=>{setText(e.target.value);if(e.target.value.trim()&&Number.isFinite(Number(e.target.value)))onChange(Number(e.target.value)*scale);}} onBlur={()=>{if(!text.trim())setText(normalized);}}/>{unit&&<span>{unit}</span>}</div></label>;
+  return <label>{label}<div className="input-unit"><ScientificInput label={label} value={current} scale={scale} min={min} max={max} onChange={onChange}/>{unit&&<span>{unit}</span>}</div></label>;
 }
 export function ExternalCircuitSketch({enabled}:{enabled:boolean}){return <div className="external-sketch"><svg viewBox="0 0 300 95" role="img" aria-label={enabled?'電源、直列R・L、DCブロックC、プラズマ、並列Cの外部回路':'理想RF電極駆動'} fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="22" cy="46" r="14"/><path d="M8 46q7-14 14 0t14 0M22 60v22h255V30"/>{enabled?<><path d="M22 32V20h33l4-7 8 14 8-14 8 14 4-7h13c0-16 11-16 11 0c0-16 11-16 11 0h13M139 11v18m8-18v18m0-9h80M192 20v30m-8 0h16m-16 7h16m-8 0v25"/><text x="57" y="48">R</text><text x="105" y="48">L</text><text x="130" y="48">Cblock</text><text x="183" y="72">Cshunt</text></>:<path d="M22 32V20h205"/>}<rect x="227" y="8" width="50" height="35" rx="6"/><text x="252" y="30" textAnchor="middle">PLASMA</text><text x="11" y="94">source</text><text x="237" y="61">electrode</text></svg><p className="muted text-small">{enabled?'電圧は電源側ピーク値。電極側波形・吸収電力を計算します。':'電圧は電極側ピーク値。外部回路を有効にすると電源側の値になります。'}</p></div>;}
 function TransportImport({onImport}:{onImport:(value:Values)=>void}){const [error,setError]=useState('');return <><label className="file-upload">出典付き輸送データJSON<input type="file" accept=".json,application/json" onChange={e=>{const file=e.target.files?.[0];if(file)void file.text().then(text=>{const data=JSON.parse(text);if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('electron_transportオブジェクトを指定してください。');onImport(data);setError('');}).catch(err=>setError(err.message));e.target.value='';}}/></label>{error&&<p className="field-error">{error}</p>}</>;}

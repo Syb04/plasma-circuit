@@ -196,6 +196,28 @@ def test_revision_conflict_and_immutable_run_snapshot(client):
     assert client.post("/api/runs", json={"employee_id": "000123", "circuit_id": saved["id"], "expected_revision": 1, "analysis": {"kind": "op"}}).status_code == 409
 
 
+def test_source_exponents_and_detailed_diode_roundtrip_into_immutable_snapshot(client):
+    original = {"name": "指数・詳細ダイオード", "components": [
+        {"id": "v1", "kind": "V", "ports": ["p", "n"], "parameters": {"dc": 0,
+            "waveform": {"kind": "pulse", "rise": 1e-9, "fall": 2e-9, "width": 5e-7, "period": 1e-6}}},
+        {"id": "d1", "kind": "D", "ports": ["p", "n"], "parameters": {"area": 2,
+            "model_parameters": {"IS": 1e-12, "N": 1.5, "BV": 75, "IBV": 1e-3, "CJO": 1e-11, "TT": 1e-8}}},
+    ]}
+    response = client.post("/api/circuits", json={"employee_id": "000123", "document": original})
+    assert response.status_code == 201, response.text
+    saved = response.json()
+    restored = client.get(f"/api/circuits/{saved['id']}").json()["document"]
+    assert [c["parameters"] for c in restored["components"]] == [c["parameters"] for c in original["components"]]
+    created = run(client, saved)
+    del restored["components"][1]["parameters"]["model_parameters"]["BV"]
+    restored["components"][0]["parameters"]["waveform"]["rise"] = 3e-9
+    updated = client.put(f"/api/circuits/{saved['id']}", json={"employee_id": "000123", "expected_revision": 1, "document": restored})
+    assert updated.status_code == 200, updated.text
+    snapshot = client.get(f"/api/runs/{created['id']}").json()["snapshot"]
+    assert snapshot["components"] == saved["document"]["components"]
+    assert "BV" not in updated.json()["document"]["components"][1]["parameters"]["model_parameters"]
+
+
 def test_queue_unavailable_leaves_failed_durable_history(client, monkeypatch):
     saved = save(client)
 

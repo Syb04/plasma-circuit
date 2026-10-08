@@ -1,0 +1,18 @@
+{
+  "completed": true,
+  "api_mocked": false,
+  "solver_results_mocked": false,
+  "checks": [
+    "Current-source scalar/waveform fields retain e/E drafts and emit numeric ampere/Hz values",
+    "PLASMA component fields retain scientific drafts, mTorr-to-Pa scaling and bounded RF-cycle values",
+    "Macro time input preserves 1 ms across all five units; cycling a blank optional RF interval emits no value"
+  ],
+  "browser_runtime_errors": [],
+  "writes": [],
+  "source_sha256": {
+    "frontend/src/ScientificInput.tsx": "ae01b02b7f6d5bd79eb886378e9a619ae116990f8cf6e3e3326cd6268850eaf3",
+    "frontend/src/TimeInput.tsx": "160f379bf59f7ccfad876820460fddd3873ee15725fa5cdf09e805660791759a",
+    "frontend/src/PlasmaControls.tsx": "28f4cf37a4cbeee60dacd1f4560b9dd59cb924ed960c707711b3483effcce57c",
+    "frontend/src/Inspector.tsx": "4f6f0d9c6e3f23cb44b154f01aae2b330ad18a0137458c736ccc90cd76a2b1da"
+  }
+}

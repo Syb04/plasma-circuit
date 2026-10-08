@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import importlib.metadata
 import ctypes.util
+import hashlib
 import math
 import os
 import re
@@ -15,6 +16,7 @@ from typing import Any
 import numpy as np
 
 from .catalog import BUILTIN_MODELS, COMPONENTS
+from .diode import diode_model
 from .expressions import ExpressionError, compile_expression, parse_si
 
 
@@ -30,7 +32,11 @@ MAX_SAMPLES = 20_000
 MAX_REQUESTED_POINTS = 250_000
 _IDENTIFIER = re.compile(r"^[A-Za-z][A-Za-z0-9_]*$")
 _NODE = re.compile(r"^[A-Za-z0-9_]+$")
-_DEFAULTS = {entry["kind"]: entry for entry in COMPONENTS}
+_DC_INITIALIZATION_NOTE = re.compile(r"Note:\s+[A-Za-z][A-Za-z0-9_]*:\s+dc value used for op instead of transient time=0 value\.")
+# The first entry is the native kind's default; later entries are palette variants.
+_DEFAULTS = {}
+for _entry in COMPONENTS:
+    _DEFAULTS.setdefault(_entry["kind"], _entry)
 
 
 def _identifier(value: Any, what: str = "識別子") -> str:
@@ -193,6 +199,12 @@ def build_netlist(document: dict, analysis: dict | None = None) -> str:
     parameters = document.get("parameters", {})
     lines = ["* Plasma Circuit: " + str(document.get("name", "circuit")).replace("\n", " ").replace("\r", " ")[:200], ".options savecurrents"]
     references = set()
+    generated_models = []
+    reserved_models = {str(model.get("name", "")).upper() for model in document.get("models", [])} | set(BUILTIN_MODELS)
+    for component in by_id.values():
+        model = component.get("parameters", {}).get("model")
+        if model:
+            reserved_models.add(str(model).upper())
 
     def node(cid, port):
         if (cid, port) not in nets:
@@ -296,11 +308,30 @@ def build_netlist(document: dict, analysis: dict | None = None) -> str:
                 if not isinstance(initial, (list, tuple)) or len(initial) != 4:
                     raise CircuitError("伝送線初期条件は[V1,I1,V2,I2]で指定してください")
                 line += " IC="+",".join(_number(value) for value in initial)
+        elif kind == "D" and "model_parameters" in component.get("parameters", {}):
+            if len(terminals) != 2:
+                raise CircuitError("ダイオードは2端子で指定してください")
+            base = "DLOCAL_" + hashlib.sha256(cid.encode()).hexdigest()[:16]
+            model = base
+            suffix = 1
+            while model.upper() in reserved_models:
+                model = f"{base}_{suffix}"
+                suffix += 1
+            reserved_models.add(model.upper())
+            try:
+                generated_models.append(diode_model(model, params["model_parameters"]))
+            except ValueError as exc:
+                raise CircuitError(f"{cid}: {exc}") from exc
+            line = f"{prefix} {model} AREA={_number(params.get('area', 1), positive=True)}"
         else:
             model = _identifier(params.get("model", ""), "モデル名")
             references.add(model)
             line = f"{prefix} {model}"
-            if kind in {"D", "Q", "J", "Z"}:
+            if kind == "D":
+                # Explicit AREA works across ngspice versions; a positional
+                # diode area can be parsed as another model name by ngspice 44.
+                line += " AREA=" + _number(params.get("area", 1), positive=True)
+            elif kind in {"Q", "J", "Z"}:
                 line += " " + _number(params.get("area", 1), positive=True)
             elif kind == "W":
                 line = f"{prefix} {control(params)} {model}"
@@ -311,6 +342,7 @@ def build_netlist(document: dict, analysis: dict | None = None) -> str:
                     line += f" {_identifier(arg)}={_number(value)}"
         lines.append(line + (" " + raw if raw else ""))
     lines += _models(document, references)
+    lines += generated_models
     settings = (analysis or {}).get("settings", {})
     initial = settings.get("initial_conditions", {})
     if initial:
@@ -397,11 +429,12 @@ def simulate_netlist(netlist: str, analysis: dict) -> dict:
     kind, settings = _analysis_settings(analysis)
     try:
         from PySpice.Spice.Netlist import Circuit
-        from PySpice.Spice.NgSpice.Shared import NgSpiceShared
+        from PySpice.Spice.NgSpice.Shared import NgSpiceShared, NgSpiceCommandError
     except ImportError as exc:
         raise SolverError("PySpice がありません。計算ワーカーの依存関係を確認してください") from exc
     circuit = Circuit("Plasma Circuit")
     circuit.raw_spice = _raw_spice(netlist)
+    initialization_notes = []
     try:
         # Runtime-only Debian packages install .so.0 without the development
         # symlink assumed by PySpice. Respect an explicit administrator path.
@@ -410,23 +443,43 @@ def simulate_netlist(netlist: str, analysis: dict) -> dict:
             if located:
                 NgSpiceShared.LIBRARY_PATH = located
         simulator = circuit.simulator(simulator="ngspice-shared")
+        def solve(method: str, plot_kind: str, **kwargs):
+            nonlocal initialization_notes
+            try:
+                return getattr(simulator, method)(**kwargs)
+            except NgSpiceCommandError:
+                shared = simulator._ngspice_shared
+                notes = [line.strip() for line in str(shared.stderr).splitlines() if line.strip()]
+                # PySpice 1.5 marks this informational stderr line as an error,
+                # even when ngspice completed a valid analysis. Recover only
+                # this exact notice and a plot of the requested analysis kind.
+                if (shared._error_in_stdout or not notes
+                        or any(not _DC_INITIALIZATION_NOTE.fullmatch(line) for line in notes)):
+                    raise
+                plot = shared.last_plot
+                if not re.fullmatch(plot_kind + r"\d+", plot):
+                    raise
+                simulator.reset_analysis()
+                initialization_notes = notes
+                return shared.plot(simulator, plot).to_analysis()
+
         if kind == "op":
-            solved = simulator.operating_point()
+            solved = solve("operating_point", "op")
             axis_name, axis_unit = "operating_point", ""
             axis = np.array([0.0])
         elif kind == "transient":
             kwargs = {"step_time": settings["time_step"], "end_time": settings["stop_time"], "start_time": settings["start_time"], "use_initial_condition": bool(settings.get("use_initial_condition", False))}
             if "max_step" in settings:
                 kwargs["max_time"] = settings["max_step"]
-            solved = simulator.transient(**kwargs)
+            solved = solve("transient", "tran", **kwargs)
             axis_name, axis_unit = "time", "s"
             axis = np.asarray(solved.time, dtype=float)
         elif kind == "ac":
-            solved = simulator.ac(variation=settings["variation"], number_of_points=settings["points"], start_frequency=settings["start_frequency"], stop_frequency=settings["stop_frequency"])
+            solved = solve("ac", "ac", variation=settings["variation"], number_of_points=settings["points"], start_frequency=settings["start_frequency"], stop_frequency=settings["stop_frequency"])
             axis_name, axis_unit = "frequency", "Hz"
             axis = np.asarray(solved.frequency, dtype=float)
         else:
-            solved = simulator.dc(**{settings["source"]: slice(settings["start"], settings["stop"], settings["step"])})
+            solved = solve("dc", "dc", **{settings["source"]: slice(settings["start"], settings["stop"], settings["step"])})
             axis_name, axis_unit = "sweep", "A" if settings["source"].lower().startswith("i") else "V"
             axis = np.asarray(solved.sweep, dtype=float)
     except Exception as exc:
@@ -507,6 +560,8 @@ def simulate_netlist(netlist: str, analysis: dict) -> dict:
     result = {"kind": kind, "converged": True, "summary": summary, "axis": {"name": axis_name, "unit": axis_unit, "values": axis[keep].tolist() if kind != "op" else []}, "signals": signals, "tables": [{"name": "動作点", "columns": ["signal", "value", "unit"], "rows": rows}] if rows else [], "logs": stderr.splitlines()[-100:] if stderr else [], "netlist": netlist, "solver": _solver_version(simulator), "model_metadata": {}, "diagnostics": {"original_sample_count": count, "saved_sample_count": len(keep), "internal_vector_sample_count": len(vector_keep), "decimated": count > len(keep), "decimation": "uniform index selection; first and last retained" if count > len(keep) else "none"}, "vectors": vectors, "x": axis[vector_keep].tolist()}
     if complex_vectors:
         result["complex_vectors"] = complex_vectors
+    if initialization_notes:
+        result["logs"] = initialization_notes + [line for line in result["logs"] if line not in initialization_notes]
     if unavailable_currents:
         result["diagnostics"]["unavailable_device_currents"] = unavailable_currents
     if count > len(keep):

@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from copy import deepcopy
 
+from .diode import DEFAULT_DIODE_PARAMETERS
+
 BUILTIN_MODELS = {
     "DDEFAULT": ".model DDEFAULT D(Is=1e-14 N=1 Rs=0.1 Cjo=1e-12)",
     "NPNDEFAULT": ".model NPNDEFAULT NPN(Is=1e-15 Bf=100 Vaf=100)",
@@ -38,6 +40,7 @@ COMPONENTS = [
     _entry("S", "電圧制御スイッチ", "スイッチ", ["p", "n", "cp", "cn"], {"model": "SWDEFAULT"}),
     _entry("W", "電流制御スイッチ", "スイッチ", ["p", "n"], {"control_source": "v1", "model": "CSWDEFAULT"}),
     _entry("D", "ダイオード", "半導体", ["p", "n"], {"model": "DDEFAULT", "area": 1}),
+    _entry("D", "ダイオード（詳細設定）", "半導体", ["p", "n"], {"area": 1, "model_parameters": DEFAULT_DIODE_PARAMETERS.copy()}, "IS・N・BV・IBV・RS・接合容量・走行時間・温度依存を部品ごとに設定します。"),
     _entry("Q", "BJT", "半導体", ["c", "b", "e"], {"model": "NPNDEFAULT", "area": 1}),
     _entry("J", "JFET", "半導体", ["d", "g", "s"], {"model": "NJFETDEFAULT", "area": 1}),
     _entry("Z", "MESFET", "半導体", ["d", "g", "s"], {"model": "NMESDEFAULT", "area": 1}),

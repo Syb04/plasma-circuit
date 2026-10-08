@@ -1,0 +1,75 @@
+{
+  "completed": true,
+  "api_mocked": false,
+  "solver_results_mocked": false,
+  "checks": [
+    "The additional diode palette variant uses native D ports, independent numeric model parameters and an initially unspecified BV",
+    "All 13 diode model fields accept character-by-character scientific notation, including optional capacitance/transit/temperature fields, in light/dark desktop/mobile layouts",
+    "Sine frequency keeps incomplete 4e and completes 4e+7; signed uppercase exponents work in scalar component fields, and scientific time input retains SI scaling",
+    "Saving emits numeric SI values to PostgreSQL; the real queued 40 MHz sine/diode run retains all 13 parameters, a reproducible netlist, analysis snapshot and benign DC-initialization notice",
+    "An unfinished negative exponent remains editable; incomplete, nonfinite, hexadecimal and underflow drafts block save/run without API mutations; pulse timing fields accept signed exponents",
+    "The real pulse run reproduces the entered delay, rise/fall, width and period; saved source voltage is 2.5 V during ON and 0 V during OFF",
+    "The full-page model library restores source/diode values and physical-time settings; clearing optional BV removes the override while historical run input stays unchanged",
+    "RF carrier/second-frequency/envelope fields support e/E notation and clearing the optional envelope removes it from the saved waveform",
+    "No browser runtime errors; final validation circuit and both real solver histories are retained"
+  ],
+  "browser_runtime_errors": [],
+  "runs": [
+    {
+      "id": "25c1fba8-31ca-41e0-b6ab-b4263635b1c2",
+      "status": "succeeded",
+      "analysis": {
+        "kind": "transient",
+        "settings": {
+          "time_step": 1e-09,
+          "stop_time": 2.0000000000000002e-07,
+          "max_step": 1e-09
+        }
+      },
+      "solver": {
+        "pyspice": "1.5",
+        "ngspice": "39"
+      },
+      "samples": 212,
+      "converged": true,
+      "netlist": "* Plasma Circuit: 指数・詳細ダイオード検証 1791433595404501887\n.options savecurrents\nv1 n1 0 DC -0.25 AC 1 0 SIN(0 250 40000000 0 0 0)\nr1 n1 n2 1000\nr2 n2 0 100000\nd_123b918ca11e4516a998b2354293cdaa n2 0 DLOCAL_3dac86fb68fda0ca AREA=1\n.model DLOCAL_3dac86fb68fda0ca D(IS=1e-12 N=1.5 RS=0.5 BV=75 IBV=0.001 CJO=9.999999999999999e-12 VJ=0.7 M=0.5 TT=1e-08 EG=1.11 XTI=3 FC=0.5 TNOM=27)\n.end\n"
+    },
+    {
+      "id": "eaf01b90-cfd1-420b-af1a-c0abf58474e0",
+      "status": "succeeded",
+      "analysis": {
+        "kind": "transient",
+        "settings": {
+          "time_step": 1e-09,
+          "stop_time": 6e-06,
+          "max_step": 1e-09
+        }
+      },
+      "solver": {
+        "pyspice": "1.5",
+        "ngspice": "39"
+      },
+      "samples": 6057,
+      "converged": true,
+      "netlist": "* Plasma Circuit: 指数・詳細ダイオード検証 1791433595404501887\n.options savecurrents\nv1 n1 0 DC 5 AC 1 0 PULSE(0 2.5 1e-07 1e-09 2e-09 8e-07 2e-06)\nr1 n1 n2 1000\nr2 n2 0 100000\nd_123b918ca11e4516a998b2354293cdaa n2 0 DLOCAL_3dac86fb68fda0ca AREA=1\n.model DLOCAL_3dac86fb68fda0ca D(IS=1e-12 N=1.5 RS=0.5 BV=75 IBV=0.001 CJO=9.999999999999999e-12 VJ=0.7 M=0.5 TT=1e-08 EG=1.11 XTI=3 FC=0.5 TNOM=27)\n.end\n"
+    }
+  ],
+  "source_sha256": {
+    "frontend/src/ScientificInput.tsx": "ae01b02b7f6d5bd79eb886378e9a619ae116990f8cf6e3e3326cd6268850eaf3",
+    "frontend/src/DiodeEditor.tsx": "8a0e010112267777f65e379e0d8ef76297cea2ac372ad1cdf439e9a2dd1560e1",
+    "frontend/src/Inspector.tsx": "4f6f0d9c6e3f23cb44b154f01aae2b330ad18a0137458c736ccc90cd76a2b1da",
+    "frontend/src/TimeInput.tsx": "160f379bf59f7ccfad876820460fddd3873ee15725fa5cdf09e805660791759a",
+    "frontend/src/PlasmaControls.tsx": "28f4cf37a4cbeee60dacd1f4560b9dd59cb924ed960c707711b3483effcce57c",
+    "frontend/src/App.tsx": "a5c82dc894628e206df4869ce3a9c3d4b0f43b6dc45c69c60bbc81dfdfdc2d15",
+    "frontend/src/Schematic.tsx": "609474be149c5934522765eca943ed4b083be0d321e6a5a05f0101094c11bd6e",
+    "frontend/src/styles.css": "6d63c86db02278957aca4bdd232621e767ff10af26c0fd63ef1920d327bef84e",
+    "backend/app/diode.py": "d165863692449d062ccd25f84f1ef6c182bcb73b572a6764569cce804edc7c5c",
+    "backend/app/catalog.py": "16d7d8c191325f9395e090514abeda53ef931954bbd9d08659d0e3ec057ef887",
+    "backend/app/engine.py": "158aae97a52d84428858256181f9d92f976465085d898484023a0a7573d6519d"
+  },
+  "frontend_assets": [
+    "/assets/index-DMFGdxD_.js",
+    "/assets/index-BBQDnMdm.css"
+  ],
+  "circuit_id": "e7e4cb39-3a42-4d69-88e2-f77367579cd7"
+}

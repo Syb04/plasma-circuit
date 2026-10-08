@@ -31,7 +31,8 @@ function ComponentNode({data, selected}: NodeProps<CircuitNode>) {
   const valueUnit = ({R:'Ω', C:'F', L:'H', V:'V', I:'A'} as Record<string,string>)[c.kind];
   const waveform=c.parameters.waveform && typeof c.parameters.waveform==='object' && !Array.isArray(c.parameters.waveform) ? c.parameters.waveform as Record<string,Json> : null;
   const sourceCaption=waveform?.kind==='sin'?`${engineering(Number(waveform.amplitude??0),valueUnit)}pk · ${engineering(Number(waveform.frequency??0),'Hz')}`:waveform?.kind==='pulse'?'PULSE':waveform?.kind==='pwl'?'PWL':typeof c.parameters.dc==='number'?engineering(c.parameters.dc,valueUnit):'';
-  const caption = typeof c.parameters.value === 'number' ? engineering(c.parameters.value,valueUnit) : ['V','I'].includes(c.kind) ? sourceCaption : c.kind==='PLASMA'?`${c.parameters.gas??'Ar'} · nₑ ${engineering(Number(c.parameters.electron_density_m3??1e16))}` : (c.kind === 'EDD' ? `${Array.isArray(c.parameters.branches) ? c.parameters.branches.length : 1} 枝` : String(c.parameters.model ?? ''));
+  const detailedDiode=c.kind==='D'&&'model_parameters' in c.parameters;
+  const caption = detailedDiode ? '詳細設定' : typeof c.parameters.value === 'number' ? engineering(c.parameters.value,valueUnit) : ['V','I'].includes(c.kind) ? sourceCaption : c.kind==='PLASMA'?`${c.parameters.gas??'Ar'} · nₑ ${engineering(Number(c.parameters.electron_density_m3??1e16))}` : (c.kind === 'EDD' ? `${Array.isArray(c.parameters.branches) ? c.parameters.branches.length : 1} 枝` : String(c.parameters.model ?? ''));
   const rotation = ((c.rotation % 360) + 360) % 360;
   return <div className={`circuit-node ${selected ? 'selected' : ''} ${c.kind==='JUNCTION'?'junction':''}`}>
     <div className="node-body" style={{transform:`rotate(${rotation}deg)`}}>

@@ -158,6 +158,7 @@ h4{font-size:12px;font-weight:600}
 .json-editor label{font-size:10px;color:var(--text-muted)}
 .json-editor textarea{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;line-height:1.7;background:var(--surface-2);tab-size:2;resize:vertical;color:var(--text)}
 .field-error{font-size:10px;color:var(--error);line-height:1.6}
+input[data-scientific-input][aria-invalid="true"]{border-color:var(--error)}
 .component-footer{margin-top:20px;padding-top:10px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;font-size:9px}
 .component-footer .text-button{font-size:9px}
 .info-box,.warning-box{border-radius:6px;padding:10px;font-size:9px;line-height:1.9;margin:12px 0;color:var(--warning);background:var(--bg);border:1px solid var(--border)}

@@ -1,5 +1,7 @@
 # 検証状況
 
+指数入力・詳細ダイオードを追加した版では、関連4ファイルのDocker内テスト163件、実ブラウザ9チェック、共通入力のUI回帰3チェックが合格した。40 MHz正弦波とパルス電源による実ngspice計算・保存・再読込を確認した。[検証範囲・結果・画像](../reports/source-diode/report.md)を参照。プラズマの実験validationの追加を意味しない。
+
 確認日：2026-10-07。最新の全機能検証は[シミュレーター拡張レポート](../reports/simulator-extensions/report.md)、機械可読の記録は[検証manifest](../reports/simulator-extensions/verification.json)と[実API結果](../reports/simulator-extensions/api-validation.json)に保存した。
 
 ## 確認できた結果

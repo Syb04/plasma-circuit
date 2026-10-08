@@ -1,0 +1,22 @@
+{
+  "backend_image": "sha256:a8cfa81225193553bdc29c69e99491b8cccee8d359ef5f880487ee038eceb84f",
+  "frontend_image": "sha256:bcabb900ae2bf8e4135d61af69eb5efb5a611a8846c44fbed3fa58e023994501",
+  "backend_test_command": "python -m pytest tests/test_engine.py tests/test_api.py tests/test_workflows.py tests/test_external_rf.py -q --tb=short",
+  "backend_tests": {
+    "passed": 163,
+    "warnings": 1,
+    "seconds": 29.59
+  },
+  "fixture_cleanup": {
+    "circuits": 3,
+    "runs": 4,
+    "revisions": 10
+  },
+  "run_hashes_match": true,
+  "health": {
+    "status": "ok",
+    "database": "ok",
+    "queue": "ok",
+    "pyspice": "1.5"
+  }
+}
