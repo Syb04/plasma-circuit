@@ -1,0 +1,161 @@
+{
+  "completed": true,
+  "api_mocked": false,
+  "solver_results_mocked": false,
+  "checks": [
+    "All 30 catalog variants retain settings, ports and rotation; source/diode/EDD/coax/plasma copy edits preserve originals",
+    "Ctrl+D / Cmd+D produce unique IDs/labels; duplication is one undo step; redo restores exact data; invalid numeric drafts and editable/modal/results contexts are protected",
+    "100-character Unicode labels remain bounded and unique; both buttons and keyboard enforce the 500-component document limit",
+    "Desktop and 390px mobile expose the duplicate action; mobile copy/undo works without page overflow",
+    "A real saved duplicate resistor and original become distinct ngspice devices; 5V/1kΩ/2kΩ gives 3.333333333V; saved model reload retains settings, IDs and connections",
+    "Only the owned validation model is hidden; existing active-model metadata is unchanged, run history remains available, and browser runtime errors are zero"
+  ],
+  "browser_runtime_errors": [],
+  "fixture_name": "部品複製検証 1791446636726673002",
+  "source_sha256": {
+    "frontend/src/App.tsx": "735e68d058c4f19ab6052ff0704e8397a9a679bf4ca0e0e64be8d08fe1377bc8",
+    "frontend/src/Inspector.tsx": "45a6acfb3af26d3df3ef715089d42b120371e81e141f28ddaa8dad2544c54476",
+    "frontend/src/Schematic.tsx": "1ccf97b9a04b3c96a3c5be4bf966312702d6a61d341c3e2a42e5f7de7053f4d4",
+    "frontend/src/ScientificInput.tsx": "9a881a6f0da7c1416b4845188172deb830966158c39fa4fb7449132be923b4c6"
+  },
+  "original_active_models": 60,
+  "frontend_assets": [
+    "/assets/index-DQbWV7R3.js",
+    "/assets/index-BkAmN0-T.css"
+  ],
+  "catalog_cases": [
+    {
+      "kind": "R",
+      "catalog_label": "抵抗"
+    },
+    {
+      "kind": "C",
+      "catalog_label": "コンデンサ"
+    },
+    {
+      "kind": "L",
+      "catalog_label": "インダクタ"
+    },
+    {
+      "kind": "K",
+      "catalog_label": "インダクタ結合"
+    },
+    {
+      "kind": "V",
+      "catalog_label": "電圧源"
+    },
+    {
+      "kind": "I",
+      "catalog_label": "電流源"
+    },
+    {
+      "kind": "E",
+      "catalog_label": "電圧制御電圧源"
+    },
+    {
+      "kind": "F",
+      "catalog_label": "電流制御電流源"
+    },
+    {
+      "kind": "G",
+      "catalog_label": "電圧制御電流源"
+    },
+    {
+      "kind": "H",
+      "catalog_label": "電流制御電圧源"
+    },
+    {
+      "kind": "B",
+      "catalog_label": "数式電源"
+    },
+    {
+      "kind": "S",
+      "catalog_label": "電圧制御スイッチ"
+    },
+    {
+      "kind": "W",
+      "catalog_label": "電流制御スイッチ"
+    },
+    {
+      "kind": "D",
+      "catalog_label": "ダイオード"
+    },
+    {
+      "kind": "D",
+      "catalog_label": "ダイオード（詳細設定）"
+    },
+    {
+      "kind": "Q",
+      "catalog_label": "BJT"
+    },
+    {
+      "kind": "J",
+      "catalog_label": "JFET"
+    },
+    {
+      "kind": "Z",
+      "catalog_label": "MESFET"
+    },
+    {
+      "kind": "T",
+      "catalog_label": "無損失伝送線"
+    },
+    {
+      "kind": "COAX",
+      "catalog_label": "同軸ケーブル"
+    },
+    {
+      "kind": "COAX_GND",
+      "catalog_label": "同軸ケーブル（シールド接地）"
+    },
+    {
+      "kind": "O",
+      "catalog_label": "損失伝送線 (LTRA)"
+    },
+    {
+      "kind": "U",
+      "catalog_label": "分布 RC 線"
+    },
+    {
+      "kind": "Y",
+      "catalog_label": "損失伝送線 (TXL)"
+    },
+    {
+      "kind": "P",
+      "catalog_label": "多導体伝送線 (CPL)"
+    },
+    {
+      "kind": "X",
+      "catalog_label": "サブ回路"
+    },
+    {
+      "kind": "EDD",
+      "catalog_label": "Equation-defined device"
+    },
+    {
+      "kind": "PLASMA",
+      "catalog_label": "CCP プラズマ"
+    },
+    {
+      "kind": "GND",
+      "catalog_label": "GND"
+    },
+    {
+      "kind": "JUNCTION",
+      "catalog_label": "接続点"
+    }
+  ],
+  "fixture_id": "250551e4-8d09-4784-a983-862c73eccf9f",
+  "run_id": "965de156-02cf-483e-aaf6-e137b7f0780b",
+  "run": {
+    "id": "965de156-02cf-483e-aaf6-e137b7f0780b",
+    "status": "succeeded",
+    "solver": {
+      "pyspice": "1.5",
+      "ngspice": "39"
+    },
+    "divider_voltage_v": 3.333333333333333,
+    "expected_voltage_v": 3.3333333333333335
+  },
+  "fixture_deleted": true
+}

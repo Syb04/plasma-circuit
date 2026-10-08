@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Background, BackgroundVariant, Controls, Handle, Position, ReactFlow, applyNodeChanges, useReactFlow, ReactFlowProvider, useUpdateNodeInternals } from '@xyflow/react';
 import type { Connection, EdgeChange, Node, NodeChange, NodeProps } from '@xyflow/react';
-import { RotateCw, Trash2, Maximize2, MousePointer2, Cable } from 'lucide-react';
+import { Copy, RotateCw, Trash2, Maximize2, MousePointer2, Cable } from 'lucide-react';
 import type { Component, CircuitDocument, Json } from './types';
 import { createId, engineering } from './types';
 import {isCoax} from './CoaxEditor';
@@ -64,7 +64,7 @@ function ComponentNode({data, selected}: NodeProps<CircuitNode>) {
 }
 const nodeTypes = {component: ComponentNode};
 
-interface Props {document:CircuitDocument; selectedId:string|null; onSelect:(id:string|null)=>void; onChange:(doc:CircuitDocument)=>void; onMessage:(message:string)=>void}
+interface Props {document:CircuitDocument; selectedId:string|null; onSelect:(id:string|null)=>void; onChange:(doc:CircuitDocument)=>void; onDuplicate:()=>void; onMessage:(message:string)=>void}
 function Editor(props:Props) {
   const {document:doc,onChange,onSelect,selectedId} = props;
   const flow = useReactFlow();
@@ -102,7 +102,7 @@ function Editor(props:Props) {
       <Background variant={BackgroundVariant.Dots} gap={20} size={1.2} color="var(--border)"/>
       <Controls showInteractive={false}/>
     </ReactFlow>
-    <div className="canvas-toolbar"><span><MousePointer2 size={14}/>選択</span><span><Cable size={14}/>端子から配線</span><div className="toolbar-divider"/><button title="90度回転" aria-label="選択部品を90度回転" disabled={!selectedId} onClick={()=>selectedAction('rotate')}><RotateCw size={16}/></button><button title="削除" aria-label="選択部品を削除" disabled={!selectedId} onClick={()=>selectedAction('delete')}><Trash2 size={16}/></button><button title="全体を表示" aria-label="回路全体を表示" onClick={()=>flow.fitView({padding:0.35,duration:250})}><Maximize2 size={16}/></button></div>
+    <div className="canvas-toolbar"><span><MousePointer2 size={14}/>選択</span><span><Cable size={14}/>端子から配線</span><div className="toolbar-divider"/><button title="複製 Ctrl+D / ⌘D" aria-label="選択部品を複製" disabled={!selectedId||doc.components.length>=500} onClick={props.onDuplicate}><Copy size={16}/></button><button title="90度回転" aria-label="選択部品を90度回転" disabled={!selectedId} onClick={()=>selectedAction('rotate')}><RotateCw size={16}/></button><button title="削除" aria-label="選択部品を削除" disabled={!selectedId} onClick={()=>selectedAction('delete')}><Trash2 size={16}/></button><button title="全体を表示" aria-label="回路全体を表示" onClick={()=>flow.fitView({padding:0.35,duration:250})}><Maximize2 size={16}/></button></div>
     {doc.components.length===0 && <div className="canvas-empty"><CircuitSymbol kind="R"/><h3>回路を組み立てる</h3><p>左のライブラリから部品を追加し、<br/>端子の丸印をドラッグして接続します。</p></div>}
     <div className="canvas-note">線の交差は接続されません。分岐には接続点を使います。</div>
   </div>;
