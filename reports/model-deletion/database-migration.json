@@ -1,0 +1,49 @@
+{
+  "unchanged": true,
+  "tables": {
+    "circuits": {
+      "count": 60,
+      "rows_md5": "27d06d8f379c9969341af501fdd2393f"
+    },
+    "circuit_revisions": {
+      "count": 75,
+      "rows_md5": "dcf83be1b96f70a599d2cdf9a6f91d4f"
+    },
+    "simulation_runs": {
+      "count": 107,
+      "rows_md5": "f90c35df88a7564783c64c1661cd22c3"
+    },
+    "studies": {
+      "count": 8,
+      "rows_md5": "a1b3ba4b572ef81b444a233ff9f0b273"
+    },
+    "study_cases": {
+      "count": 48,
+      "rows_md5": "9f88228c6ce56db9a3c1643c42c88892"
+    },
+    "study_attempts": {
+      "count": 80,
+      "rows_md5": "f74ab92003a5082c642e3f7b5d04f69a"
+    },
+    "benchmarks": {
+      "count": 4,
+      "rows_md5": "8a9da16c4fb2dccaa8156d05674b2b8e"
+    },
+    "package_imports": {
+      "count": 2,
+      "rows_md5": "ab1ed5cdbf440411767e7ef59a71b215"
+    }
+  },
+  "circuit_columns": [
+    "id",
+    "name",
+    "revision",
+    "document",
+    "created_by",
+    "updated_by",
+    "created_at",
+    "updated_at",
+    "deleted_at",
+    "deleted_by"
+  ]
+}

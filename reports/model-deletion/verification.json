@@ -1,0 +1,76 @@
+{
+  "completed": true,
+  "api_responses_mocked": false,
+  "solver_results_mocked": false,
+  "checks": [
+    "Employee ID is required for deletion; selection alone does not delete, and Cancel/Escape keep the model",
+    "Refresh and page changes clear selection; deleting the only final-page model returns to page 1 with correct counts",
+    "A real concurrent update aborts the entire two-model deletion with 409; refreshed selection deletes both models atomically",
+    "Deleting the current model preserves unsaved name/memo/physical-time settings and history; Save creates a new ID without resurrecting the original",
+    "Native ngspice run, immutable input/result, CSV bytes and analysis-package content/hashes are unchanged after model deletion",
+    "Deletion confirmation fits 390 px light and 320 px dark viewports and keeps keyboard focus within the dialog",
+    "A real offline failure keeps the dialog and model; reconnecting and retrying completes deletion",
+    "Two simultaneous overlapping PostgreSQL batches yield one success and one 409 with no partial deletion or deadlock",
+    "Select-all deletes only the displayed fixture page; empty results and sidebar counts update while every original model remains unchanged"
+  ],
+  "browser_runtime_errors": [],
+  "fixture_prefix": "削除検証 1791435057743177500",
+  "employee_id": "000-delete-1791435057743177500",
+  "source_sha256": {
+    "frontend/src/App.tsx": "5e5b127f6a87b38220106ef1cfaed827813b0d9a69443274610d510e2d9087ff",
+    "frontend/src/ModelLibrary.tsx": "756b2596d27fa2f98d5c1315c40788dede9e5bb1d02cc2e085b0dd3e2b52e322",
+    "frontend/src/styles.css": "993f900ecfc5edcba07f7be5a814afb0c8c48cd1c6977c74d8ae9f91550ad182",
+    "backend/app/api.py": "52e41842032465cae20ca963534f91b6521e2e5a6bbab20b46026639666774ab",
+    "backend/app/database.py": "c973527aff1281bdbc69fb83b72f2c4358134a49ad4afafeffa65784017b555d",
+    "backend/app/schemas.py": "916e3b53c61fe81d5d012947713ac42bedf8677defeff75efe82d7a73ce07cb4"
+  },
+  "fixture_ids": [
+    "e4571d0b-5452-4b6b-91df-e552ca02e630",
+    "7973b419-43f7-48e9-a689-0bf7b1e3b343",
+    "2f8ad573-a3ca-4917-a8ae-58da8a07a7ac",
+    "80bf8968-cee9-44c8-859e-519cdb3ee9e3",
+    "5c5abb18-40d2-4c19-95ea-3ef13d052e91",
+    "5eafffd3-6224-4f37-a4ef-3d04c42ab6c0",
+    "f25c4583-e2c0-4003-a921-4a4009751556",
+    "dd7181b3-c84f-4ca4-9ec7-21d4653ab5d5",
+    "c30e9fae-e606-4b80-b24e-ef81ef92736f",
+    "2502a2ec-4678-41f8-9cab-c63a037a6806",
+    "bd1b255d-6b6b-4c0d-a552-5a6db3bf0547",
+    "ba57b8d2-6862-4e05-bc23-754657352247",
+    "e25b3cc8-32db-49e4-88a6-da84e7be3426",
+    "b371aa9e-31d0-4b31-97cf-08438e83f778",
+    "a977c351-fb4e-4bbd-89bf-8cf8f5591af0",
+    "2c446ff5-051e-410f-b4fd-19f0cc00868f",
+    "3367b1ab-21bc-4bc0-b459-676f3b618c72",
+    "753402f4-2b01-4ec4-803a-338ac4abc87f",
+    "353ff62f-5c69-413f-8d89-d7b8f8d47146",
+    "e1415f84-93aa-47ea-ba0d-12a0342d50dc",
+    "a9e86d6f-00e8-494c-b4fc-fa371eaaa5a1",
+    "477138a4-c1c2-4d05-ae71-32664a19c213",
+    "d0c04be2-9503-4f02-b450-f1a4a0ec028b",
+    "3a1b3c27-6e8b-4ee6-90d9-c0a209ec2179",
+    "51a1ba5b-33f2-44d5-ba43-144a50430c6a",
+    "bf9fbde9-c580-48f3-87ae-3efff9ea35b2",
+    "d1781b7a-b058-447f-a99d-99739f24bc4d",
+    "e78f7c9d-b0fc-4b55-8e1b-84198aff5d07",
+    "2cca6145-e213-4970-87a5-922e496484c5",
+    "1f665160-c60e-458f-b4b3-d4feadd452da"
+  ],
+  "real_solver_run": {
+    "id": "5aa37bf7-7e22-4d4c-ac84-ad4f692ea2f8",
+    "status": "succeeded",
+    "converged": true
+  },
+  "retained_package_content_hashes": {
+    "input_sha256": "c8eb3f108b2e70c93b76e788f66664d04ccd507460f4469aa9bbcb98c52595c9",
+    "model_sha256": "b56a75d19f249357394b7f58c22013f49dd4d349da7f4656e62419d794798203",
+    "source_sha256": "2652e1192be28ee2f704c85911dbe1cffa0b4f0dea72da34961f6150225b82d8",
+    "result_sha256": "bf4ef38ade7ba2e5b70fb7c0cf1baa7a96cf24ebb89352349d366f44fae6b184"
+  },
+  "concurrent_batch_statuses": [
+    200,
+    409
+  ],
+  "original_model_count": 60,
+  "remaining_model_count": 60
+}

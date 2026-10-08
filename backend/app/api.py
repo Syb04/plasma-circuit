@@ -15,13 +15,13 @@ from redis.exceptions import RedisError
 from rq.command import send_stop_job_command
 from rq.exceptions import NoSuchJobError
 from rq.job import Job
-from sqlalchemy import func, or_, select, text, update
+from sqlalchemy import and_, func, or_, select, text, update
 from sqlalchemy.orm import Session
 
 from . import database as db
 from . import worker, studies, benchmarks, analysis_package
 from .schemas import (CompareBenchmark, CompareRuns, CreateBenchmark, CreateRun, CreateStudy,
-                      EmployeeRequest, ImportPackage, SaveCircuit, UpdateCircuit)
+                      DeleteCircuits, EmployeeRequest, ImportPackage, SaveCircuit, UpdateCircuit)
 
 logger = logging.getLogger(__name__)
 
@@ -151,7 +151,7 @@ def list_circuits(
     # always supplies a bounded limit and never downloads every document.
     circuit = db.Circuit
     description = circuit.document["description"].as_string()
-    filters = []
+    filters = [circuit.deleted_at.is_(None)]
     if term := q.strip():
         filters.append(or_(*(column.icontains(term, autoescape=True) for column in
                              (circuit.name, description, circuit.created_by, circuit.updated_by))))
@@ -167,7 +167,7 @@ def list_circuits(
         "created_desc": circuit.created_at.desc(),
     }
     total = session.scalar(select(func.count()).select_from(circuit).where(*filters))
-    total_all = session.scalar(select(func.count()).select_from(circuit)) if filters else total
+    total_all = session.scalar(select(func.count()).select_from(circuit).where(circuit.deleted_at.is_(None)))
     statement = select(circuit.id, circuit.name, circuit.revision, circuit.created_by,
                        circuit.updated_by, circuit.created_at, circuit.updated_at,
                        description.label("description")).where(*filters).order_by(orders[sort], circuit.id).offset(offset)
@@ -190,10 +190,36 @@ def create_circuit(request: SaveCircuit, session: Session = Depends(get_session)
     return circuit_response(circuit)
 
 
+@app.post("/api/circuits/delete")
+def delete_circuits(request: DeleteCircuits, session: Session = Depends(get_session)):
+    ids = [target.id for target in request.circuits]
+    # A consistent lock order makes overlapping batch deletes serialize safely.
+    circuits = {circuit.id: circuit for circuit in session.scalars(
+        select(db.Circuit).where(db.Circuit.id.in_(ids)).order_by(db.Circuit.id).with_for_update()
+    )}
+    for target in request.circuits:
+        circuit = circuits.get(target.id)
+        if circuit is None:
+            raise HTTPException(404, "削除対象のモデルが見つかりません。一覧を更新して選び直してください")
+        if circuit.deleted_at is not None or circuit.revision != target.expected_revision:
+            raise HTTPException(409, "削除対象に更新・削除されたモデルがあります。一覧を更新して選び直してください。今回は削除していません")
+    deleted_at = db.utcnow()
+    result = session.execute(update(db.Circuit).where(
+        db.Circuit.deleted_at.is_(None),
+        or_(*(and_(db.Circuit.id == target.id, db.Circuit.revision == target.expected_revision)
+              for target in request.circuits)),
+    ).values(deleted_at=deleted_at, deleted_by=request.employee_id))
+    if result.rowcount != len(ids):
+        session.rollback()
+        raise HTTPException(409, "モデルの状態が変わりました。一覧を更新して選び直してください。今回は削除していません")
+    session.commit()
+    return {"deleted_ids": ids, "deleted_at": iso(deleted_at)}
+
+
 @app.get("/api/circuits/{circuit_id}")
 def get_circuit(circuit_id: str, session: Session = Depends(get_session)):
     circuit = session.get(db.Circuit, circuit_id)
-    if circuit is None:
+    if circuit is None or circuit.deleted_at is not None:
         raise HTTPException(404, "回路が見つかりません")
     return circuit_response(circuit)
 
@@ -203,12 +229,13 @@ def update_circuit(circuit_id: str, request: UpdateCircuit, session: Session = D
     document = finite_json(request.document.model_dump())
     result = session.execute(
         update(db.Circuit)
-        .where(db.Circuit.id == circuit_id, db.Circuit.revision == request.expected_revision)
+        .where(db.Circuit.id == circuit_id, db.Circuit.revision == request.expected_revision, db.Circuit.deleted_at.is_(None))
         .values(name=document["name"], document=document, revision=request.expected_revision + 1, updated_by=request.employee_id, updated_at=db.utcnow())
     )
     if result.rowcount != 1:
         session.rollback()
-        if session.get(db.Circuit, circuit_id) is None:
+        circuit = session.get(db.Circuit, circuit_id)
+        if circuit is None or circuit.deleted_at is not None:
             raise HTTPException(404, "回路が見つかりません")
         raise HTTPException(409, "他の保存で回路が更新されています。最新の回路を読み込んでから保存してください")
     session.add(db.CircuitRevision(circuit_id=circuit_id, revision=request.expected_revision + 1, document=document, employee_id=request.employee_id))
@@ -220,7 +247,7 @@ def update_circuit(circuit_id: str, request: UpdateCircuit, session: Session = D
 @app.post("/api/runs", status_code=202)
 def create_run(request: CreateRun, session: Session = Depends(get_session)):
     circuit = session.get(db.Circuit, request.circuit_id, with_for_update=True)
-    if circuit is None:
+    if circuit is None or circuit.deleted_at is not None:
         raise HTTPException(404, "回路が見つかりません")
     if circuit.revision != request.expected_revision:
         raise HTTPException(409, "回路が更新されています。最新の回路を確認してから計算してください")
@@ -347,7 +374,7 @@ def reconcile_study(study: db.Study, session: Session) -> None:
 def create_study(request: CreateStudy, session: Session = Depends(get_session)):
     # The lock serializes snapshotting with the revision CAS used by circuit saves.
     circuit = session.get(db.Circuit, request.circuit_id, with_for_update=True)
-    if circuit is None:
+    if circuit is None or circuit.deleted_at is not None:
         raise HTTPException(404, "Circuit not found")
     if circuit.revision != request.expected_revision:
         raise HTTPException(409, "Circuit revision changed; reload the circuit before creating a study")

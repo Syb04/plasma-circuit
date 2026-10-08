@@ -73,6 +73,24 @@ class UpdateCircuit(SaveCircuit):
     expected_revision: int = Field(ge=1)
 
 
+class DeleteCircuitTarget(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    id: str = Field(min_length=1, max_length=36)
+    expected_revision: int = Field(ge=1, strict=True)
+
+
+class DeleteCircuits(EmployeeRequest):
+    model_config = ConfigDict(extra="forbid")
+    circuits: list[DeleteCircuitTarget] = Field(min_length=1, max_length=100)
+
+    @field_validator("circuits")
+    @classmethod
+    def distinct_circuits(cls, value: list[DeleteCircuitTarget]) -> list[DeleteCircuitTarget]:
+        if len({target.id for target in value}) != len(value):
+            raise ValueError("削除対象のモデルが重複しています")
+        return value
+
+
 class CreateRun(EmployeeRequest):
     circuit_id: str
     expected_revision: int = Field(ge=1)

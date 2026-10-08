@@ -1,0 +1,13 @@
+{
+  "containers": {
+    "api": "sha256:0f8add3f74d0ad763dc6e5d860d52274fa85cfa0824fe876ce8e285d04b0fff9",
+    "worker": "sha256:0f8add3f74d0ad763dc6e5d860d52274fa85cfa0824fe876ce8e285d04b0fff9",
+    "frontend": "sha256:5087892d95365bc41a758d9a3d5deacddb8da853045f5dd4240aabb5f16a37f6"
+  },
+  "served_assets_sha256": {
+    "/assets/index-IyRjPO_n.js": "38ea070212010f342e98153c3c5be8256dbe5da866bfbc19256aac87854b9387",
+    "/assets/index-BZGxhtS5.css": "e8d3cf203854289f2319bbd72e94468a340eec92e579396ee3dbe1338672cc03"
+  },
+  "source_matches_browser_verification": true,
+  "backend_tests_passed": 113
+}

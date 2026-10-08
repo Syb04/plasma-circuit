@@ -8,7 +8,7 @@ import zlib
 from datetime import datetime, timezone
 from typing import Any
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, JSON, LargeBinary, String, Text, UniqueConstraint, create_engine
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, JSON, LargeBinary, String, Text, UniqueConstraint, create_engine, inspect, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 
@@ -34,6 +34,8 @@ class Circuit(Base):
     updated_by: Mapped[str] = mapped_column(String(80))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    deleted_by: Mapped[str | None] = mapped_column(String(80), nullable=True)
 
 
 class CircuitRevision(Base):
@@ -143,7 +145,16 @@ def configure_database(url: str | None = None) -> None:
 def init_database() -> None:
     if engine is None:
         configure_database()
-    Base.metadata.create_all(engine)
+    with engine.begin() as connection:
+        if connection.dialect.name == "postgresql":
+            # API and worker can start together against the same existing DB.
+            connection.execute(text("SELECT pg_advisory_xact_lock(1732050807)"))
+        Base.metadata.create_all(connection)
+        columns = {column["name"] for column in inspect(connection).get_columns("circuits")}
+        for name in ("deleted_at", "deleted_by"):
+            if name not in columns:
+                sql_type = Circuit.__table__.c[name].type.compile(dialect=connection.dialect)
+                connection.execute(text(f"ALTER TABLE circuits ADD COLUMN {name} {sql_type}"))
 
 
 def session() -> Session:
