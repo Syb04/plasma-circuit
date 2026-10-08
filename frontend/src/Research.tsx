@@ -3,6 +3,7 @@ import {Activity,ArrowRight,Download,FileInput,GitCompareArrows,Layers,LoaderCir
 import {CartesianGrid,Legend,ResponsiveContainer,Scatter,ScatterChart,Tooltip,XAxis,YAxis} from 'recharts';
 import type {Analysis,Benchmark,CircuitDocument,Comparison,Json,Run,SavedCircuit,Study,StudyAxis} from './types';
 import {analysisLabel,api,downloadApi,isPlasmaAnalysis,isPrescribedPower,statusNames} from './types';
+import {coaxFields} from './CoaxEditor';
 
 type Props={document:CircuitDocument;analysis:Analysis;saved:SavedCircuit|null;employee:string;runs:Run[];saveCurrent:()=>Promise<SavedCircuit|null>;onOpenRun:(id:string)=>void;onImport:(circuit:SavedCircuit,analysis?:Analysis)=>void;onMessage:(message:string,error?:boolean)=>void};
 const format=(value:unknown)=>typeof value==='number'?value.toExponential(3):typeof value==='object'?JSON.stringify(value):String(value??'—');
@@ -29,7 +30,9 @@ export default function Research(props:Props){
   const [packageData,setPackageData]=useState(''),[packageName,setPackageName]=useState(''),[packageRun,setPackageRun]=useState('');
   const paths=useMemo(()=>{
     const componentNumbers=new Set(['value','dc','amplitude','frequency','offset','phase','delay','damping','rise_time','fall_time','pulse_width','period','initial']);
-    const componentPaths=doc.components.flatMap(c=>Object.entries(c.parameters).filter(([key,v])=>componentNumbers.has(key)&&typeof v==='number').map(([key])=>({path:`document.components.${c.id}.parameters.${key}`,label:`${c.label} / ${key}（SI）`,scale:1})));
+    const componentPaths=doc.components.flatMap(c=>c.kind==='COAX'
+      ? coaxFields.filter(field=>typeof c.parameters[field.key]==='number').map(field=>({path:`document.components.${c.id}.parameters.${field.key}`,label:`${c.label} / ${field.label}`,scale:field.scale}))
+      : Object.entries(c.parameters).filter(([key,v])=>componentNumbers.has(key)&&typeof v==='number').map(([key])=>({path:`document.components.${c.id}.parameters.${key}`,label:`${c.label} / ${key}（SI）`,scale:1})));
     const waveformNumbers=new Set(['frequency','frequency_hz','amplitude','rf_peak_voltage','second_frequency_hz','second_rf_peak_voltage']);
     const waveformPaths=doc.components.filter(c=>['V','I'].includes(c.kind)).flatMap(c=>{
       const wave=c.parameters.waveform;

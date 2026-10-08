@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "run_id": "94ed4b78-da92-4bd3-9577-dbfd91a74ea8",
+  "method": "Independent distributed TEM ABCD matrix using cylindrical Bessel conductor impedance and DC-area-preserving shield surface approximation; no app.coax import",
+  "frequency_hz": 40000000,
+  "length_m": 1.5,
+  "segments": 32,
+  "input_peak_v": 1,
+  "source_resistance_ohm": 50,
+  "load_resistance_ohm": 50,
+  "output_expected_peak_v": 0.49481267621556546,
+  "output_actual_peak_v": 0.49480968111074347,
+  "phase_expected_deg": -104.99413181697405,
+  "phase_actual_deg": -105.00832650631918,
+  "relative_complex_voltage_error": 0.00024781724918858817,
+  "net_input_power_expected_w": 5.145205202772068e-05,
+  "net_input_power_actual_w": 5.146991013295398e-05,
+  "relative_power_error": 0.0003470824686190451,
+  "attenuation_db_m": 0.06041952243886575,
+  "tolerance_relative": 0.0005,
+  "model_limits": "Validation at reference frequency only, ideal common shield, homogeneous TEM; not a broadband material or experimental validation"
+}

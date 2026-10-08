@@ -151,7 +151,7 @@ def _dc_cluster(document: dict, start: str, nets: dict) -> set[str]:
         if kind in {"C", "PLASMA", "GND", "JUNCTION", "K"}:
             continue
         terminals = [net for (owner, _), net in nets.items() if owner == cid]
-        if kind in {"T", "O", "Y", "P"} and len(terminals) == 4:
+        if kind in {"T", "O", "Y", "P", "COAX"} and len(terminals) == 4:
             pairs = [(terminals[0], terminals[2]), (terminals[1], terminals[3])]
         else:
             pairs = [(a, b) for a in terminals for b in terminals if a != b]
@@ -319,11 +319,17 @@ def solve_external_ccp(settings: Any, document: dict, settings_data: dict | None
     _, raw, netlist = sample(initial_bias)
     t, vectors = raw.pop("_plasma_samples")
     source_voltage, source_current = raw.pop("_source_samples")
+    from .coax import add_results
+    original_signal_count = len(raw["signals"])
+    add_results(raw, document, nets, "transient", periodic_time=t)
+    coax_signals = raw["signals"][original_signal_count:]
     bias = _mean(t, vectors["cathode"])
     metadata = _ccp_metadata(settings)
     metadata.update(template="external_circuit", arbitrary_schematic_coupling=True,
                     dc_boundary_condition="DC block periodic charge equilibrium" if isolated else "explicit DC feed: current follows circuit topology",
                     startup="RF sources of kind rf use an eight common-period smoothstep; schematic sources retain their explicit waveform")
+    if "coax_cables" in raw["model_metadata"]:
+        metadata["coax_cables"] = raw["model_metadata"]["coax_cables"]
     metadata["assumptions"][0] = "電極電圧・自己バイアス・端子電流は外部回路とPLASMAの同時ngspice解析から求める。"
     reference_impedance = float(data.get("source_reference_impedance_ohm", data.get("external_circuit", {}).get("reference_impedance_ohm", 50)))
     if not math.isfinite(reference_impedance) or reference_impedance <= 0:
@@ -335,7 +341,7 @@ def solve_external_ccp(settings: Any, document: dict, settings_data: dict | None
     result = summarize_ccp(settings, raw, t, vectors, bias=bias, netlist=netlist,
                            dc_root_evaluations=len(cache) if isolated else 0, dc_equilibrium_required=isolated,
                            model_metadata=metadata, extra_signals=[{"name": "V(source_port)", "unit": "V", "values": source_voltage.tolist()},
-                                                                 {"name": "I(source_port)", "unit": "A", "values": source_current.tolist()}])
+                                                                 {"name": "I(source_port)", "unit": "A", "values": source_current.tolist()}] + coax_signals)
     result["diagnostics"].update(node_map={f"{owner}.{port}": node for (owner, port), node in nets.items()},
                                  plasma_component_id=cid, dc_block_initial_bias_v=initial_bias if isolated else None,
                                  source_port_absorbed_power_w=_mean(t, source_voltage*source_current),

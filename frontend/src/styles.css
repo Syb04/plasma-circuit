@@ -535,6 +535,15 @@ a{color:var(--accent-text)}
 .model-delete-list .kind-tag{flex-shrink:0}
 .modal.model-delete-dialog>p.model-delete-employee{margin:16px 0 0;font-size:10px;overflow-wrap:anywhere}
 .modal.model-delete-dialog>p.model-action-error{margin:16px 0 0;padding:0;color:var(--error);border:0}
+.coax-editor>h4{margin:18px 0 12px}
+.coax-editor>.form-grid{margin-bottom:16px}
+.coax-derived{padding:14px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);margin:18px 0}
+.coax-derived>h4{margin-bottom:12px}
+.coax-derived>p{font-size:11px;line-height:1.8}
+.coax-derived dl{margin:0;display:flex;flex-direction:column;gap:10px;font-size:10px}
+.coax-derived dl>div{display:flex;justify-content:space-between;gap:10px}
+.coax-derived dt{color:var(--text-muted)}
+.coax-derived dd{margin:0;text-align:right;white-space:nowrap;color:var(--text);font-variant-numeric:tabular-nums}
 @media(max-width:760px){.model-selection-toolbar{padding:14px 16px;gap:12px}.model-delete-button{margin-left:0}.model-table tr.selected{background:var(--surface-2)}.model-table tr.selected td{background:none}.model-delete-dialog .modal-header h2{line-height:1.6}.model-delete-dialog .modal-actions{flex-wrap:wrap}}
 .model-table-wrap{overflow-x:auto}
 .model-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px}

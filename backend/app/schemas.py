@@ -53,6 +53,11 @@ class Analysis(BaseModel):
     settings: dict[str, Any] = Field(default_factory=dict)
 
 
+class CoaxPreview(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    parameters: dict[str, Any] = Field(default_factory=dict)
+
+
 class EmployeeRequest(BaseModel):
     employee_id: str = Field(min_length=1, max_length=80)
 

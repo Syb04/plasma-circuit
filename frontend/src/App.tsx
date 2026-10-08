@@ -9,6 +9,7 @@ import type {ModelFilters} from './ModelLibrary';
 import type { Analysis, AnalysisKind, CatalogComponent, CircuitDocument, Component, Preset, Run, SavedCircuit, CircuitList } from './types';
 import { api, ApiError, clone, createId, defaultSettings, emptyDocument, statusNames, analysisLabel, isPrescribedPower, isPlasmaAnalysis } from './types';
 import { useTheme, type ThemePreference } from './theme';
+import {coaxDefaults} from './CoaxEditor';
 
 const fallbackCatalog:CatalogComponent[]=[
   {kind:'R',label:'抵抗',category:'受動素子',ports:['p','n'],parameters:{value:1000}},
@@ -20,6 +21,7 @@ const fallbackCatalog:CatalogComponent[]=[
   {kind:'D',label:'ダイオード（詳細設定）',category:'半導体',ports:['p','n'],parameters:{area:1,model_parameters:{IS:1e-14,N:1,RS:0.1,CJO:1e-12}}},
   {kind:'GND',label:'グラウンド',category:'接続',ports:['g'],parameters:{}},
   {kind:'JUNCTION',label:'接続点',category:'接続',ports:['p'],parameters:{}},
+  {kind:'COAX',label:'同軸ケーブル',category:'伝送線',ports:['p1','n1','p2','n2'],parameters:coaxDefaults},
   {kind:'EDD',label:'数式定義素子',category:'数式・モデル',ports:['p1','n1'],parameters:{branches:[{positive:'p1',negative:'n1',current:'V1/R',charge:'C0*V1'}],parameters:{R:1000,C0:1e-9},intermediates:{}}},
   {kind:'PLASMA',label:'2端子プラズマ',category:'数式・モデル',ports:['p','n'],parameters:clone(defaultSettings.ccp)},
 ];

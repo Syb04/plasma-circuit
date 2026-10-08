@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from .coax import DEFAULT_COAX_PARAMETERS
 
 
 def component(id: str, kind: str, x: float, y: float, parameters: dict, ports: list[str] | None = None) -> dict:
@@ -34,6 +35,17 @@ _EDD = document(
     [wire("w1", "v1", "p", "r1", "p"), wire("w2", "r1", "n", "edd1", "p1"), wire("w3", "edd1", "n1", "gnd", "g"), wire("w4", "v1", "n", "gnd", "g")],
 )
 
+_COAX = document(
+    "同軸ケーブル — 40 MHz", "約50 Ω・1 mの同軸を50 Ω電源と負荷に接続。寸法・材料と基準周波数の損失を変更できます。",
+    [component("v1", "V", 70, 120, {"dc": 0, "ac_magnitude": 1, "waveform": {"kind": "sin", "offset": 0, "amplitude": 1, "frequency": 40e6}}),
+     component("source_r", "R", 240, 120, {"value": 50}),
+     component("coax1", "COAX", 440, 120, DEFAULT_COAX_PARAMETERS.copy(), ["p1", "n1", "p2", "n2"]),
+     component("load", "R", 650, 120, {"value": 50}), component("gnd", "GND", 70, 330, {})],
+    [wire("w1", "v1", "p", "source_r", "p"), wire("w2", "source_r", "n", "coax1", "p1"),
+     wire("w3", "coax1", "p2", "load", "p"), wire("w4", "load", "n", "coax1", "n2"),
+     wire("w5", "coax1", "n1", "gnd", "g"), wire("w6", "v1", "n", "gnd", "g")],
+)
+
 CCP_SETTINGS = {
     "gas": "Ar", "frequency_hz": 40e6, "rf_peak_voltage": 250,
     "pressure_pa": 1.3332236842105263, "gap_m": 0.05,
@@ -47,6 +59,7 @@ def get_presets() -> dict:
         {"id": "divider", "name": _DIVIDER["name"], "description": _DIVIDER["description"], "document": _DIVIDER, "analysis": {"kind": "op", "settings": {}}},
         {"id": "rc", "name": _RC["name"], "description": _RC["description"], "document": _RC, "analysis": {"kind": "ac", "settings": {"start_frequency": 1, "stop_frequency": 100000, "points": 40, "variation": "dec"}}},
         {"id": "edd", "name": _EDD["name"], "description": _EDD["description"], "document": _EDD, "analysis": {"kind": "transient", "settings": {"time_step": 2e-6, "stop_time": 0.005, "max_step": 2e-6}}},
+        {"id": "coax", "name": _COAX["name"], "description": _COAX["description"], "document": _COAX, "analysis": {"kind": "transient", "settings": {"time_step": .1e-9, "stop_time": .5e-6, "max_step": .1e-9}}},
     ]
     for gas in ("Ar", "O2"):
         name = f"{gas} CCP — 40 MHz / 250 Vpeak"

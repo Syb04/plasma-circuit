@@ -114,6 +114,11 @@ def _topology(document: dict) -> tuple[dict, dict, dict]:
                 raise CircuitError(f"配線先の端子が存在しません: {key[0]}.{key[1]}")
             ends.append(key)
         union(*ends)
+    # The coax TEM model uses a common ideal shield reference at both ports.
+    # Merge those references instead of creating redundant zero-volt loops.
+    for cid, component in by_id.items():
+        if component["kind"].upper() == "COAX" and {"n1", "n2"} <= set(ports[cid]):
+            union((cid, "n1"), (cid, "n2"))
     grounded = [key for key in parent if by_id[key[0]]["kind"].upper() == "GND"]
     if not grounded:
         raise CircuitError("回路に GND を接続してください")
@@ -200,6 +205,7 @@ def build_netlist(document: dict, analysis: dict | None = None) -> str:
     lines = ["* Plasma Circuit: " + str(document.get("name", "circuit")).replace("\n", " ").replace("\r", " ")[:200], ".options savecurrents"]
     references = set()
     generated_models = []
+    coax_segments = 0
     reserved_models = {str(model.get("name", "")).upper() for model in document.get("models", [])} | set(BUILTIN_MODELS)
     for component in by_id.values():
         model = component.get("parameters", {}).get("model")
@@ -308,6 +314,24 @@ def build_netlist(document: dict, analysis: dict | None = None) -> str:
                 if not isinstance(initial, (list, tuple)) or len(initial) != 4:
                     raise CircuitError("伝送線初期条件は[V1,I1,V2,I2]で指定してください")
                 line += " IC="+",".join(_number(value) for value in initial)
+        elif kind == "COAX":
+            from .coax import Coax, stamp, MAX_TOTAL_COAX_SEGMENTS
+            if ports[cid] != ["p1", "n1", "p2", "n2"]:
+                raise CircuitError("同軸ケーブルはp1・n1（入力）、p2・n2（出力）の4端子で指定してください")
+            try:
+                cable = Coax.parse(component.get("parameters", {}))
+            except ValueError as exc:
+                raise CircuitError(f"{cid}: {exc}") from exc
+            coax_segments += cable.parameters["segments"]
+            if coax_segments > MAX_TOTAL_COAX_SEGMENTS:
+                raise CircuitError(f"同軸ケーブルの分割数は回路全体で{MAX_TOTAL_COAX_SEGMENTS}以下にしてください")
+            initial = (analysis or {}).get("settings", {}).get("initial_conditions", {})
+            resolved_initial = {
+                node(*key.split(".", 1)) if "." in key else str(key): float(_number(value))
+                for key, value in initial.items()
+            }
+            lines += stamp(cable, cid, terminals, resolved_initial)
+            continue
         elif kind == "D" and "model_parameters" in component.get("parameters", {}):
             if len(terminals) != 2:
                 raise CircuitError("ダイオードは2端子で指定してください")
@@ -518,7 +542,7 @@ def simulate_netlist(netlist: str, analysis: dict) -> dict:
             key = str(key)
             state = re.fullmatch(r"edd_(.+)_([iq])(\d+)", key) if prefix == "V" else None
             total = re.fullmatch(r"v_edd_(.+)_total(\d+)", key) if prefix == "I" else None
-            if not state and not total and (key.startswith("edd_") or "_edd_" in key or re.search(r"_int\d+$", key) or "#" in key):
+            if not state and not total and (key.startswith(("edd_", "cx_")) or "_edd_" in key or "_cx_" in key or re.search(r"_int\d+$", key) or "#" in key):
                 continue
             values = np.asarray(waveform)
             if len(values) != count:
@@ -619,4 +643,6 @@ def execute_circuit(document: dict, analysis: dict) -> dict:
                 else:
                     result["signals"].append({"name": name, "unit": "V", "values": values})
     result["model_metadata"] = {"edd_convention": "Ik is conductive current; terminal current = Ik + dQk/dt", "models": document.get("models", []), "parameters": document.get("parameters", {})}
+    from .coax import add_results
+    add_results(result, document, nets, kind)
     return result

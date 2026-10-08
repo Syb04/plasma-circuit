@@ -10,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from . import database as db, worker
+from .coax import COAX_NUMBERS
 
 # Paths are data selectors, never expressions. Model definitions, identifiers,
 # arbitrary nested objects and solver controls cannot be rewritten by a sweep.
@@ -65,14 +66,21 @@ def apply_value(document: dict, analysis: dict, path: str, value: float) -> None
         waveform[field] = value
         return
     match = COMPONENT_PATH.fullmatch(path)
-    if not match or match[2] not in COMPONENT_NUMBERS:
+    if not match:
         raise ValueError(f"Unsupported sweep path: {path}")
     component = next((item for item in document.get("components", []) if item["id"] == match[1]), None)
+    allowed = COAX_NUMBERS if component and str(component["kind"]).upper() == "COAX" else COMPONENT_NUMBERS
+    if match[2] not in allowed:
+        raise ValueError(f"Unsupported sweep path: {path}")
     if component is None or match[2] not in component.get("parameters", {}):
         raise ValueError(f"Component parameter does not exist: {path}")
     current = component["parameters"][match[2]]
     if isinstance(current, bool) or not isinstance(current, (int, float)):
         raise ValueError(f"Component parameter is not numeric: {path}")
+    if str(component["kind"]).upper() == "COAX" and match[2] == "segments":
+        if not float(value).is_integer() or not 1 <= value <= 256:
+            raise ValueError("Coax segments require an integer from 1 to 256")
+        value = int(value)
     component["parameters"][match[2]] = value
 
 

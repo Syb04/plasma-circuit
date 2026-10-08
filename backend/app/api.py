@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 
 from . import database as db
 from . import worker, studies, benchmarks, analysis_package
-from .schemas import (CompareBenchmark, CompareRuns, CreateBenchmark, CreateRun, CreateStudy,
+from .schemas import (CoaxPreview, CompareBenchmark, CompareRuns, CreateBenchmark, CreateRun, CreateStudy,
                       DeleteCircuits, EmployeeRequest, ImportPackage, SaveCircuit, UpdateCircuit)
 
 logger = logging.getLogger(__name__)
@@ -39,6 +39,15 @@ async def lifespan(application: FastAPI):
 app = FastAPI(title="プラズマ回路シミュレーター", version="0.1.0", lifespan=lifespan)
 origins = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",") if origin.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST", "PUT"], allow_headers=["Content-Type"])
+
+
+@app.post("/api/coax/preview")
+def preview_coax(request: CoaxPreview):
+    from .coax import Coax
+    try:
+        return Coax.parse(request.parameters).metadata()
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
 
 
 def get_session():

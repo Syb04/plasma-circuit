@@ -9,7 +9,7 @@ function display(value: number | undefined, scale: number) {
 
 /** Keep the draft (including an unfinished exponent) separate from SI data. */
 export function ScientificInput({value, onChange, onClear, label, id, scale = 1, min, max, minExclusive, maxExclusive,
-  required = value !== undefined, placeholder}: {
+  required = value !== undefined, placeholder, integer = false}: {
   value: number | undefined;
   onChange: (value: number) => void;
   onClear?: () => void;
@@ -22,6 +22,7 @@ export function ScientificInput({value, onChange, onClear, label, id, scale = 1,
   maxExclusive?: boolean;
   required?: boolean;
   placeholder?: string;
+  integer?: boolean;
 }) {
   const [text, setText] = useState(() => display(value, scale));
   const emitted = useRef(value);
@@ -44,6 +45,7 @@ export function ScientificInput({value, onChange, onClear, label, id, scale = 1,
       return '有限の数値を入力してください（例: 4e7、1e-9）。';
     if ((numeric === 0 && /[1-9]/.test(trimmed.split(/[eE]/)[0])) || (numeric !== 0 && converted === 0))
       return '数値が小さすぎます。';
+    if (integer && !Number.isInteger(converted)) return '整数を入力してください。';
     if (min !== undefined && (minExclusive ? numeric <= min : numeric < min))
       return minExclusive ? `${min}より大きい数値を入力してください。` : `${min}以上の数値を入力してください。`;
     if (max !== undefined && (maxExclusive ? numeric >= max : numeric > max))
