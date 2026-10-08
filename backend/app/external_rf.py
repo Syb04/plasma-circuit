@@ -151,7 +151,10 @@ def _dc_cluster(document: dict, start: str, nets: dict) -> set[str]:
         if kind in {"C", "PLASMA", "GND", "JUNCTION", "K"}:
             continue
         terminals = [net for (owner, _), net in nets.items() if owner == cid]
-        if kind in {"T", "O", "Y", "P", "COAX"} and len(terminals) == 4:
+        if kind == "COAX_GND":
+            # The implicit shield ground is separated by capacitors at DC.
+            pairs = [(nets[(cid, "p1")], nets[(cid, "p2")])]
+        elif kind in {"T", "O", "Y", "P", "COAX"} and len(terminals) == 4:
             pairs = [(terminals[0], terminals[2]), (terminals[1], terminals[3])]
         else:
             pairs = [(a, b) for a in terminals for b in terminals if a != b]

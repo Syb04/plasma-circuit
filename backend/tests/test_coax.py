@@ -21,11 +21,12 @@ from test_api import client  # noqa: F401 - isolated DB/queue fixture
 native = pytest.mark.skipif(not SOLVER_PRESENT, reason="real ngspice required")
 
 
-def circuit(parameters=None, source=None, resistance=50, source_resistance=50, cid="coax1"):
+def circuit(parameters=None, source=None, resistance=50, source_resistance=50, cid="coax1", kind="COAX"):
+    pins = {"p1": "in", "p2": "out"} if kind == "COAX_GND" else {"p1": "in", "n1": "0", "p2": "out", "n2": "shield"}
     return graph([("source", "V", {"p": "src", "n": "0"}, source or {"dc": 1, "ac_magnitude": 1}),
         ("rs", "R", {"p": "src", "n": "in"}, {"value": source_resistance}),
-        (cid, "COAX", {"p1": "in", "n1": "0", "p2": "out", "n2": "shield"}, parameters or {}),
-        ("load", "R", {"p": "out", "n": "shield"}, {"value": resistance})])
+        (cid, kind, pins, parameters or {}),
+        ("load", "R", {"p": "out", "n": "0" if kind == "COAX_GND" else "shield"}, {"value": resistance})])
 
 
 def test_tem_geometry_and_epsilon_mu_scaling():
@@ -82,35 +83,51 @@ def test_preview_is_read_only_validates_and_accepts_scientific_values(client):
     assert client.post("/api/coax/preview", json={"parameters": {}, "force": True}).status_code == 422
 
 
-def test_shield_reference_and_dc_clusters_do_not_short_the_inner_conductor():
+@pytest.mark.parametrize("kind", ["COAX", "COAX_GND"])
+def test_shield_reference_and_dc_clusters_do_not_short_the_inner_conductor(kind):
     from app.engine import _topology
-    doc = circuit()
+    doc = circuit(kind=kind)
     _, _, nets = _topology(doc)
-    assert nets[("coax1", "n1")] == nets[("coax1", "n2")] == "0"
+    if kind == "COAX":
+        assert nets[("coax1", "n1")] == nets[("coax1", "n2")] == "0"
+    else:
+        assert {port for owner, port in nets if owner == "coax1"} == {"p1", "p2"}
     assert nets[("coax1", "p1")] != "0" and nets[("coax1", "p2")] != "0"
     # Isolate the line to prove that its two conductors are not merged at DC.
-    cable_only = {"components": [c for c in doc["components"] if c["kind"] == "COAX"]}
+    cable_only = {"components": [c for c in doc["components"] if c["kind"] == kind]}
     connected = _dc_cluster(cable_only, nets[("coax1", "p1")], nets)
     assert nets[("coax1", "p2")] in connected and "0" not in connected
-    netlist = build_netlist(doc, {"kind": "transient", "settings": {"initial_conditions": {
-        "coax1.p1": "2e2", "coax1.p2": "2e2", "coax1.n1": 0}}})
+    initial = {"coax1.p1": "2e2", "coax1.p2": "2e2"}
+    if kind == "COAX":
+        initial["coax1.n1"] = 0
+    netlist = build_netlist(doc, {"kind": "transient", "settings": {"initial_conditions": initial}})
     assert "IC=200" in next(line for line in netlist.splitlines() if line.startswith("C_cx_coax1_16 "))
 
 
 def test_total_discretization_is_bounded_and_ports_are_fixed():
     doc = circuit({"segments": 256})
     for i in range(2):
-        doc["components"].append({"id": f"extra{i}", "kind": "COAX", "ports": ["p1", "n1", "p2", "n2"], "parameters": {"segments": 256}})
+        doc["components"].append({"id": f"extra{i}", "kind": "COAX_GND" if i == 0 else "COAX",
+            "ports": ["p1", "p2"] if i == 0 else ["p1", "n1", "p2", "n2"], "parameters": {"segments": 256}})
     with pytest.raises(CircuitError, match="512"):
         build_netlist(doc)
     doc = circuit()
     doc["components"][2]["ports"].append("extra")
     with pytest.raises(CircuitError, match="4端子"):
         build_netlist(doc)
+    doc = circuit(kind="COAX_GND")
+    doc["components"][2]["ports"].append("n1")
+    with pytest.raises(CircuitError, match="2端子"):
+        build_netlist(doc)
+    doc = circuit(kind="COAX_GND")
+    doc["wires"].append(wire("hidden_shield", "coax1", "n1", "gnd", "g"))
+    with pytest.raises(CircuitError, match="配線先の端子"):
+        build_netlist(doc)
 
 
-def test_coax_study_sweeps_keep_original_inputs_and_require_integer_sections():
-    doc = circuit(DEFAULT_COAX_PARAMETERS.copy())
+@pytest.mark.parametrize("kind", ["COAX", "COAX_GND"])
+def test_coax_study_sweeps_keep_original_inputs_and_require_integer_sections(kind):
+    doc = circuit(DEFAULT_COAX_PARAMETERS.copy(), kind=kind)
     cases = expand_cases(doc, {"kind": "ac", "settings": {}}, [{"path": "document.components.coax1.parameters.length_m", "values": [.5, 2]}])
     assert [case[1]["components"][2]["parameters"]["length_m"] for case in cases] == [.5, 2]
     assert doc["components"][2]["parameters"]["length_m"] == 1
@@ -119,10 +136,11 @@ def test_coax_study_sweeps_keep_original_inputs_and_require_integer_sections():
 
 
 @native
+@pytest.mark.parametrize("kind", ["COAX", "COAX_GND"])
 @pytest.mark.parametrize("loss_tangent", [0, .03])
-def test_ac_complex_transfer_matches_independent_distributed_abcd_solution(loss_tangent):
+def test_ac_complex_transfer_matches_independent_distributed_abcd_solution(loss_tangent, kind):
     p = {"segments": 64, "inner_resistivity_ohm_m": 0, "shield_resistivity_ohm_m": 0, "loss_tangent": loss_tangent}
-    result = execute_circuit(circuit(p, resistance=100, cid="COAX1"), {"kind": "ac", "settings": {"start_frequency": 39e6, "stop_frequency": 41e6, "variation": "lin", "points": 3}})
+    result = execute_circuit(circuit(p, resistance=100, cid="COAX1", kind=kind), {"kind": "ac", "settings": {"start_frequency": 39e6, "stop_frequency": 41e6, "variation": "lin", "points": 3}})
     omega = 2 * math.pi * 40e6
     l = MU0 / (2 * math.pi) * math.log(3.35)
     c = 2 * math.pi * EPS0 * 2.1 / math.log(3.35)
@@ -137,25 +155,29 @@ def test_ac_complex_transfer_matches_independent_distributed_abcd_solution(loss_
     assert not any("cx_" in s["name"] for s in result["signals"])
     assert all(len(s["values"]) == len(result["axis"]["values"]) for s in result["signals"])
     assert result["model_metadata"]["coax_cables"]["COAX1"]["attenuation_db"] >= 0
+    assert result["model_metadata"]["coax_cables"]["COAX1"]["component_kind"] == kind
+    assert result["model_metadata"]["coax_cables"]["COAX1"]["shield_reference_node"] == "0"
     json.dumps(result, allow_nan=False)
 
 
 @native
-def test_dc_keeps_true_conductor_resistance_and_no_dielectric_leakage():
+@pytest.mark.parametrize("kind", ["COAX", "COAX_GND"])
+def test_dc_keeps_true_conductor_resistance_and_no_dielectric_leakage(kind):
     cable = Coax.parse({"loss_tangent": .2})
-    result = execute_circuit(circuit({"loss_tangent": .2}, resistance=1e6, source={"dc": 250}), {"kind": "op"})
+    result = execute_circuit(circuit({"loss_tangent": .2}, resistance=1e6, source={"dc": 250}, kind=kind), {"kind": "op"})
     expected = 250 / (1e6 + 50 + cable.dc_resistance_ohm_m)
     assert result["summary"]["I(coax1:input)"] == pytest.approx(expected, rel=1e-5)
     assert result["summary"]["V(coax1:output)"] == pytest.approx(expected * 1e6, rel=1e-6)
 
 
 @native
-def test_step_delay_and_matching_agree_with_tem_propagation():
+@pytest.mark.parametrize("kind", ["COAX", "COAX_GND"])
+def test_step_delay_and_matching_agree_with_tem_propagation(kind):
     p = {"segments": 64, "inner_resistivity_ohm_m": 0, "shield_resistivity_ohm_m": 0, "loss_tangent": 0}
     z0 = math.sqrt(MU0 / EPS0 / 2.1) / (2 * math.pi) * math.log(3.35)
     source = {"dc": 0, "waveform": {"kind": "pulse", "initial": 0, "pulsed": 1, "delay": 2e-9,
         "rise": 1e-9, "fall": 1e-9, "width": 80e-9, "period": 200e-9}}
-    result = execute_circuit(circuit(p, source=source, resistance=z0, source_resistance=z0),
+    result = execute_circuit(circuit(p, source=source, resistance=z0, source_resistance=z0, kind=kind),
         {"kind": "transient", "settings": {"time_step": .02e-9, "max_step": .02e-9, "stop_time": 30e-9}})
     voltage = next(s["values"] for s in result["signals"] if s["name"] == "V(coax1:output)")
     t = np.asarray(result["axis"]["values"])
@@ -167,17 +189,20 @@ def test_step_delay_and_matching_agree_with_tem_propagation():
 
 
 @native
+@pytest.mark.parametrize("kind", ["COAX", "COAX_GND"])
 @pytest.mark.parametrize("dc_block", [False, True])
-def test_coax_preset_and_periodic_ccp_include_terminal_power_and_metadata(dc_block):
-    preset = next(p for p in get_presets()["presets"] if p["id"] == "coax")
+def test_coax_preset_and_periodic_ccp_include_terminal_power_and_metadata(dc_block, kind):
+    preset = next(p for p in get_presets()["presets"] if p["id"] == ("coax_grounded" if kind == "COAX_GND" else "coax"))
     result = execute_circuit(preset["document"], preset["analysis"])
     assert result["converged"] and "coax1" in result["model_metadata"]["coax_cables"]
     settings = CCPSettings(cycles=32, points_per_cycle=128, rf_peak_voltage=100)
     doc = template_document(settings, {"source_resistance_ohm": 50, "dc_block_capacitance_f": 1e-9 if dc_block else 0})
-    doc["components"].append(component("coax1", "COAX", 350, 120, {"length_m": .5, "segments": 16}, ["p1", "n1", "p2", "n2"]))
+    doc["components"].append(component("coax1", kind, 350, 120, {"length_m": .5, "segments": 16}, ["p1", "p2"] if kind == "COAX_GND" else ["p1", "n1", "p2", "n2"]))
     electrode = next(w for w in doc["wires"] if w["id"] == "electrode")
     electrode["target"] = {"component_id": "coax1", "port": "p1"}
-    doc["wires"] += [wire("line_out", "coax1", "p2", "plasma", "p"), wire("line_return", "coax1", "n1", "gnd", "g")]
+    doc["wires"].append(wire("line_out", "coax1", "p2", "plasma", "p"))
+    if kind == "COAX":
+        doc["wires"].append(wire("line_return", "coax1", "n1", "gnd", "g"))
     result = solve_external_ccp(settings, doc)
     assert result["converged"]
     assert result["diagnostics"]["dc_equilibrium_required"] == dc_block
@@ -185,3 +210,29 @@ def test_coax_preset_and_periodic_ccp_include_terminal_power_and_metadata(dc_blo
     assert {"V(coax1:input)", "V(coax1:output)", "I(coax1:input)", "P(coax1) net input"} <= {s["name"] for s in result["signals"]}
     assert all(len(s["values"]) == len(result["axis"]["values"]) for s in result["signals"])
     json.dumps(result, allow_nan=False)
+
+
+@native
+@pytest.mark.parametrize("analysis", [
+    {"kind": "op", "settings": {}},
+    {"kind": "dc", "settings": {"source": "source", "start": 0, "stop": 5, "step": 1}},
+    {"kind": "ac", "settings": {"start_frequency": 1e6, "stop_frequency": 100e6, "points": 9, "variation": "lin"}},
+    {"kind": "transient", "settings": {"time_step": .1e-9, "max_step": .1e-9, "stop_time": 100e-9}},
+])
+def test_grounded_variant_matches_explicit_grounded_shield_in_real_solver(analysis):
+    source = {"dc": 1, "ac_magnitude": 1, "waveform": {"kind": "sin", "offset": 0, "amplitude": 1, "frequency": 40e6}}
+    explicit = execute_circuit(circuit(source=source), analysis)
+    grounded = execute_circuit(circuit(source=source, kind="COAX_GND"), analysis)
+    assert grounded["converged"] and explicit["converged"]
+    assert grounded["axis"]["values"] == pytest.approx(explicit["axis"]["values"])
+    if analysis["kind"] == "op":
+        for name in ("V(coax1:input)", "V(coax1:output)", "I(coax1:input)", "I(coax1:output)", "P(coax1) net input"):
+            assert grounded["summary"][name] == pytest.approx(explicit["summary"][name], rel=1e-10, abs=1e-12)
+    else:
+        expected = {s["name"]: s["values"] for s in explicit["signals"] if "coax1:" in s["name"] or s["name"] == "P(coax1) net input"}
+        actual = {s["name"]: s["values"] for s in grounded["signals"] if s["name"] in expected}
+        assert actual.keys() == expected.keys()
+        for name in expected:
+            assert actual[name] == pytest.approx(expected[name], rel=1e-10, abs=1e-12)
+    assert "coax1.n1" not in grounded["diagnostics"]["node_map"]
+    assert "coax1.n2" not in grounded["diagnostics"]["node_map"]

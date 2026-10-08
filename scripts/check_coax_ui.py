@@ -25,13 +25,17 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--base-url', default='http://localhost:8080')
     parser.add_argument('--output', type=Path, default=Path('reports/coax-cable'))
+    parser.add_argument('--variant', choices=['explicit', 'grounded'], default='explicit')
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     base = args.base_url.rstrip('/')
+    grounded = args.variant == 'grounded'
+    component_kind = 'COAX_GND' if grounded else 'COAX'
+    preset_name = '同軸ケーブル（シールド接地）— 40 MHz' if grounded else '同軸ケーブル — 40 MHz'
     employee = '000-coax-check'
     name = '同軸ケーブル検証 ' + str(time.time_ns())
     evidence = {'completed': False, 'api_mocked': False, 'solver_results_mocked': False,
-                'checks': [], 'browser_runtime_errors': [], 'runs': [], 'fixture_name': name}
+                'checks': [], 'browser_runtime_errors': [], 'runs': [], 'fixture_name': name, 'variant': args.variant}
     report_path = args.output / 'verification.json'
     root = Path(__file__).resolve().parents[1]
     evidence['source_sha256'] = {path: hashlib.sha256((root / path).read_bytes()).hexdigest() for path in
@@ -83,8 +87,10 @@ def main():
             page.get_by_label('外観', exact=True).select_option('light')
             evidence['frontend_assets'] = page.locator('script[src],link[rel="stylesheet"]').evaluate_all(
                 'els=>els.map(e=>e.getAttribute("src")||e.getAttribute("href"))')
+            assert page.get_by_title('同軸ケーブルを追加', exact=True).count() == 1
+            assert page.get_by_title('同軸ケーブル（シールド接地）を追加', exact=True).count() == 1
             page.get_by_role('button', name='プリセットから始める', exact=False).click()
-            page.get_by_role('button', name='同軸ケーブル — 40 MHz', exact=False).click()
+            page.get_by_role('button', name=preset_name, exact=False).click()
             replace = page.get_by_role('button', name='変更を閉じて開く', exact=True)
             if replace.is_visible():
                 replace.click()
@@ -92,9 +98,13 @@ def main():
             panel = page.get_by_role('region', name='同軸ケーブルの線路定数', exact=True)
             expect(panel).to_have_attribute('aria-busy', 'false')
             expect(panel).to_contain_text('50.021')
-            assert page.locator('.react-flow__node[data-id="coax1"] .react-flow__handle').count() == 4
+            node = page.locator('.react-flow__node[data-id="coax1"]')
+            assert node.locator('.react-flow__handle').count() == (2 if grounded else 4)
+            assert node.locator('.port-label').all_text_contents() == (['p1', 'p2'] if grounded else ['p1', 'n1', 'p2', 'n2'])
+            if grounded:
+                expect(page.locator('.coax-editor .info-box')).to_contain_text('シールドは内部で回路のGNDに接続')
             assert len(mutations) == 0
-            passed('The wired 40 MHz preset opens a four-port coax editor and read-only default 50.021 Ω / 4.8338 ns constants without creating a model or job')
+            passed(f'Both coax variants appear in the palette; the wired 40 MHz {args.variant} preset shows exactly {2 if grounded else 4} ports and read-only default 50.021 Ω / 4.8338 ns constants without creating a model or job')
 
             def enter(label, text):
                 field = page.get_by_label(label, exact=True)
@@ -157,6 +167,9 @@ def main():
             saved = pending.value.json()
             evidence['circuit_id'] = saved['id']
             parameters = next(c['parameters'] for c in saved['document']['components'] if c['id'] == 'coax1')
+            saved_coax = next(c for c in saved['document']['components'] if c['id'] == 'coax1')
+            assert saved_coax['kind'] == component_kind
+            assert saved_coax['ports'] == (['p1', 'p2'] if grounded else ['p1', 'n1', 'p2', 'n2'])
             assert math.isclose(parameters['inner_diameter_m'], .001, rel_tol=1e-12)
             assert math.isclose(parameters['shield_thickness_m'], .00015, rel_tol=1e-12)
             assert parameters['reference_frequency_hz'] == 40e6 and parameters['segments'] == 32
@@ -172,6 +185,8 @@ def main():
                 assert run['status'] == 'succeeded' and run['result']['converged'], run.get('error')
                 assert run['runtime_config']['implementation_sha256']['coax.py'] == evidence['source_sha256']['backend/app/coax.py']
                 metadata = run['result']['model_metadata']['coax_cables']['coax1']
+                assert metadata['component_kind'] == component_kind
+                assert metadata['shield_reference_node'] == '0'
                 assert metadata['parameters']['length_m'] == next(c['parameters']['length_m'] for c in run['snapshot']['components'] if c['id'] == 'coax1')
                 assert not any('cx_' in s['name'] for s in run['result']['signals'])
                 assert all(len(s['values']) == len(run['result']['axis']['values']) for s in run['result']['signals'])
@@ -241,6 +256,7 @@ def main():
             expect(page.get_by_label('シールド厚さ（mm）', exact=True)).to_have_value('0.15')
             expect(page.get_by_label('損失の基準周波数（MHz）', exact=True)).to_have_value('40')
             expect(panel).to_have_attribute('aria-busy', 'false')
+            assert page.locator('.react-flow__node[data-id="coax1"] .react-flow__handle').count() == (2 if grounded else 4)
             passed('Opening the saved model from the full-page library restores SI-scaled geometry/material values and the derived preview after the length study')
 
             latest = request('/circuits/' + saved['id'])

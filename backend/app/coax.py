@@ -27,6 +27,7 @@ DEFAULT_COAX_PARAMETERS = {
     "reference_frequency_hz": 40e6, "segments": 32,
 }
 COAX_NUMBERS = frozenset(DEFAULT_COAX_PARAMETERS)
+COAX_KINDS = frozenset({"COAX", "COAX_GND"})
 MAX_TOTAL_COAX_SEGMENTS = 512
 
 
@@ -159,6 +160,14 @@ def _shield_impedance(radius: float, thickness: float, rho: float, omega: float,
     return rho * k / (2 * math.pi * radius) / cmath.tanh(x)
 
 
+def terminal_nodes(component: dict, nets: dict) -> list[str]:
+    """Map visible ports to TEM terminals, including the grounded shield."""
+    cid = component["id"]
+    if str(component["kind"]).upper() == "COAX_GND":
+        return [nets[(cid, "p1")], "0", nets[(cid, "p2")], "0"]
+    return [nets[(cid, port)] for port in ("p1", "n1", "p2", "n2")]
+
+
 def stamp(cable: Coax, cid: str, terminals: list[str], initial: dict) -> list[str]:
     p1, n1, p2, n2 = terminals
     p = cable.parameters
@@ -199,11 +208,13 @@ def add_results(result: dict, document: dict, nets: dict, kind: str, periodic_ti
     """Publish terminal quantities; keep ladder implementation out of plots."""
     cables = {}
     for component in document.get("components", []):
-        if str(component["kind"]).upper() != "COAX":
+        if str(component["kind"]).upper() not in COAX_KINDS:
             continue
         cid = component["id"]
         cable = Coax.parse(component.get("parameters", {}))
         cables[cid] = cable.metadata()
+        p1, n1, p2, n2 = terminal_nodes(component, nets)
+        cables[cid].update(component_kind=str(component["kind"]).upper(), shield_reference_node=n1)
         complex_mode = kind == "ac"
         x = np.asarray(result["x"])
         def vector(alias):
@@ -220,8 +231,8 @@ def add_results(result: dict, document: dict, nets: dict, kind: str, periodic_ti
             if periodic_time is not None:
                 return np.interp(periodic_time, x, values).tolist()
             return values[sample_indices].tolist()
-        for port, positive, negative, sense in (("input", "p1", "n1", "in"), ("output", "p2", "n2", "out")):
-            voltage = vector(nets[(cid, positive)]) - vector(nets[(cid, negative)])
+        for port, positive, negative, sense in (("input", p1, n1, "in"), ("output", p2, n2, "out")):
+            voltage = vector(positive) - vector(negative)
             current = vector(f"i(v_coax_{cid}_{sense})")
             powers.append(.5 * (voltage * current.conjugate()).real if complex_mode else voltage * current)
             for letter, unit, values in (("V", "V", voltage), ("I", "A", current)):

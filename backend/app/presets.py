@@ -46,6 +46,17 @@ _COAX = document(
      wire("w5", "coax1", "n1", "gnd", "g"), wire("w6", "v1", "n", "gnd", "g")],
 )
 
+_COAX_GND = document(
+    "同軸ケーブル（シールド接地）— 40 MHz", "シールドを内部でGNDに接続した2端子の同軸。約50 Ω・1 mを50 Ω電源と負荷に接続。",
+    [component("v1", "V", 70, 120, {"dc": 0, "ac_magnitude": 1, "waveform": {"kind": "sin", "offset": 0, "amplitude": 1, "frequency": 40e6}}),
+     component("source_r", "R", 240, 120, {"value": 50}),
+     component("coax1", "COAX_GND", 440, 120, DEFAULT_COAX_PARAMETERS.copy(), ["p1", "p2"]),
+     component("load", "R", 650, 120, {"value": 50}), component("gnd", "GND", 70, 330, {})],
+    [wire("w1", "v1", "p", "source_r", "p"), wire("w2", "source_r", "n", "coax1", "p1"),
+     wire("w3", "coax1", "p2", "load", "p"), wire("w4", "load", "n", "gnd", "g"),
+     wire("w6", "v1", "n", "gnd", "g")],
+)
+
 CCP_SETTINGS = {
     "gas": "Ar", "frequency_hz": 40e6, "rf_peak_voltage": 250,
     "pressure_pa": 1.3332236842105263, "gap_m": 0.05,
@@ -60,6 +71,7 @@ def get_presets() -> dict:
         {"id": "rc", "name": _RC["name"], "description": _RC["description"], "document": _RC, "analysis": {"kind": "ac", "settings": {"start_frequency": 1, "stop_frequency": 100000, "points": 40, "variation": "dec"}}},
         {"id": "edd", "name": _EDD["name"], "description": _EDD["description"], "document": _EDD, "analysis": {"kind": "transient", "settings": {"time_step": 2e-6, "stop_time": 0.005, "max_step": 2e-6}}},
         {"id": "coax", "name": _COAX["name"], "description": _COAX["description"], "document": _COAX, "analysis": {"kind": "transient", "settings": {"time_step": .1e-9, "stop_time": .5e-6, "max_step": .1e-9}}},
+        {"id": "coax_grounded", "name": _COAX_GND["name"], "description": _COAX_GND["description"], "document": _COAX_GND, "analysis": {"kind": "transient", "settings": {"time_step": .1e-9, "stop_time": .5e-6, "max_step": .1e-9}}},
     ]
     for gas in ("Ar", "O2"):
         name = f"{gas} CCP — 40 MHz / 250 Vpeak"

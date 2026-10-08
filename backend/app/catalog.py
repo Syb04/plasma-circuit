@@ -47,6 +47,7 @@ COMPONENTS = [
     _entry("Z", "MESFET", "半導体", ["d", "g", "s"], {"model": "NMESDEFAULT", "area": 1}),
     _entry("T", "無損失伝送線", "伝送線", ["p1", "n1", "p2", "n2"], {"impedance": 50, "delay": 1e-9}),
     _entry("COAX", "同軸ケーブル", "伝送線", ["p1", "n1", "p2", "n2"], DEFAULT_COAX_PARAMETERS.copy(), "寸法・誘電体・導体抵抗率からTEM線路を生成。表皮効果・誘電体損失を基準周波数で合わせた受動RLC近似。"),
+    _entry("COAX_GND", "同軸ケーブル（シールド接地）", "伝送線", ["p1", "p2"], DEFAULT_COAX_PARAMETERS.copy(), "内部導体の入力p1・出力p2の2端子。シールドは内部でGNDに接続。寸法・材料・損失モデルは4端子版と共通。"),
     _entry("O", "損失伝送線 (LTRA)", "伝送線", ["p1", "n1", "p2", "n2"], {"model": "LTRDEFAULT"}),
     _entry("U", "分布 RC 線", "伝送線", ["p1", "p2", "reference"], {"model": "URCDEFAULT", "length": 1, "lumps": 5}),
     _entry("Y", "損失伝送線 (TXL)", "伝送線", ["p1", "n1", "p2", "n2"], {"model": "TXLDEFAULT"}),

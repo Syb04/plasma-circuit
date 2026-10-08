@@ -4,6 +4,7 @@ import type { Connection, EdgeChange, Node, NodeChange, NodeProps } from '@xyflo
 import { RotateCw, Trash2, Maximize2, MousePointer2, Cable } from 'lucide-react';
 import type { Component, CircuitDocument, Json } from './types';
 import { createId, engineering } from './types';
+import {isCoax} from './CoaxEditor';
 
 type CircuitNode = Node<{component: Component}, 'component'>;
 function Symbol({kind}: {kind:string}) {
@@ -20,6 +21,7 @@ function Symbol({kind}: {kind:string}) {
     case 'EDD': return <><rect x="17" y="6" width="46" height="48" rx="7"/><path d="M0 30h17M63 30h17"/><text x="40" y="25" textAnchor="middle" className="symbol-text">I(V)</text><text x="40" y="42" textAnchor="middle" className="symbol-text">Q(V)</text></>;
     case 'PLASMA': return <><rect x="16" y="7" width="48" height="46" rx="8"/><path d="M0 30h16m48 0h16M25 18v24M55 18v24M33 21l5 8-4 8 8-5 5 8"/><circle cx="47" cy="22" r="2"/></>;
     case 'COAX': return <><rect x="17" y="7" width="46" height="46" rx="8"/><path d="M0 18h80M0 42h17m46 0h17M25 42h30"/><text x="40" y="35" textAnchor="middle" className="symbol-text">同軸</text></>;
+    case 'COAX_GND': return <><rect x="17" y="5" width="46" height="38" rx="8"/><path d="M0 30h80M40 43v5M32 48h16M35 52h10M38 56h4"/><text x="40" y="22" textAnchor="middle" className="symbol-text">同軸</text></>;
     case 'S': case 'W': return <><path d="M0 30h24m0 0 30-17m2 17h24"/><circle cx="24" cy="30" r="2"/><circle cx="56" cy="30" r="2"/></>;
     default: return <><path d="M0 30H17M63 30H80"/><rect x="17" y="8" width="46" height="44" rx="5"/><text x="40" y="36" textAnchor="middle" className="symbol-text">{kind}</text></>;
   }
@@ -33,7 +35,7 @@ function ComponentNode({data, selected}: NodeProps<CircuitNode>) {
   const waveform=c.parameters.waveform && typeof c.parameters.waveform==='object' && !Array.isArray(c.parameters.waveform) ? c.parameters.waveform as Record<string,Json> : null;
   const sourceCaption=waveform?.kind==='sin'?`${engineering(Number(waveform.amplitude??0),valueUnit)}pk · ${engineering(Number(waveform.frequency??0),'Hz')}`:waveform?.kind==='pulse'?'PULSE':waveform?.kind==='pwl'?'PWL':typeof c.parameters.dc==='number'?engineering(c.parameters.dc,valueUnit):'';
   const detailedDiode=c.kind==='D'&&'model_parameters' in c.parameters;
-  const caption = c.kind==='COAX' ? `${engineering(Number(c.parameters.length_m??1),'m')} · 同軸` : detailedDiode ? '詳細設定' : typeof c.parameters.value === 'number' ? engineering(c.parameters.value,valueUnit) : ['V','I'].includes(c.kind) ? sourceCaption : c.kind==='PLASMA'?`${c.parameters.gas??'Ar'} · nₑ ${engineering(Number(c.parameters.electron_density_m3??1e16))}` : (c.kind === 'EDD' ? `${Array.isArray(c.parameters.branches) ? c.parameters.branches.length : 1} 枝` : String(c.parameters.model ?? ''));
+  const caption = isCoax(c.kind) ? `${engineering(Number(c.parameters.length_m??1),'m')} · ${c.kind==='COAX_GND'?'シールド接地':'同軸'}` : detailedDiode ? '詳細設定' : typeof c.parameters.value === 'number' ? engineering(c.parameters.value,valueUnit) : ['V','I'].includes(c.kind) ? sourceCaption : c.kind==='PLASMA'?`${c.parameters.gas??'Ar'} · nₑ ${engineering(Number(c.parameters.electron_density_m3??1e16))}` : (c.kind === 'EDD' ? `${Array.isArray(c.parameters.branches) ? c.parameters.branches.length : 1} 枝` : String(c.parameters.model ?? ''));
   const rotation = ((c.rotation % 360) + 360) % 360;
   return <div className={`circuit-node ${selected ? 'selected' : ''} ${c.kind==='JUNCTION'?'junction':''}`}>
     <div className="node-body" style={{transform:`rotate(${rotation}deg)`}}>

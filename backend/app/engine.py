@@ -314,9 +314,12 @@ def build_netlist(document: dict, analysis: dict | None = None) -> str:
                 if not isinstance(initial, (list, tuple)) or len(initial) != 4:
                     raise CircuitError("伝送線初期条件は[V1,I1,V2,I2]で指定してください")
                 line += " IC="+",".join(_number(value) for value in initial)
-        elif kind == "COAX":
-            from .coax import Coax, stamp, MAX_TOTAL_COAX_SEGMENTS
-            if ports[cid] != ["p1", "n1", "p2", "n2"]:
+        elif kind in {"COAX", "COAX_GND"}:
+            from .coax import Coax, stamp, terminal_nodes, MAX_TOTAL_COAX_SEGMENTS
+            expected_ports = ["p1", "p2"] if kind == "COAX_GND" else ["p1", "n1", "p2", "n2"]
+            if ports[cid] != expected_ports:
+                if kind == "COAX_GND":
+                    raise CircuitError("シールド接地の同軸ケーブルはp1（入力）・p2（出力）の2端子で指定してください")
                 raise CircuitError("同軸ケーブルはp1・n1（入力）、p2・n2（出力）の4端子で指定してください")
             try:
                 cable = Coax.parse(component.get("parameters", {}))
@@ -330,7 +333,7 @@ def build_netlist(document: dict, analysis: dict | None = None) -> str:
                 node(*key.split(".", 1)) if "." in key else str(key): float(_number(value))
                 for key, value in initial.items()
             }
-            lines += stamp(cable, cid, terminals, resolved_initial)
+            lines += stamp(cable, cid, terminal_nodes(component, nets), resolved_initial)
             continue
         elif kind == "D" and "model_parameters" in component.get("parameters", {}):
             if len(terminals) != 2:

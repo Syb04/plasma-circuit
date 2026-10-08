@@ -1,0 +1,330 @@
+{
+  "completed": true,
+  "api_mocked": false,
+  "solver_results_mocked": false,
+  "checks": [
+    "Both coax variants appear in the palette; the wired 40 MHz grounded preset shows exactly 2 ports and read-only default 50.021 Ω / 4.8338 ns constants without creating a model or job",
+    "All eleven geometry/material/frequency/segment fields accept scientific input; invalid geometry, fractional segments and incomplete exponents block save without API mutations; length updates the delay preview",
+    "Coax parameters and derived constants remain reachable in dark mobile layouts at 390 and 320 pixels without horizontal page overflow",
+    "Saving persists numeric SI parameters to PostgreSQL; the real UI-queued transient job publishes terminal waveforms, power and constants, with solver/source provenance and downloadable CSV/package",
+    "A second real queued AC job retains identical coax parameters and exposes terminal magnitude/phase plus average net-input power",
+    "Research exposes all eleven coax selectors; a UI-created two-case length study runs real ngspice with distinct immutable cable inputs",
+    "Opening the saved model from the full-page library restores SI-scaled geometry/material values and the derived preview after the length study",
+    "Only the owned validation model is hidden after checking; original active-model metadata is unchanged and validation history remains available; browser runtime errors: zero"
+  ],
+  "browser_runtime_errors": [],
+  "runs": [
+    {
+      "id": "c9df37c3-ea7c-49eb-b5a3-2d5b388b0a1b",
+      "status": "succeeded",
+      "analysis": {
+        "kind": "transient",
+        "settings": {
+          "time_step": 1e-10,
+          "stop_time": 5e-07,
+          "max_step": 1e-10
+        }
+      },
+      "converged": true,
+      "solver": {
+        "pyspice": "1.5",
+        "ngspice": "39"
+      },
+      "samples": 5011,
+      "metadata": {
+        "parameters": {
+          "inner_diameter_m": 0.001,
+          "shield_inner_diameter_m": 0.00335,
+          "length_m": 1.5,
+          "relative_permittivity": 2.1,
+          "relative_permeability": 1.0,
+          "loss_tangent": 0.0002,
+          "inner_resistivity_ohm_m": 1.724e-08,
+          "shield_resistivity_ohm_m": 1.724e-08,
+          "shield_thickness_m": 0.00015,
+          "reference_frequency_hz": 40000000.0,
+          "segments": 32
+        },
+        "model": "passive TEM pi ladder with reference-frequency Foster/Debye loss fits",
+        "nominal_impedance_ohm": 50.02108498705766,
+        "tem_velocity_m_s": 206876450.21639374,
+        "tem_delay_s": 7.250704458777173e-09,
+        "inductance_h_m": 2.417920692990206e-07,
+        "capacitance_f_m": 9.663530836583819e-11,
+        "dc_resistance_ohm_m": 0.032403340108964784,
+        "rf_resistance_ohm_m": 0.6875129046471966,
+        "internal_inductance_at_reference_h_m": 2.7133464276274172e-09,
+        "dielectric_conductance_at_reference_s_m": 4.8574203974320245e-06,
+        "reference_impedance_real_ohm": 50.30178010630393,
+        "reference_impedance_imag_ohm": -0.2763490553755804,
+        "attenuation_db_m": 0.060419522438865794,
+        "attenuation_db": 0.0906292836582987,
+        "reference_phase_rad_m": 1.2216831212339674,
+        "section_phase_rad": 0.05726639630784222,
+        "warnings": [],
+        "assumptions": [
+          "シールド径は内径。均一な誘電体、非磁性の中実内部導体と平滑な円筒シールド。",
+          "内部導体は円柱Bessel解、シールドはDC断面積を保つ平板表皮近似。編組・撚線・めっき・粗さは含まない。",
+          "内部・シールドの抵抗と内部インダクタンスを差動ループへ合算。シールド両端は共通の理想基準。外部コモンモードは含まない。",
+          "導体のDC抵抗と基準周波数の複素インピーダンス、誘電体の基準周波数の複素アドミタンスを受動回路で再現。",
+          "損失の周波数依存は基準周波数に合わせた近似。広帯域・高調波・急峻なパルスでは材料モデルと分割数を検証する。"
+        ],
+        "component_kind": "COAX_GND",
+        "shield_reference_node": "0"
+      }
+    },
+    {
+      "id": "458cfb5d-2a25-41e1-89cb-80f547b253c5",
+      "status": "succeeded",
+      "analysis": {
+        "kind": "ac",
+        "settings": {
+          "start_frequency": 39000000.0,
+          "stop_frequency": 41000000.0,
+          "points": 3,
+          "variation": "lin"
+        }
+      },
+      "converged": true,
+      "solver": {
+        "pyspice": "1.5",
+        "ngspice": "39"
+      },
+      "samples": 3,
+      "metadata": {
+        "parameters": {
+          "inner_diameter_m": 0.001,
+          "shield_inner_diameter_m": 0.00335,
+          "length_m": 1.5,
+          "relative_permittivity": 2.1,
+          "relative_permeability": 1.0,
+          "loss_tangent": 0.0002,
+          "inner_resistivity_ohm_m": 1.724e-08,
+          "shield_resistivity_ohm_m": 1.724e-08,
+          "shield_thickness_m": 0.00015,
+          "reference_frequency_hz": 40000000.0,
+          "segments": 32
+        },
+        "model": "passive TEM pi ladder with reference-frequency Foster/Debye loss fits",
+        "nominal_impedance_ohm": 50.02108498705766,
+        "tem_velocity_m_s": 206876450.21639374,
+        "tem_delay_s": 7.250704458777173e-09,
+        "inductance_h_m": 2.417920692990206e-07,
+        "capacitance_f_m": 9.663530836583819e-11,
+        "dc_resistance_ohm_m": 0.032403340108964784,
+        "rf_resistance_ohm_m": 0.6875129046471966,
+        "internal_inductance_at_reference_h_m": 2.7133464276274172e-09,
+        "dielectric_conductance_at_reference_s_m": 4.8574203974320245e-06,
+        "reference_impedance_real_ohm": 50.30178010630393,
+        "reference_impedance_imag_ohm": -0.2763490553755804,
+        "attenuation_db_m": 0.060419522438865794,
+        "attenuation_db": 0.0906292836582987,
+        "reference_phase_rad_m": 1.2216831212339674,
+        "section_phase_rad": 0.05726639630784222,
+        "warnings": [],
+        "assumptions": [
+          "シールド径は内径。均一な誘電体、非磁性の中実内部導体と平滑な円筒シールド。",
+          "内部導体は円柱Bessel解、シールドはDC断面積を保つ平板表皮近似。編組・撚線・めっき・粗さは含まない。",
+          "内部・シールドの抵抗と内部インダクタンスを差動ループへ合算。シールド両端は共通の理想基準。外部コモンモードは含まない。",
+          "導体のDC抵抗と基準周波数の複素インピーダンス、誘電体の基準周波数の複素アドミタンスを受動回路で再現。",
+          "損失の周波数依存は基準周波数に合わせた近似。広帯域・高調波・急峻なパルスでは材料モデルと分割数を検証する。"
+        ],
+        "component_kind": "COAX_GND",
+        "shield_reference_node": "0"
+      }
+    },
+    {
+      "id": "0db9c6b0-8937-439d-a31d-92853e564705",
+      "status": "succeeded",
+      "analysis": {
+        "kind": "transient",
+        "settings": {
+          "time_step": 1e-10,
+          "stop_time": 5e-07,
+          "max_step": 1e-10
+        }
+      },
+      "converged": true,
+      "solver": {
+        "pyspice": "1.5",
+        "ngspice": "39"
+      },
+      "samples": 5015,
+      "metadata": {
+        "parameters": {
+          "inner_diameter_m": 0.001,
+          "shield_inner_diameter_m": 0.00335,
+          "length_m": 0.5,
+          "relative_permittivity": 2.1,
+          "relative_permeability": 1.0,
+          "loss_tangent": 0.0002,
+          "inner_resistivity_ohm_m": 1.724e-08,
+          "shield_resistivity_ohm_m": 1.724e-08,
+          "shield_thickness_m": 0.00015,
+          "reference_frequency_hz": 40000000.0,
+          "segments": 32
+        },
+        "model": "passive TEM pi ladder with reference-frequency Foster/Debye loss fits",
+        "nominal_impedance_ohm": 50.02108498705766,
+        "tem_velocity_m_s": 206876450.21639374,
+        "tem_delay_s": 2.416901486259058e-09,
+        "inductance_h_m": 2.417920692990206e-07,
+        "capacitance_f_m": 9.663530836583819e-11,
+        "dc_resistance_ohm_m": 0.032403340108964784,
+        "rf_resistance_ohm_m": 0.6875129046471966,
+        "internal_inductance_at_reference_h_m": 2.7133464276274172e-09,
+        "dielectric_conductance_at_reference_s_m": 4.8574203974320245e-06,
+        "reference_impedance_real_ohm": 50.30178010630393,
+        "reference_impedance_imag_ohm": -0.2763490553755804,
+        "attenuation_db_m": 0.060419522438865794,
+        "attenuation_db": 0.030209761219432897,
+        "reference_phase_rad_m": 1.2216831212339674,
+        "section_phase_rad": 0.01908879876928074,
+        "warnings": [],
+        "assumptions": [
+          "シールド径は内径。均一な誘電体、非磁性の中実内部導体と平滑な円筒シールド。",
+          "内部導体は円柱Bessel解、シールドはDC断面積を保つ平板表皮近似。編組・撚線・めっき・粗さは含まない。",
+          "内部・シールドの抵抗と内部インダクタンスを差動ループへ合算。シールド両端は共通の理想基準。外部コモンモードは含まない。",
+          "導体のDC抵抗と基準周波数の複素インピーダンス、誘電体の基準周波数の複素アドミタンスを受動回路で再現。",
+          "損失の周波数依存は基準周波数に合わせた近似。広帯域・高調波・急峻なパルスでは材料モデルと分割数を検証する。"
+        ],
+        "component_kind": "COAX_GND",
+        "shield_reference_node": "0"
+      }
+    },
+    {
+      "id": "b344ec0f-8d56-450a-986e-604a35d552f6",
+      "status": "succeeded",
+      "analysis": {
+        "kind": "transient",
+        "settings": {
+          "time_step": 1e-10,
+          "stop_time": 5e-07,
+          "max_step": 1e-10
+        }
+      },
+      "converged": true,
+      "solver": {
+        "pyspice": "1.5",
+        "ngspice": "39"
+      },
+      "samples": 5011,
+      "metadata": {
+        "parameters": {
+          "inner_diameter_m": 0.001,
+          "shield_inner_diameter_m": 0.00335,
+          "length_m": 1.5,
+          "relative_permittivity": 2.1,
+          "relative_permeability": 1.0,
+          "loss_tangent": 0.0002,
+          "inner_resistivity_ohm_m": 1.724e-08,
+          "shield_resistivity_ohm_m": 1.724e-08,
+          "shield_thickness_m": 0.00015,
+          "reference_frequency_hz": 40000000.0,
+          "segments": 32
+        },
+        "model": "passive TEM pi ladder with reference-frequency Foster/Debye loss fits",
+        "nominal_impedance_ohm": 50.02108498705766,
+        "tem_velocity_m_s": 206876450.21639374,
+        "tem_delay_s": 7.250704458777173e-09,
+        "inductance_h_m": 2.417920692990206e-07,
+        "capacitance_f_m": 9.663530836583819e-11,
+        "dc_resistance_ohm_m": 0.032403340108964784,
+        "rf_resistance_ohm_m": 0.6875129046471966,
+        "internal_inductance_at_reference_h_m": 2.7133464276274172e-09,
+        "dielectric_conductance_at_reference_s_m": 4.8574203974320245e-06,
+        "reference_impedance_real_ohm": 50.30178010630393,
+        "reference_impedance_imag_ohm": -0.2763490553755804,
+        "attenuation_db_m": 0.060419522438865794,
+        "attenuation_db": 0.0906292836582987,
+        "reference_phase_rad_m": 1.2216831212339674,
+        "section_phase_rad": 0.05726639630784222,
+        "warnings": [],
+        "assumptions": [
+          "シールド径は内径。均一な誘電体、非磁性の中実内部導体と平滑な円筒シールド。",
+          "内部導体は円柱Bessel解、シールドはDC断面積を保つ平板表皮近似。編組・撚線・めっき・粗さは含まない。",
+          "内部・シールドの抵抗と内部インダクタンスを差動ループへ合算。シールド両端は共通の理想基準。外部コモンモードは含まない。",
+          "導体のDC抵抗と基準周波数の複素インピーダンス、誘電体の基準周波数の複素アドミタンスを受動回路で再現。",
+          "損失の周波数依存は基準周波数に合わせた近似。広帯域・高調波・急峻なパルスでは材料モデルと分割数を検証する。"
+        ],
+        "component_kind": "COAX_GND",
+        "shield_reference_node": "0"
+      }
+    }
+  ],
+  "fixture_name": "同軸ケーブル検証 1791439346445794541",
+  "variant": "grounded",
+  "source_sha256": {
+    "frontend/src/CoaxEditor.tsx": "e0fdca04b31414d3d31189cdbe9ee001d158e8494f812a8b33f7a84a521da563",
+    "frontend/src/ScientificInput.tsx": "9a881a6f0da7c1416b4845188172deb830966158c39fa4fb7449132be923b4c6",
+    "frontend/src/Inspector.tsx": "8c2adddede2c7217c6813bc098147dadf3dcd741e8656e265963beff6a886d60",
+    "frontend/src/Schematic.tsx": "a9c9b231ba7549ef5985d2f916e70f1631f6693bf7e46be22ce25244186423f3",
+    "frontend/src/Research.tsx": "d94d300681a59e8ab3b69406f34808ca333b71dac4455b5b58cb92013aa0fae2",
+    "frontend/src/App.tsx": "85e6032f059067e1f6a1ea8c5ba793c33e72c18edd8bba8f69f361a52e363f4d",
+    "frontend/src/styles.css": "55bd0e0db984b5aa26ad2b6e789a553035e6834755d62bc3bd480d40f75ddbd4",
+    "backend/app/coax.py": "aba22a077b7e27399f4b5fa781ddd2050a00793e5f48b00f9d369a2a88eb0283",
+    "backend/app/engine.py": "048c7076e0bbbca3ee4684f61d1accf0526f1368fc4b6c3c44d4e74fb2327b1f",
+    "backend/app/external_rf.py": "e8f2f8852a1263c9578bbbed165bea44bd7cee254ad9db0f98df24e372e6cd4f",
+    "backend/app/catalog.py": "bd0242c3fb3a9849768f5e7e0fdc4850613656547cbf6206ea6fce943fdb3b74",
+    "backend/app/studies.py": "71de2b9375eb7ba1bdd3a1540b2dc89c05d22e0e74ccf575abd44fd8edad8a84",
+    "backend/app/presets.py": "e90eb9fd78fe121d9bfc959ab64a20678c0643d1e6853873e1f58e49f393f8d8"
+  },
+  "original_active_models": 60,
+  "frontend_assets": [
+    "/assets/index-D17mFXt6.js",
+    "/assets/index-BkAmN0-T.css"
+  ],
+  "circuit_id": "216a617c-df93-41c1-9882-1f03fcaea2b7",
+  "study_id": "849244b9-cc4e-47a3-bc8e-5cff74b02b48",
+  "study_coordinates": [
+    {
+      "document.components.coax1.parameters.length_m": 0.5
+    },
+    {
+      "document.components.coax1.parameters.length_m": 1.5
+    }
+  ],
+  "fixture_deleted": true,
+  "csv_download": {
+    "sha256": "6e7a50682d53216ec8b0e4fbfe1891f15c11ed96c50da538387e093d1118960f",
+    "bytes": 1486518,
+    "matches_prior_explicit_grounded_shield_csv": true,
+    "retained_artifact": "../coax-cable/transient.csv",
+    "comparison_scope": "Exported sampled transient values; not the analysis metadata or packages"
+  },
+  "browser_script_sha256": "73e1d197958b8236570f40b7da547980279da1e75107d2ab027524615a988b0a",
+  "test_file_sha256": "bfe0a54b487bb0ac2af540b6b1136c684e34d7a56afba2653e636f73757551dc",
+  "deployed_containers": [
+    {
+      "name": "/plasma-circuit-api-1",
+      "image": "sha256:18945eeacae0496ffbfcd5c1e83ff6eeafa210c0b27e117993287df6b20c8675",
+      "state": "running"
+    },
+    {
+      "name": "/plasma-circuit-worker-1",
+      "image": "sha256:18945eeacae0496ffbfcd5c1e83ff6eeafa210c0b27e117993287df6b20c8675",
+      "state": "running"
+    },
+    {
+      "name": "/plasma-circuit-frontend-1",
+      "image": "sha256:bdb3e15631ebf84b937b9c974f376d4d7e69dab4271868be865c7657be0c3b7b",
+      "state": "running"
+    },
+    {
+      "name": "/plasma-circuit-db-1",
+      "image": "sha256:2698c2096ca78a41ae7477580afb30fe36d5368564511b2ea593dbfb26401fdd",
+      "state": "running"
+    },
+    {
+      "name": "/plasma-circuit-redis-1",
+      "image": "sha256:9a07b03a187109922388a4ec71fb5db4bc76b301504243ad9d69398e392599d8",
+      "state": "running"
+    }
+  ],
+  "deployed_health": {
+    "status": "ok",
+    "database": "ok",
+    "queue": "ok",
+    "pyspice": "1.5"
+  }
+}

@@ -4,6 +4,8 @@ import {api, ApiError} from './types';
 import {ScientificInput} from './ScientificInput';
 import {JsonEditor} from './Editors';
 
+export function isCoax(kind: string) { return kind === 'COAX' || kind === 'COAX_GND'; }
+
 export const coaxDefaults = {
   inner_diameter_m: 1e-3, shield_inner_diameter_m: 3.35e-3, length_m: 1,
   relative_permittivity: 2.1, relative_permeability: 1, loss_tangent: 2e-4,
@@ -59,7 +61,9 @@ export function CoaxEditor({component, onChange}: {component: Component; onChang
     })}</div>;
   }
   return <div className="coax-editor">
-    <div className="info-box">p1・n1が入力、p2・n2が出力です。pは内部導体、nは共通シールド基準。シールド径には誘電体に接する内径を指定してください。</div>
+    <div className="info-box">{component.kind === 'COAX_GND'
+      ? 'p1が入力、p2が出力の内部導体端子です。シールドは内部で回路のGNDに接続しています。'
+      : 'p1・n1が入力、p2・n2が出力です。pは内部導体、nは共通シールド基準。'}シールド径には誘電体に接する内径を指定してください。</div>
     <h4>寸法・誘電体</h4>{inputs(coaxFields.slice(0, 6))}
     <h4>導体・解析条件</h4>{inputs(coaxFields.slice(6))}
     <p className="muted text-small">指数表記も使えます。導体は非磁性の中実円柱・平滑なシールドを想定します。抵抗率0で理想導体、誘電正接0で誘電体損失なし。</p>
