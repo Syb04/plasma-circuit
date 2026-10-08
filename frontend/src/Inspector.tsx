@@ -3,6 +3,7 @@ import { Plus, SlidersHorizontal, FileCode2, Check, X } from 'lucide-react';
 import type { Analysis, AnalysisKind, CircuitDocument, Component, Json } from './types';
 import { analysisNames, clone, defaultSettings, isPlasmaAnalysis, isPrescribedPower } from './types';
 import { PlasmaControls } from './PlasmaControls';
+import {TimeInput, type TimeUnit} from './TimeInput';
 
 import {JsonEditor} from './Editors';
 export {JsonEditor} from './Editors';
@@ -55,7 +56,7 @@ export function ComponentInspector({component,components,onChange,onDelete}:{com
     <div className="component-footer"><span className="muted">ID: {component.id}</span><span className="muted">端子: {component.ports.join(' · ')||'なし'}</span><button className="text-button danger" onClick={onDelete}>部品を削除</button></div>
   </div>;
 }
-type Field = {key:string;label:string;unit?:string;factor?:number;min?:number;hint?:string};
+type Field = {key:string;label:string;unit?:string;factor?:number;min?:number;hint?:string;timeUnit?:TimeUnit};
 const plasmaFields:Field[]=[
   {key:'frequency_hz',label:'RF周波数',unit:'MHz',factor:1e6,min:0},
   {key:'rf_peak_voltage',label:'RF電圧・ピーク',unit:'V',min:0},
@@ -70,7 +71,7 @@ const plasmaFields:Field[]=[
 const fields:Record<AnalysisKind,Field[]>={
   op:[],dc:[{key:'start',label:'開始値'},{key:'stop',label:'終了値'},{key:'step',label:'増分'}],
   ac:[{key:'start_frequency',label:'開始周波数',unit:'Hz',min:0},{key:'stop_frequency',label:'終了周波数',unit:'Hz',min:0},{key:'points',label:'ポイント数',min:1}],
-  transient:[{key:'time_step',label:'出力時間刻み',unit:'µs',factor:1e-6,min:0},{key:'stop_time',label:'終了時間',unit:'ms',factor:0.001,min:0}],
+  transient:[{key:'time_step',label:'出力時間刻み',timeUnit:'us',min:0},{key:'stop_time',label:'終了時間',timeUnit:'ms',min:0}],
   ccp:plasmaFields,global:plasmaFields,global_transient:plasmaFields,radial:plasmaFields,
 };
 function NumberField({field,value,onChange}:{field:Field;value:Json|undefined;onChange:(v:number)=>void}) {
@@ -94,7 +95,7 @@ export function AnalysisPanel({analysis,onChange,document}:{analysis:Analysis;on
     {isPlasma&&document.components.some(c=>c.kind==='PLASMA')&&<><label>RF電源<select aria-label="RF電源" value={String(values.rf_source_id??'')} onChange={e=>setting('rf_source_id',e.target.value)}><option value="">電圧源が1つなら自動選択</option>{document.components.filter(c=>c.kind==='V').map(c=><option key={c.id} value={c.id}>{c.label} ({c.id})</option>)}</select></label><NumberField field={{key:'source_reference_impedance_ohm',label:'電源基準インピーダンス',unit:'Ω'}} value={values.source_reference_impedance_ohm??50} onChange={v=>setting('source_reference_impedance_ohm',v)}/></>}
     {isPlasma&&<><label>単一ガス<select aria-label="単一ガス" value={String(values.gas)} onChange={e=>setting('gas',e.target.value)}><option value="Ar">Ar — アルゴン</option><option value="O2">O₂ — 酸素</option>{!['Ar','O2'].includes(String(values.gas))&&<option value={String(values.gas)} disabled>{String(values.gas)} — 保存済み条件</option>}</select></label><div className="info-box">{isPrescribedPower(analysis)?'総吸収プラズマ電力を指定する0Dモデルです。':'RF電圧は電極ピーク値。外部回路を有効にすると電源側ピーク値です。'}{['global','global_transient'].includes(analysis.kind)&&' nₑ・Tₑは初期推定値です。'}</div></>}
     {sourceWaveformDrive&&<p className="info-box">RF周波数・ピーク電圧・第2RF・パルス包絡は、回路図のRF電圧源を選択して「電源波形・2周波数RF」で設定します。</p>}
-    <div className="form-grid">{fields[analysis.kind].filter(field=>!(isPrescribedPower(analysis)||sourceWaveformDrive)||!['frequency_hz','rf_peak_voltage'].includes(field.key)).map(field=><NumberField key={`${analysis.kind}-${field.key}`} field={field} value={values[field.key]} onChange={v=>setting(field.key,v)}/>)}</div>
+    <div className="form-grid">{fields[analysis.kind].filter(field=>!(isPrescribedPower(analysis)||sourceWaveformDrive)||!['frequency_hz','rf_peak_voltage'].includes(field.key)).map(field=>field.timeUnit?<TimeInput key={`${analysis.kind}-${field.key}`} label={field.label} value={values[field.key]} defaultUnit={field.timeUnit} min={field.min} onChange={v=>setting(field.key,v)}/>:<NumberField key={`${analysis.kind}-${field.key}`} field={field} value={values[field.key]} onChange={v=>setting(field.key,v)}/>)}</div>
     {isPlasma&&<PlasmaControls kind={analysis.kind} values={values} set={setting} componentMode={document.components.some(c=>c.kind==='PLASMA')}/>}
     <details className="advanced"><summary>詳細な解析条件</summary><p className="muted text-small">SI単位で指定します。設定値は計算履歴に保存されます。</p><JsonEditor label="settings" value={analysis.settings} rows={8} onApply={v=>{if(!v||Array.isArray(v)||typeof v!=='object')throw new Error('JSONオブジェクトを指定してください。');onChange({...analysis,settings:v as Record<string,Json>});}}/></details>
   </div>;

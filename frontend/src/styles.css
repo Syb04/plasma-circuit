@@ -143,6 +143,11 @@ h4{font-size:12px;font-weight:600}
 .input-unit>span{display:flex;align-items:center;padding:0 8px 0 3px;white-space:nowrap;color:var(--text);font-size:9px;pointer-events:none}
 .input-unit input::-webkit-outer-spin-button,.input-unit input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .input-unit input{-moz-appearance:textfield}
+.form-grid .time-field{grid-column:1 / -1}
+.time-field>.input-unit{margin-top:5px}
+.time-input input{flex:1;width:0}
+.time-input select{flex:0 0 64px;width:64px;border:0;border-left:1px solid var(--border);border-radius:0;padding:8px 23px 8px 8px;font-size:11px}
+.time-input input:focus,.time-input select:focus{outline:none;box-shadow:none}
 .advanced{margin-top:15px;padding-top:12px;border-top:1px solid var(--border)}
 .advanced>summary{list-style:none;cursor:pointer;color:var(--text-muted);font-size:10px;display:flex;align-items:center;gap:7px}
 .advanced>summary:before{content:"›";font-size:15px;color:var(--text-muted)}

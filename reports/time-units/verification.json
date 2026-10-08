@@ -1,0 +1,53 @@
+{
+  "completed": true,
+  "api_mocked": false,
+  "solver_results_mocked": false,
+  "checks": [
+    "Existing transient SI settings load and all five display units preserve both physical times exactly",
+    "Nanosecond edits convert to seconds; clearing restores the valid value; JSON edits refresh the selected unit",
+    "A real ngspice transient run succeeds with 25 ns output steps and a 2 us end time; persisted conditions contain seconds only",
+    "Reopening the saved circuit restores the same physical time conditions from the stored run",
+    "Macro end time and RF reevaluation interval support all units; an unspecified interval remains absent, and power-mode switching preserves end time",
+    "390 px mobile layout has usable time controls without horizontal overflow; dark theme retains a visible focus outline"
+  ],
+  "browser_runtime_errors": [],
+  "source_sha256": {
+    "frontend/src/TimeInput.tsx": "18f931984331c1afbbf8d73761fefc6b10b0b1556288c71f2daad9054d837c86",
+    "frontend/src/Inspector.tsx": "1f25084d6a03289e2e85ea27b2d69b09adcff15a7ab8925044eadab4a48759b2",
+    "frontend/src/PlasmaControls.tsx": "66f9d2d02774eb5682fccabf415e3b9b75d3763fb801bb9d67035d234f6f7d22",
+    "frontend/src/styles.css": "da1656358159a0922a9821a8031363fb7d52bd8e69bfc68d7bb590ceb66dd23c"
+  },
+  "real_transient_run": {
+    "id": "0ab5ca26-c04e-4f8f-800d-02e7c0198bbc",
+    "circuit_id": "aeb15e71-6c63-441a-990d-3d6298622cb6",
+    "status": "succeeded",
+    "converged": true,
+    "analysis": {
+      "kind": "transient",
+      "settings": {
+        "time_step": 2.5000000000000002e-08,
+        "stop_time": 2.0000000000000003e-06,
+        "max_step": 2e-06
+      }
+    },
+    "axis_end_s": 2e-06
+  },
+  "mobile_control_dimensions": {
+    "input": 284,
+    "control": 350,
+    "scroll": 348,
+    "client": 348,
+    "page": 390,
+    "viewport": 390
+  },
+  "dark_keyboard_focus": {
+    "outline": "solid",
+    "color": "rgb(217, 119, 87)"
+  },
+  "checked_at_utc": "2026-10-08 03:09:28 UTC",
+  "frontend_image": "sha256:b42e0474601d5cfd535ca4c186237cb9d4398a745376bb0003f0ab031fa1ad55",
+  "frontend_assets": [
+    "index-BFA1z4py.js",
+    "index-BO64NSr4.css"
+  ]
+}
