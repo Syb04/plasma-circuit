@@ -12,7 +12,8 @@ export type AnalysisKind = 'op' | 'dc' | 'ac' | 'transient' | 'ccp' | 'global' |
 export interface Analysis {kind: AnalysisKind; settings: Record<string, Json>}
 export interface CatalogComponent {kind: string; label: string; category: string; ports: string[]; parameters: Record<string, Json>; description?: string}
 export interface Preset {id: string; name: string; description: string; document: CircuitDocument; analysis: Analysis}
-export interface CircuitSummary {id: string; name: string; revision: number; created_by: string; updated_by: string; updated_at: string}
+export interface CircuitSummary {id: string; name: string; description?: string; revision: number; created_by: string; updated_by: string; created_at: string; updated_at: string}
+export interface CircuitList {circuits: CircuitSummary[]; total: number; total_all: number; limit: number | null; offset: number}
 export interface SavedCircuit extends CircuitSummary {document: CircuitDocument}
 export type RunStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'canceled' | 'timed_out';
 export interface Result {

@@ -102,6 +102,81 @@ def test_employee_required_and_leading_zero_preserved(client):
     assert client.get("/api/circuits").json()["circuits"][0]["id"] == saved["id"]
 
 
+def test_model_list_paginates_with_stable_order_and_lightweight_metadata(client):
+    now = db.utcnow()
+    with db.session() as session:
+        session.add_all(db.Circuit(id=f"model-{i:03}", name="同名モデル", revision=1,
+            document={"description": f"メモ {i}", "components": [{"large": "x" * 2000}]},
+            created_by="000123", updated_by="000456", created_at=now, updated_at=now)
+            for i in range(53))
+        session.commit()
+    pages = [client.get("/api/circuits", params={"limit": 25, "offset": offset}).json()
+             for offset in (0, 25, 50)]
+    assert [len(page["circuits"]) for page in pages] == [25, 25, 3]
+    assert all(page["total"] == page["total_all"] == 53 for page in pages)
+    assert [row["id"] for page in pages for row in page["circuits"]] == [f"model-{i:03}" for i in range(53)]
+    assert pages[0]["circuits"][0]["description"] == "メモ 0"
+    assert all("document" not in row for page in pages for row in page["circuits"])
+    assert len(client.get("/api/circuits").json()["circuits"]) == 53  # Existing clients remain compatible.
+    past_end = client.get("/api/circuits", params={"limit": 25, "offset": 100}).json()
+    assert past_end["total"] == 53 and past_end["circuits"] == []
+
+
+@pytest.fixture()
+def searchable_models(client):
+    now = db.utcnow()
+    rows = [("alpha", "Ar CCP", "シリコン表面", "000123", "000456", 1),
+            ("beta", "O2 model 100%", "Pulse response", "000456", "000123", 10),
+            ("gamma", "Legacy_model", "old", "00123", "00123", 60)]
+    with db.session() as session:
+        session.add_all(db.Circuit(id=id, name=name, document={"description": memo},
+            created_by=creator, updated_by=updater, created_at=now - timedelta(days=days + 1),
+            updated_at=now - timedelta(days=days)) for id, name, memo, creator, updater, days in rows)
+        session.commit()
+    return rows
+
+
+def test_model_list_searches_name_memo_and_employees_with_literal_wildcards(client, searchable_models):
+    def ids(query):
+        result = client.get("/api/circuits", params={"q": query, "limit": 25})
+        assert result.status_code == 200, result.text
+        payload = result.json()
+        assert payload["total_all"] == 3
+        assert payload["total"] == len(payload["circuits"])
+        return {row["id"] for row in payload["circuits"]}
+    assert ids("  ar ccp  ") == {"alpha"}
+    assert ids("シリコン") == {"alpha"}
+    assert ids("pUlSe") == {"beta"}
+    assert ids("000123") == {"alpha", "beta"}
+    assert ids("%") == {"beta"}
+    assert ids("_") == {"gamma"}
+    assert ids("no matches") == set()
+    assert ids("' OR 1=1 --") == set()
+
+
+def test_model_list_combines_exact_employee_period_and_sort_filters(client, searchable_models):
+    def list_models(**params):
+        response = client.get("/api/circuits", params={"limit": 25, **params})
+        assert response.status_code == 200, response.text
+        return response.json()
+    assert [row["id"] for row in list_models(updated_by=" 000123 ")["circuits"]] == ["beta"]
+    assert [row["id"] for row in list_models(updated_by="00123")["circuits"]] == ["gamma"]
+    assert list_models(q="O2", updated_by="000123", updated_within_days=7)["total"] == 0
+    assert list_models(q="O2", updated_by="000123", updated_within_days=30)["total"] == 1
+    assert [row["id"] for row in list_models(updated_within_days=7)["circuits"]] == ["alpha"]
+    assert [row["id"] for row in list_models(sort="updated_asc")["circuits"]] == ["gamma", "beta", "alpha"]
+    assert [row["id"] for row in list_models(sort="name_asc")["circuits"]] == ["alpha", "gamma", "beta"]
+    assert [row["id"] for row in list_models(sort="name_desc")["circuits"]] == ["beta", "gamma", "alpha"]
+    assert [row["id"] for row in list_models(sort="created_desc")["circuits"]] == ["alpha", "beta", "gamma"]
+
+
+@pytest.mark.parametrize("params", [{"limit": 0}, {"limit": 101}, {"offset": -1},
+    {"sort": "unknown"}, {"updated_within_days": 0}, {"updated_within_days": 3651},
+    {"q": "x" * 201}, {"updated_by": "x" * 81}])
+def test_model_list_validates_pagination_and_filters(client, params):
+    assert client.get("/api/circuits", params=params).status_code == 422
+
+
 def test_revision_conflict_and_immutable_run_snapshot(client):
     saved = save(client)
     created = run(client, saved)

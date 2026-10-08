@@ -107,7 +107,7 @@ All paths use `/api`. PostgreSQL is durable; Redis queues solver work. Run snaps
 | GET `/health` | Service health |
 | GET `/catalog` | `{components:[...],analyses:[...]}` with actual supported defaults/ports |
 | GET `/presets` | `{presets:[{id,name,description,document,analysis}]}` |
-| GET `/circuits` | `{circuits:[{id,name,revision,created_by,updated_by,created_at,updated_at}]}` |
+| GET `/circuits` | `{circuits:[{id,name,description,revision,created_by,updated_by,created_at,updated_at}],total,total_all,limit,offset}` |
 | POST `/circuits` | `{employee_id,document}` → saved circuit detail |
 | GET `/circuits/{id}` | Saved detail with document |
 | PUT `/circuits/{id}` | `{employee_id,expected_revision,document}` → detail; stale revision 409 |
@@ -128,6 +128,8 @@ All paths use `/api`. PostgreSQL is durable; Redis queues solver work. Run snaps
 | POST `/benchmarks/{id}/compare` | `{run_id}` → metric errors, uncertainty checks, missing metrics and warnings; completed run required |
 | GET `/runs/{id}/package` | Analysis package including original status/error |
 | POST `/packages/import` | `{employee_id,package}` → new circuit, analysis/provenance, verification and `requires_recalculation=true`, `result=null` |
+
+Circuit-list queries accept `q` (up to 200 characters; case-insensitive literal substring of name, description, creator or updater), `updated_by` (exact employee ID, up to 80 characters), `updated_within_days` (1–3650 days), `sort` (`updated_desc`, `updated_asc`, `name_asc`, `name_desc`, `created_desc`), `limit` (1–100) and `offset` (nonnegative). Filters combine with AND; search fields combine with OR. `total` counts matches before pagination and `total_all` counts all saved models. Ordering has an ID tie-breaker. List entries contain metadata and descriptions, never complete circuit documents. The UI always requests a bounded page; omitting `limit` preserves the original API behavior for existing clients.
 
 Run states are `queued/running/succeeded/failed/canceled/timed_out`. Studies derive `queued/running/succeeded/partial_failed/canceled` from latest attempts and cancellation. A queue failure stays a durable failed case. Resume uses the previous attempt's input snapshot and creates a new run/attempt with current runtime provenance, preserving failures and diagnostics.
 

@@ -1,0 +1,23 @@
+{
+  "base_url": "http://localhost:8080",
+  "api_mocked": false,
+  "completed": true,
+  "checks": [
+    "employee validation, edited EDD snapshot, real run, charge/branch voltage, Q–V, CSV",
+    "palette, terminal drag wiring, saved divider numeric value, reopening circuit analysis/history",
+    "responsive layout and no browser runtime errors"
+  ],
+  "run_ids": [
+    "a6af9d85-0d6d-4a06-bb6c-3a65180ea50a",
+    "319838b4-110c-4064-89c7-ca246fac24b7"
+  ],
+  "browser_runtime_errors": [],
+  "last_run": {
+    "id": "319838b4-110c-4064-89c7-ca246fac24b7",
+    "status": "succeeded",
+    "error": null,
+    "converged": true
+  },
+  "api_worker_image": "sha256:3dda4b121feb1c5fd666b51e2a42327f30d262afdbc220c91d2fbcd34f793c48",
+  "frontend_image": "sha256:5abb8012498d998521e2df36bb1058443442a9c5062bf9619fb8928cad26a06a"
+}

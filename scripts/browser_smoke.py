@@ -120,11 +120,12 @@ def main() -> None:
             assert any(math.isclose(v, 2.5, rel_tol=1e-6) for v in divider["result"]["summary"].values() if isinstance(v,(float,int)))
             page.get_by_role("button", name="回路エディタ", exact=True).click()
             page.screenshot(path=str(artifacts / "constructed-circuit.png"), full_page=True)
-            page.get_by_role("button", name="保存済みの回路", exact=False).click()
-            page.locator(".saved-circuits button").filter(has_text="ブラウザ検証：非線形EDD").first.click()
+            page.get_by_role("button", name="保存済みモデル", exact=False).click()
+            page.get_by_label("モデルを検索", exact=True).fill("ブラウザ検証：非線形EDD")
+            page.locator(".model-table .model-name button").filter(has_text="ブラウザ検証：非線形EDD").first.click()
             # Opening a saved circuit waits for document/history GETs. A single
             # input_value() can still read the previous operating-point analysis.
-            page.wait_for_function("""() => !document.querySelector('.modal') ||
+            page.wait_for_function("""() => !document.querySelector('.model-library') ||
                 document.querySelector('#modal-title')?.textContent === '未保存の変更があります'""")
             replace = page.get_by_role("button", name="変更を閉じて開く", exact=True)
             if replace.is_visible():

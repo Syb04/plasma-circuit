@@ -1,0 +1,89 @@
+{
+  "completed": true,
+  "api_mocked": false,
+  "solver_results_mocked": false,
+  "checks": [
+    "A full-page library opens without a modal or employee ID; browser Back preserves unsaved document and physical-time settings",
+    "Real PostgreSQL pagination shows 25 + 2 distinct models; page-size and sort changes reset the page and order correctly",
+    "Name/memo/employee searches, exact updater and period filters, own-updater shortcut and no-match recovery work on persisted models",
+    "Opening a model protects unsaved input, cancellation preserves edits, search state survives navigation, and latest saved calculation conditions/results restore",
+    "Copy-as-new still creates a separate model without overwriting the original revision",
+    "Refresh fetches another client's newly saved model; a real network interruption displays an error and retry recovers",
+    "320/390 px mobile views have no horizontal overflow; dark keyboard focus and direct #models navigation work; every UI list request is bounded"
+  ],
+  "browser_runtime_errors": [],
+  "fixture_prefix": "一覧検証 1791431487373101594",
+  "source_sha256": {
+    "frontend/src/App.tsx": "e8c497bf66c0774b9f8b33c41c1dc7a90df36474cf4da0da0e026356292a5022",
+    "frontend/src/ModelLibrary.tsx": "5bf1ed75678613e1cb02a9b616338073305060d882df6868d1728407968dbb38",
+    "frontend/src/styles.css": "1621e6250d387bc7a7c07d67bf64b154d70aa666c2eb115a14a01e9b0dabe635",
+    "frontend/src/types.ts": "596f36df446e616d0ed74f4167617920e69c8779bbce0dfe8997b8dcf971471a",
+    "backend/app/api.py": "1be46e139b8271edd2d22201c066abac400c37f6d2530163b7b09de34ecfe672"
+  },
+  "real_solver_run": {
+    "id": "f2cff83e-cc84-4c23-8594-88df9b4ab301",
+    "status": "succeeded",
+    "converged": true,
+    "analysis": {
+      "kind": "transient",
+      "settings": {
+        "time_step": 2.5e-08,
+        "stop_time": 2e-06
+      }
+    }
+  },
+  "fixture_ids": [
+    "823d1ac5-be07-4a67-a416-7b1d8e246ec6",
+    "61dee8a2-30ad-4993-8bbc-e85f2468c3ec",
+    "00f717e7-2d18-4c2c-bf0a-9e9ae6d1ebcd",
+    "2270b8ce-4abf-4c6d-92c6-73c7b341da2c",
+    "fb1d0daa-37f4-4db7-b389-89367f87ed08",
+    "7e59ecf4-4a54-4c9a-b2b9-25f103b4f786",
+    "44145243-0a72-4201-87be-ddb4407e5728",
+    "79b03daf-a923-41a0-9508-a382e22f622c",
+    "f4182140-faf2-40ee-a8e2-1ed9fbafb700",
+    "65cb7649-5842-4d79-9488-1db307f55635",
+    "20cfb51c-50ab-4cde-9cfd-fb1121cde1bd",
+    "d53426ab-7ca6-499b-81a3-2387e62ad933",
+    "bb72cc79-fe81-4a00-a316-eadc66a2604c",
+    "526d99fb-7308-45b2-84e8-4b75f734a277",
+    "be109d72-0008-4bba-b14f-05ee354c3f3f",
+    "7ef707f4-9c29-4850-a726-1185b049bf91",
+    "fee7215d-1293-4ef0-9ca6-51d9fa69291a",
+    "89aa68d1-901b-4630-a6f8-35d45c6cc6ff",
+    "5cb074fb-b32f-4bea-a07c-efd571c49cf8",
+    "1c809b21-1893-4224-8818-b9070452eadd",
+    "ec2cf55c-00a7-42ea-a5da-ec825fea9145",
+    "24fc3f02-c352-456d-b121-8ef45e70ae77",
+    "3ef1395a-895e-4f77-863e-76d3eef7e8ca",
+    "1a98b053-6cca-463b-86df-bebfb3331f27",
+    "efe12f11-a55b-4f70-b4a9-bb206ebbeebc",
+    "9162c0ff-094f-4a80-98a5-e8af9f75bee9",
+    "6eaca878-a8b5-45c7-a4ef-16008df954da"
+  ],
+  "copied_model_id": "ee0accd0-9b75-4b68-84d0-67efec692bfe",
+  "list_requests": 24,
+  "all_ui_list_requests_bounded": true,
+  "checked_at_utc": "2026-10-08 03:53:06 UTC",
+  "api_worker_image": "sha256:3dda4b121feb1c5fd666b51e2a42327f30d262afdbc220c91d2fbcd34f793c48",
+  "frontend_image": "sha256:6aeb1033ef1cecbab7737058593d5891d66f906814e2d157dc8cbb89d0036559",
+  "frontend_assets": [
+    "index-CRDmpjh9.js",
+    "index-CipJd3sd.css"
+  ],
+  "docker_tests": {
+    "files": [
+      "tests/test_api.py",
+      "tests/test_workflows.py"
+    ],
+    "passed": 92,
+    "warnings": 1,
+    "seconds": 4.87
+  },
+  "earlier_validation_models_cleaned": 110,
+  "post_cleanup": {
+    "retained_validation_models": 29,
+    "total_saved_models": 59,
+    "final_solver_run_preserved": true
+  }
+}

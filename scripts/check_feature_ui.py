@@ -297,8 +297,11 @@ def main() -> None:
             circuits = get("/circuits")["circuits"]
             for key, target in targets.items():
                 circuit_index = next(i for i, value in enumerate(circuits) if value["id"] == target["circuit_id"])
-                page.get_by_role("button", name="保存済みの回路", exact=False).click()
-                page.locator(".saved-circuits button").nth(circuit_index).click()
+                page.get_by_role("button", name="保存済みモデル", exact=False).click()
+                page.get_by_label("モデルを検索", exact=True).fill(circuits[circuit_index]["name"])
+                page.locator(f'.model-table tr[data-model-id="{target["circuit_id"]}"] .model-name button').click()
+                page.wait_for_function("""() => !document.querySelector('.model-library') ||
+                    document.querySelector('#modal-title')?.textContent === '未保存の変更があります'""")
                 settle_document_open()
                 expect(page.get_by_label("回路名", exact=True)).to_have_value(circuits[circuit_index]["name"])
                 history = get("/runs?circuit_id=" + target["circuit_id"])["runs"]

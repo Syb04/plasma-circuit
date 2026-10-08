@@ -88,13 +88,10 @@ def main() -> None:
         if waveform is not None:
             circuit = page.request.get(base+"/api/circuits/"+waveform["circuit_id"])
             assert circuit.ok
-            listing = page.request.get(base+"/api/circuits")
-            assert listing.ok
-            circuit_index = next(i for i, row in enumerate(listing.json()["circuits"])
-                                 if row["id"] == waveform["circuit_id"])
-            page.get_by_role("button", name="保存済みの回路", exact=False).click()
-            page.locator(".saved-circuits button").nth(circuit_index).click()
-            page.wait_for_function("""() => !document.querySelector('.modal') ||
+            page.get_by_role("button", name="保存済みモデル", exact=False).click()
+            page.get_by_label("モデルを検索", exact=True).fill(circuit.json()["name"])
+            page.locator(f'.model-table tr[data-model-id="{waveform["circuit_id"]}"] .model-name button').click()
+            page.wait_for_function("""() => !document.querySelector('.model-library') ||
                 document.querySelector('#modal-title')?.textContent === '未保存の変更があります'""")
             replace = page.get_by_role("button", name="変更を閉じて開く", exact=True)
             if replace.is_visible():

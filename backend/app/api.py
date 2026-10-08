@@ -6,16 +6,16 @@ import io
 import logging
 import os
 from contextlib import asynccontextmanager
-from datetime import datetime
-from typing import Any
+from datetime import datetime, timedelta
+from typing import Any, Literal
 
-from fastapi import Depends, FastAPI, HTTPException, Response
+from fastapi import Depends, FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from redis.exceptions import RedisError
 from rq.command import send_stop_job_command
 from rq.exceptions import NoSuchJobError
 from rq.job import Job
-from sqlalchemy import select, text, update
+from sqlalchemy import func, or_, select, text, update
 from sqlalchemy.orm import Session
 
 from . import database as db
@@ -138,9 +138,45 @@ def presets():
 
 
 @app.get("/api/circuits")
-def list_circuits(session: Session = Depends(get_session)):
-    circuits = session.scalars(select(db.Circuit).order_by(db.Circuit.updated_at.desc())).all()
-    return {"circuits": [circuit_response(circuit, detail=False) for circuit in circuits]}
+def list_circuits(
+    q: str = Query("", max_length=200),
+    updated_by: str = Query("", max_length=80),
+    updated_within_days: int | None = Query(None, ge=1, le=3650),
+    sort: Literal["updated_desc", "updated_asc", "name_asc", "name_desc", "created_desc"] = "updated_desc",
+    limit: int | None = Query(None, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    session: Session = Depends(get_session),
+):
+    # Keep the original unpaginated API available to existing clients. The UI
+    # always supplies a bounded limit and never downloads every document.
+    circuit = db.Circuit
+    description = circuit.document["description"].as_string()
+    filters = []
+    if term := q.strip():
+        filters.append(or_(*(column.icontains(term, autoescape=True) for column in
+                             (circuit.name, description, circuit.created_by, circuit.updated_by))))
+    if employee := updated_by.strip():
+        filters.append(circuit.updated_by == employee)
+    if updated_within_days is not None:
+        filters.append(circuit.updated_at >= db.utcnow() - timedelta(days=updated_within_days))
+    orders = {
+        "updated_desc": circuit.updated_at.desc(),
+        "updated_asc": circuit.updated_at.asc(),
+        "name_asc": func.lower(circuit.name).asc(),
+        "name_desc": func.lower(circuit.name).desc(),
+        "created_desc": circuit.created_at.desc(),
+    }
+    total = session.scalar(select(func.count()).select_from(circuit).where(*filters))
+    total_all = session.scalar(select(func.count()).select_from(circuit)) if filters else total
+    statement = select(circuit.id, circuit.name, circuit.revision, circuit.created_by,
+                       circuit.updated_by, circuit.created_at, circuit.updated_at,
+                       description.label("description")).where(*filters).order_by(orders[sort], circuit.id).offset(offset)
+    if limit is not None:
+        statement = statement.limit(limit)
+    circuits = [{**row, "description": row["description"] or "",
+                 "created_at": iso(row["created_at"]), "updated_at": iso(row["updated_at"])}
+                for row in session.execute(statement).mappings()]
+    return {"circuits": circuits, "total": total, "total_all": total_all, "limit": limit, "offset": offset}
 
 
 @app.post("/api/circuits", status_code=201)
