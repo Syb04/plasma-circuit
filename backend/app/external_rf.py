@@ -350,4 +350,11 @@ def solve_external_ccp(settings: Any, document: dict, settings_data: dict | None
                                  source_port_absorbed_power_w=_mean(t, source_voltage*source_current),
                                  fundamental_frequency_hz=drive.fundamental_frequency_hz)
     result["logs"][0] = "実際のPySpice/ngspiceで外部回路とPLASMAを同時過渡解析。"+("DCブロック初期電荷を周期電荷平衡へ反復。" if isolated else "DC電流は明示した給電回路から計算。")
+    # Named schematic nodes are absolute voltages versus GND. The existing
+    # cathode/source-port traces can be differential voltages and stay distinct.
+    from .node_labels import apply_node_labels, resolve_node_labels
+    for node in resolve_node_labels(document, nets):
+        values = np.zeros(len(t)) if node == "0" else np.interp(t, raw["x"], _vector(raw, node))
+        result["signals"].append({"name": f"V({node})", "unit": "V", "values": values.tolist()})
+    apply_node_labels(result, document, nets)
     return result

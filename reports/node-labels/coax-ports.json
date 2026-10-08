@@ -1,0 +1,25 @@
+{
+  "completed": true,
+  "saved_model_or_run_requests": [],
+  "runtime_errors": [],
+  "checks": [
+    {
+      "variant": "explicit",
+      "visible_ports": [
+        "p1",
+        "n1",
+        "p2",
+        "n2"
+      ],
+      "label_scope": "common shield"
+    },
+    {
+      "variant": "grounded",
+      "visible_ports": [
+        "p1",
+        "p2"
+      ],
+      "label_scope": "inner conductor only"
+    }
+  ]
+}

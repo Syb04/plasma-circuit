@@ -18,6 +18,7 @@ import numpy as np
 from .catalog import BUILTIN_MODELS, COMPONENTS
 from .diode import diode_model
 from .expressions import ExpressionError, compile_expression, parse_si
+from .node_labels import apply_node_labels, resolve_node_labels
 
 
 class CircuitError(ValueError):
@@ -132,6 +133,10 @@ def _topology(document: dict) -> tuple[dict, dict, dict]:
         if representative not in net_names:
             net_names[representative] = f"n{len(net_names)}"
         net_map[key] = net_names[representative]
+    try:
+        resolve_node_labels(document, net_map)
+    except ValueError as exc:
+        raise CircuitError(str(exc)) from exc
     return by_id, ports, net_map
 
 
@@ -648,4 +653,5 @@ def execute_circuit(document: dict, analysis: dict) -> dict:
     result["model_metadata"] = {"edd_convention": "Ik is conductive current; terminal current = Ik + dQk/dt", "models": document.get("models", []), "parameters": document.get("parameters", {})}
     from .coax import add_results
     add_results(result, document, nets, kind)
+    apply_node_labels(result, document, nets)
     return result

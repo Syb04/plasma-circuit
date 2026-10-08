@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_serializer, model_validator
+
+from .node_labels import endpoint_groups, label_name, resolve_node_labels
 
 
 class Position(BaseModel):
@@ -37,6 +39,18 @@ class SpiceModel(BaseModel):
     definition: str = Field(min_length=1, max_length=100000)
 
 
+class NodeLabel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    component_id: str = Field(min_length=1, max_length=80, pattern=r"^[A-Za-z][A-Za-z0-9_]*$")
+    port: str = Field(min_length=1, max_length=100, pattern=r"^[A-Za-z][A-Za-z0-9_]*$")
+    name: str
+
+    @field_validator("name", mode="before")
+    @classmethod
+    def validate_name(cls, value):
+        return label_name(value)
+
+
 class CircuitDocument(BaseModel):
     model_config = ConfigDict(extra="forbid")
     schema_version: Literal[1] = 1
@@ -46,6 +60,21 @@ class CircuitDocument(BaseModel):
     wires: list[Wire] = Field(default_factory=list, max_length=2000)
     parameters: dict[str, float] = Field(default_factory=dict)
     models: list[SpiceModel] = Field(default_factory=list, max_length=100)
+    node_labels: list[NodeLabel] = Field(default_factory=list, max_length=2000)
+
+    @model_serializer(mode="wrap")
+    def serialize_document(self, handler):
+        data = handler(self)
+        if not self.node_labels:
+            data.pop("node_labels", None)
+        return data
+
+    @model_validator(mode="after")
+    def validate_node_labels(self):
+        if self.node_labels:
+            document = self.model_dump()
+            resolve_node_labels(document, endpoint_groups(document))
+        return self
 
 
 class Analysis(BaseModel):

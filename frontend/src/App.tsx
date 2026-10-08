@@ -6,10 +6,11 @@ import Results from './Results';
 import Research from './Research';
 import ModelLibrary, {defaultModelFilters} from './ModelLibrary';
 import type {ModelFilters} from './ModelLibrary';
-import type { Analysis, AnalysisKind, CatalogComponent, CircuitDocument, Component, Preset, Run, SavedCircuit, CircuitList } from './types';
+import type { Analysis, AnalysisKind, CatalogComponent, CircuitDocument, Component, Endpoint, Preset, Run, SavedCircuit, CircuitList } from './types';
 import { api, ApiError, clone, createId, defaultSettings, emptyDocument, statusNames, analysisLabel, isPrescribedPower, isPlasmaAnalysis } from './types';
 import { useTheme, type ThemePreference } from './theme';
 import {coaxDefaults} from './CoaxEditor';
+import {pruneNodeLabels} from './NodeLabels';
 
 const fallbackCatalog:CatalogComponent[]=[
   {kind:'R',label:'抵抗',category:'受動素子',ports:['p','n'],parameters:{value:1000}},
@@ -40,6 +41,9 @@ export default function App() {
   const savedRef=useRef(saved);savedRef.current=saved;
   const [dirty,setDirty]=useState(false);
   const [selectedId,setSelectedId]=useState<string|null>(null);
+  const [selectedPort,setSelectedPort]=useState<string|null>(null);
+  const selectComponent=useCallback((id:string|null)=>{setSelectedId(id);setSelectedPort(null);},[]);
+  const selectPort=useCallback((endpoint:Endpoint)=>{setSelectedId(endpoint.component_id);setSelectedPort(endpoint.port);},[]);
   const [past,setPast]=useState<CircuitDocument[]>([]),[future,setFuture]=useState<CircuitDocument[]>([]);
   const [employee,setEmployee]=useState(readEmployee),[employeeError,setEmployeeError]=useState(false);
   const [catalog,setCatalog]=useState<CatalogComponent[]>(fallbackCatalog);
@@ -63,13 +67,13 @@ export default function App() {
       displayMessage(`${ids.length} 件のモデルを削除しました。編集中の内容は保持しています。保存すると別モデルを作成します。`,false);
     }else displayMessage(`${ids.length} 件のモデルを削除しました。`,false);
   },[displayMessage]);
-  const commit=useCallback((next:CircuitDocument)=>{const previous=docRef.current;if(JSON.stringify(previous)===JSON.stringify(next))return;setPast(items=>[...items.slice(-49),clone(previous)]);setFuture([]);docRef.current=next;setDoc(next);setDirty(true);},[]);
+  const commit=useCallback((next:CircuitDocument)=>{next=pruneNodeLabels(next);const previous=docRef.current;if(JSON.stringify(previous)===JSON.stringify(next))return;setPast(items=>[...items.slice(-49),clone(previous)]);setFuture([]);docRef.current=next;setDoc(next);setDirty(true);},[]);
   function openModels(){if(view!=='models')workspaceView.current=view;window.location.hash='models';setView('models');}
   function showWorkspace(next:WorkspaceView=workspaceView.current){workspaceView.current=next;if(window.location.hash==='#models')window.location.hash='workspace';setView(next);}
   useEffect(()=>{function navigate(){setView(current=>{if(window.location.hash==='#models'){if(current!=='models')workspaceView.current=current;return 'models';}return workspaceView.current;});}window.addEventListener('hashchange',navigate);return()=>window.removeEventListener('hashchange',navigate);},[]);
   useEffect(()=>{if(view!=='models')workspaceView.current=view;},[view]);
   function copyCurrent(){setSaved(null);setDirty(true);showWorkspace();displayMessage('コピーとして保存できる状態にしました。保存ボタンで別モデルを作成します。',false);}
-  function loadDocument(document:CircuitDocument,savedCircuit:SavedCircuit|null,nextAnalysis?:Analysis){setDoc(clone(document));setSaved(savedCircuit);setDirty(!savedCircuit);setPast([]);setFuture([]);setSelectedId(null);setSelectedRun(null);setRuns([]);showWorkspace('editor');setModal(null);if(nextAnalysis)setAnalysis(clone(nextAnalysis));}
+  function loadDocument(document:CircuitDocument,savedCircuit:SavedCircuit|null,nextAnalysis?:Analysis){setDoc(clone(document));setSaved(savedCircuit);setDirty(!savedCircuit);setPast([]);setFuture([]);selectComponent(null);setSelectedRun(null);setRuns([]);showWorkspace('editor');setModal(null);if(nextAnalysis)setAnalysis(clone(nextAnalysis));}
   useEffect(()=>{
     if(started.current)return;started.current=true;
     async function load(){
@@ -92,8 +96,8 @@ export default function App() {
     async function poll(){try{const run=await api<Run>(`/runs/${activeRun!.id}`);if(disposed)return;setActiveRun(run);setSelectedRun(previous=>previous?.id===run.id?run:previous);if(!isBusy(run)){void refreshRuns(run.circuit_id);if(run.status==='failed'||run.status==='timed_out')displayMessage(run.error??statusNames[run.status]);}}catch(e){if(!disposed)displayMessage(errorMessage(e));}}
     const timer=setInterval(()=>void poll(),1800);void poll();return()=>{disposed=true;clearInterval(timer);};
   },[activeRun?.id,activeRun?.status,refreshRuns,displayMessage]);
-  function undo(){if(!past.length)return;setFuture(items=>[clone(doc),...items]);setDoc(past[past.length-1]);setPast(items=>items.slice(0,-1));setDirty(true);setSelectedId(null);}
-  function redo(){if(!future.length)return;setPast(items=>[...items,clone(doc)]);setDoc(future[0]);setFuture(items=>items.slice(1));setDirty(true);setSelectedId(null);}
+  function undo(){if(!past.length)return;setFuture(items=>[clone(doc),...items]);setDoc(past[past.length-1]);setPast(items=>items.slice(0,-1));setDirty(true);selectComponent(null);}
+  function redo(){if(!future.length)return;setPast(items=>[...items,clone(doc)]);setDoc(future[0]);setFuture(items=>items.slice(1));setDirty(true);selectComponent(null);}
   useEffect(()=>{function keyboard(event:KeyboardEvent){const target=event.target;if(target instanceof HTMLElement&&(target.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(target.tagName)))return;if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='z'){event.preventDefault();if(event.shiftKey)redo();else undo();}if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='y'){event.preventDefault();redo();}if((event.ctrlKey||event.metaKey)&&!event.shiftKey&&!event.altKey&&event.key.toLowerCase()==='d'&&view==='editor'&&!modal&&docRef.current.components.some(c=>c.id===selectedId)){event.preventDefault();if(!event.repeat)duplicateComponent();}}window.addEventListener('keydown',keyboard);return()=>window.removeEventListener('keydown',keyboard);});
   function requireEmployee(){if(!employee.trim()){setEmployeeError(true);employeeRef.current?.focus();displayMessage('保存・計算には社員番号を入力してください。');return false;}setEmployeeError(false);return true;}
   function validateScientificInputs(selector='input[data-scientific-input]'){
@@ -126,14 +130,14 @@ export default function App() {
     const kind:AnalysisKind=circuit.document.parameters?.builtin_ccp_template?'ccp':'transient';
     const latest=[...history.runs].sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at))[0];
     const restored=latest?.analysis??{kind,settings:clone(defaultSettings[kind])};
-    replacing(()=>loadDocument(circuit.document,circuit,restored));
+    replacing(()=>{loadDocument(circuit.document,circuit,restored);setRuns(history.runs);});
   }catch(e){handleError(e);}finally{setBusy(false);}}
   async function openRun(id:string){try{const run=await api<Run>(`/runs/${id}`);setSelectedRun(run);showWorkspace('results');setModal(null);}catch(e){handleError(e);}}
   function addComponent(entry:CatalogComponent){
     const index=doc.components.filter(c=>c.kind===entry.kind).length+1;
     const component:Component={id:createId(entry.kind.toLowerCase()),kind:entry.kind,label:`${entry.kind}${index}`,ports:clone(entry.ports),parameters:clone(entry.parameters),position:{x:120+(doc.components.length%4)*180,y:100+Math.floor(doc.components.length/4)*140},rotation:['V','I'].includes(entry.kind)?90:0};
     const parameters={...doc.parameters};delete parameters.builtin_ccp_template;
-    commit({...doc,components:[...doc.components,component],parameters});setSelectedId(component.id);setView('editor');if(isPlasmaAnalysis(analysis.kind))setAnalysis({kind:'transient',settings:clone(defaultSettings.transient)});
+    commit({...doc,components:[...doc.components,component],parameters});selectComponent(component.id);setView('editor');if(isPlasmaAnalysis(analysis.kind))setAnalysis({kind:'transient',settings:clone(defaultSettings.transient)});
   }
   function componentChange(component:Component){
     const allowed=new Set(component.ports);
@@ -159,9 +163,9 @@ export default function App() {
     while(current.components.some(c=>Math.abs(c.position.x-copy.position.x)<100&&Math.abs(c.position.y-copy.position.y)<120)){
       copy.position.x+=40;copy.position.y+=40;
     }
-    commit({...current,components:[...current.components,copy]});setSelectedId(copy.id);
+    commit({...current,components:[...current.components,copy]});selectComponent(copy.id);
   }
-  function deleteComponent(){if(!selectedId)return;commit({...doc,components:doc.components.filter(c=>c.id!==selectedId),wires:doc.wires.filter(w=>w.source.component_id!==selectedId&&w.target.component_id!==selectedId)});setSelectedId(null);}
+  function deleteComponent(){if(!selectedId)return;commit({...doc,components:doc.components.filter(c=>c.id!==selectedId),wires:doc.wires.filter(w=>w.source.component_id!==selectedId&&w.target.component_id!==selectedId)});selectComponent(null);}
   function downloadDocument(){const url=URL.createObjectURL(new Blob([JSON.stringify(doc,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`${doc.name||'circuit'}.json`;a.click();URL.revokeObjectURL(url);}
   const selectedComponent=doc.components.find(c=>c.id===selectedId);
   const isPlasma=isPlasmaAnalysis(analysis.kind);
@@ -181,8 +185,8 @@ export default function App() {
       {view==='models'?<ModelLibrary filters={modelFilters} onFiltersChange={setModelFilters} employee={employee} currentId={saved?.id} currentName={doc.name} dirty={dirty} busy={busy} onOpen={id=>void openCircuit(id)} onBack={()=>showWorkspace()} onCopy={copyCurrent} onTotal={setModelCount} onDeleted={modelsDeleted}/>:<>
       <div className="workspace-bar"><div className="document-title"><CircuitBoard size={18}/><strong title={doc.name}>{doc.name}</strong><span className={`document-state ${dirty?'unsaved':''}`}>{dirty?'未保存':saved?`rev.${saved.revision}`:'新規'}</span></div><div className="workspace-actions"><button className="icon-button" aria-label="元に戻す" title="元に戻す Ctrl+Z" onClick={undo} disabled={!past.length}><Undo2 size={16}/></button><button className="icon-button" aria-label="やり直す" title="やり直す Ctrl+Shift+Z" onClick={redo} disabled={!future.length}><Redo2 size={16}/></button><span className="toolbar-divider"/><button className="icon-button" aria-label="回路JSONをダウンロード" title="回路JSONをダウンロード" onClick={downloadDocument}><Download size={16}/></button><button className="text-button" onClick={()=>replacing(()=>loadDocument(emptyDocument(),null,{kind:'transient',settings:clone(defaultSettings.transient)}))}><Plus size={14}/>新規</button></div></div>
       <div className="workbench-body"><main className="main-workspace"><div className="view-tabs"><button className={view==='editor'?'active':''} onClick={()=>setView('editor')}><CircuitBoard size={16}/>{templateMode?'プラズマモデル':'回路エディタ'}</button><button className={view==='results'?'active':''} onClick={()=>setView('results')}><Activity size={16}/>計算結果{isBusy(activeRun)&&<span className="status-dot running"/>}</button><button className={view==='research'?'active':''} onClick={()=>setView('research')}><Layers size={16}/>研究・比較</button><span className="analysis-badge">{analysisLabel(analysis)}</span></div>
-        {view==='editor'?templateMode?<PlasmaDiagram gas={String(analysis.settings.gas??'Ar')} global={['global','global_transient'].includes(analysis.kind)} prescribedPower={isPrescribedPower(analysis)} kind={analysis.kind}/>:<Schematic document={doc} selectedId={selectedId} onSelect={setSelectedId} onChange={commit} onDuplicate={duplicateComponent} onMessage={displayMessage}/>:view==='results'?<div className="results-scroll"><Results run={selectedRun} onMessage={displayMessage}/></div>:<div className="results-scroll"><Research document={doc} analysis={analysis} saved={saved} employee={employee} runs={runs} saveCurrent={saveCurrent} onOpenRun={id=>void openRun(id)} onImport={(circuit,nextAnalysis)=>replacing(()=>loadDocument(circuit.document,circuit,nextAnalysis))} onMessage={displayMessage}/></div>}
-      </main><aside className="inspector">{selectedComponent&&view==='editor'&&<ComponentInspector key={selectedComponent.id} component={selectedComponent} components={doc.components} onChange={componentChange} onDuplicate={duplicateComponent} onDelete={deleteComponent}/>}<AnalysisPanel analysis={analysis} onChange={setAnalysis} document={doc}/><DocumentPanel document={doc} onChange={commit}/><div className="save-info"><Save size={15}/><p>計算前に最新の回路を保存します。<br/>回路・モデル・条件を履歴に記録します。</p></div></aside></div>
+        {view==='editor'?templateMode?<PlasmaDiagram gas={String(analysis.settings.gas??'Ar')} global={['global','global_transient'].includes(analysis.kind)} prescribedPower={isPrescribedPower(analysis)} kind={analysis.kind}/>:<Schematic document={doc} selectedId={selectedId} selectedPort={selectedPort} onSelect={selectComponent} onSelectPort={selectPort} onChange={commit} onDuplicate={duplicateComponent} onMessage={displayMessage}/>:view==='results'?<div className="results-scroll"><Results run={selectedRun} onMessage={displayMessage}/></div>:<div className="results-scroll"><Research document={doc} analysis={analysis} saved={saved} employee={employee} runs={runs} saveCurrent={saveCurrent} onOpenRun={id=>void openRun(id)} onImport={(circuit,nextAnalysis)=>replacing(()=>loadDocument(circuit.document,circuit,nextAnalysis))} onMessage={displayMessage}/></div>}
+      </main><aside className="inspector">{selectedComponent&&view==='editor'&&<ComponentInspector key={selectedComponent.id} component={selectedComponent} components={doc.components} document={doc} selectedPort={selectedPort} onSelectPort={selectPort} onDocumentChange={commit} onChange={componentChange} onDuplicate={duplicateComponent} onDelete={deleteComponent}/>}<AnalysisPanel analysis={analysis} onChange={setAnalysis} document={doc}/><DocumentPanel document={doc} onChange={commit}/><div className="save-info"><Save size={15}/><p>計算前に最新の回路を保存します。<br/>回路・モデル・条件を履歴に記録します。</p></div></aside></div>
       <footer className="workbench-footer"><span><span className="status-dot blue"/>{templateMode?(isPrescribedPower(analysis)?'0D反応モデル 専用テンプレート':'CCP 専用テンプレート'):`${doc.components.length} 部品 · ${doc.wires.length} 配線`}</span><span>PySpice / ngspice · 社員番号は操作履歴に記録</span></footer>
       </>}
     </div>

@@ -45,6 +45,10 @@ docker compose -f compose.yaml -f compose.cloud.yaml up --build -d
 
 素子複製の全30種別・個別編集・保存再読込・実計算の確認結果は[素子複製の検証レポート](reports/component-duplication/report.md)を参照してください。[check_component_duplication.py](scripts/check_component_duplication.py)で再実行できます。
 
+端子名や配線をクリックし、設定欄の「端子・ノード名」で任意の名前を適用できます。つながる端子は同じ名前になり、波形の凡例・X–Y・CSVに `V(電極)` などで表示します。保存した過去の計算は計算時の名前を保持します。詳しくは[ノード名の操作](docs/node-labels.md)を参照してください。
+
+ノード名の実計算・凡例・保存履歴・モバイルと既存機能の確認結果は[検証レポート](reports/node-labels/report.md)を参照してください。[check_node_labels.py](scripts/check_node_labels.py)で再実行できます。
+
 ## 実装範囲
 
 | 機能 | 内容 |
@@ -52,6 +56,7 @@ docker compose -f compose.yaml -f compose.cloud.yaml up --build -d
 | 回路解析 | DC動作点、DCスイープ、AC小信号、過渡解析 |
 | 基本素子 | R/C/L、相互結合、独立・従属電源、数式電源、スイッチ、ダイオード、BJT、JFET、MESFET、伝送線、サブ回路、接地・接続点 |
 | 素子の複製 | 配置済み部品の内部設定・端子・回転角をコピー。固有IDと部品名で配置し、個別編集・取り消し・保存・再読込に対応 |
+| ノード名 | 端子・配線から名前を設定。接続ノードで共有し、波形の凡例・ツールチップ・X–Y・CSV・比較表示に使用。計算時の名前を履歴に保存 |
 | 素子パラメータ | `4e7`・`1e-9` の指数入力、詳細ダイオードのIS/N/RS/BV/IBV・接合容量・走行時間・温度依存。通常のモデル名参照も使用可能 |
 | 同軸ケーブル | 4端子版とシールド接地の2端子版。内部導体径・シールド内径・長さ・εr・μr・tan δ・両導体抵抗率・シールド厚さを入力。TEM線路定数と基準周波数での表皮・誘電体損失、DC/AC/過渡・CCPへの接続 |
 | EDD | 複数枝の導電電流 `I(V)` と電荷 `Q(V)`、枝間依存、パラメータ、中間式。端子電流は `I + dQ/dt` |

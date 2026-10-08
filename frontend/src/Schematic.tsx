@@ -2,11 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Background, BackgroundVariant, Controls, Handle, Position, ReactFlow, applyNodeChanges, useReactFlow, ReactFlowProvider, useUpdateNodeInternals } from '@xyflow/react';
 import type { Connection, EdgeChange, Node, NodeChange, NodeProps } from '@xyflow/react';
 import { Copy, RotateCw, Trash2, Maximize2, MousePointer2, Cable } from 'lucide-react';
-import type { Component, CircuitDocument, Json } from './types';
+import type { Component, CircuitDocument, Endpoint, Json } from './types';
 import { createId, engineering } from './types';
 import {isCoax} from './CoaxEditor';
+import {endpointNames,nodeNames} from './NodeLabels';
 
-type CircuitNode = Node<{component: Component}, 'component'>;
+type CircuitNode = Node<{component: Component;portLabels:Map<string,string>;selectedPort:string|null;onSelectPort:(endpoint:Endpoint)=>void}, 'component'>;
 function Symbol({kind}: {kind:string}) {
   switch (kind) {
     case 'R': return <path d="M0 30H10l5-12 10 24 10-24 10 24 10-24 5 12H80"/>;
@@ -56,7 +57,7 @@ function ComponentNode({data, selected}: NodeProps<CircuitNode>) {
       if (rotation) side = sides[(sides.indexOf(side)+rotation/90)%4] ?? side;
       return <div key={port}>
         <Handle id={port} type="source" position={side} isConnectable style={{left:px,top:py,transform:'translate(-50%, -50%)'}} aria-label={`${c.label} 端子 ${port}`}/>
-        {c.kind!=='JUNCTION' && <span className="port-label" style={{left:px,top:py}}>{port}</span>}
+        <button type="button" className={`node-port-name nodrag nopan ${data.portLabels.has(`${c.id}.${port}`)?'named':''} ${selected&&data.selectedPort===port?'selected-port':''} ${[Position.Top,Position.Bottom].includes(side)&&c.ports.length<=2?'vertical-port':''}`} data-node-port={port} style={{left:px,top:py}} aria-label={`${c.label} の端子 ${port} のノード名を編集`} title={`${port}${data.portLabels.has(`${c.id}.${port}`)?`: ${data.portLabels.get(`${c.id}.${port}`)}`:''} — ノード名を編集`} onClick={event=>{event.stopPropagation();data.onSelectPort({component_id:c.id,port});}}>{data.portLabels.has(`${c.id}.${port}`)?`${port}: ${data.portLabels.get(`${c.id}.${port}`)}`:port}</button>
       </div>;
     })}
     {c.kind!=='JUNCTION' && <><div className="node-label">{c.label}</div><div className="node-value">{caption}</div></>}
@@ -64,11 +65,12 @@ function ComponentNode({data, selected}: NodeProps<CircuitNode>) {
 }
 const nodeTypes = {component: ComponentNode};
 
-interface Props {document:CircuitDocument; selectedId:string|null; onSelect:(id:string|null)=>void; onChange:(doc:CircuitDocument)=>void; onDuplicate:()=>void; onMessage:(message:string)=>void}
+interface Props {document:CircuitDocument; selectedId:string|null;selectedPort:string|null;onSelectPort:(endpoint:Endpoint)=>void; onSelect:(id:string|null)=>void; onChange:(doc:CircuitDocument)=>void; onDuplicate:()=>void; onMessage:(message:string)=>void}
 function Editor(props:Props) {
   const {document:doc,onChange,onSelect,selectedId} = props;
   const flow = useReactFlow();
-  const mapped = useMemo<CircuitNode[]>(() => doc.components.map(c => ({id:c.id,type:'component',position:c.position,data:{component:c},selected:c.id===selectedId})), [doc, selectedId]);
+  const portLabels=useMemo(()=>endpointNames(doc),[doc]);
+  const mapped = useMemo<CircuitNode[]>(() => doc.components.map(c => ({id:c.id,type:'component',position:c.position,data:{component:c,portLabels,selectedPort:c.id===selectedId?props.selectedPort:null,onSelectPort:props.onSelectPort},selected:c.id===selectedId})), [doc, selectedId,portLabels,props.selectedPort,props.onSelectPort]);
   const [nodes,setNodes] = useState<CircuitNode[]>(mapped);
   useEffect(()=>setNodes(mapped),[mapped]);
   const edges = useMemo(()=>doc.wires.map(w=>({id:w.id,source:w.source.component_id,target:w.target.component_id,sourceHandle:w.source.port,targetHandle:w.target.port,type:'step',style:{stroke:'var(--text-muted)',strokeWidth:2},interactionWidth:20})),[doc.wires]);
@@ -87,7 +89,9 @@ function Editor(props:Props) {
     const source={component_id:connection.source,port:connection.sourceHandle}, target={component_id:connection.target,port:connection.targetHandle};
     const existing=doc.wires.some(w=>(JSON.stringify(w.source)===JSON.stringify(source)&&JSON.stringify(w.target)===JSON.stringify(target))||(JSON.stringify(w.target)===JSON.stringify(source)&&JSON.stringify(w.source)===JSON.stringify(target)));
     if (existing) {props.onMessage('この端子間は接続済みです。');return;}
-    onChange({...doc,wires:[...doc.wires,{id:createId('w'),source,target}]});
+    const next={...doc,wires:[...doc.wires,{id:createId('w'),source,target}]};
+    if(nodeNames(next,source).length>1){props.onMessage('接続先のノードに異なる名前があります。どちらかの名前を解除または統一してから配線してください。');return;}
+    onChange(next);
   }
   function selectedAction(action:'rotate'|'delete') {
     if (!selectedId) return;
@@ -96,7 +100,7 @@ function Editor(props:Props) {
   }
   return <div className="schematic-wrap">
     <ReactFlow<CircuitNode> nodes={nodes} edges={edges} nodeTypes={nodeTypes} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
-      onConnect={connect} connectionLineStyle={{stroke:'var(--accent)',strokeWidth:2}} connectionMode={'loose' as import('@xyflow/react').ConnectionMode} onNodeClick={(_,node)=>onSelect(node.id)} onPaneClick={()=>onSelect(null)}
+      onConnect={connect} connectionLineStyle={{stroke:'var(--accent)',strokeWidth:2}} connectionMode={'loose' as import('@xyflow/react').ConnectionMode} onNodeClick={(event,node)=>{const handle=(event.target as HTMLElement).closest('.react-flow__handle');if(handle?.getAttribute('data-handleid'))props.onSelectPort({component_id:node.id,port:handle.getAttribute('data-handleid')!});else onSelect(node.id);}} onPaneClick={()=>onSelect(null)} onEdgeClick={(_,edge)=>{const wire=doc.wires.find(w=>w.id===edge.id);if(wire)props.onSelectPort(wire.source);}}
       onNodeDragStop={(_,node)=>onChange({...doc,components:doc.components.map(c=>c.id===node.id?{...c,position:node.position}:c)})}
       snapToGrid snapGrid={[20,20]} fitView fitViewOptions={{padding:0.35}} minZoom={0.2} maxZoom={2} deleteKeyCode={['Backspace','Delete']} proOptions={{hideAttribution:true}}>
       <Background variant={BackgroundVariant.Dots} gap={20} size={1.2} color="var(--border)"/>

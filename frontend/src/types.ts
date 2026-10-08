@@ -3,10 +3,13 @@ export interface Component {
   id: string; kind: string; label: string; ports: string[];
   parameters: Record<string, Json>; position: {x: number; y: number}; rotation: number;
 }
-export interface Wire { id: string; source: {component_id: string; port: string}; target: {component_id: string; port: string}; }
+export interface Endpoint {component_id:string;port:string}
+export interface NodeLabel extends Endpoint {name:string}
+export interface Wire { id: string; source: Endpoint; target: Endpoint; }
 export interface CircuitDocument {
   schema_version: number; name: string; description: string; components: Component[]; wires: Wire[];
   parameters: Record<string, Json>; models: {name: string; definition: string}[];
+  node_labels?: NodeLabel[];
 }
 export type AnalysisKind = 'op' | 'dc' | 'ac' | 'transient' | 'ccp' | 'global' | 'global_transient' | 'radial';
 export interface Analysis {kind: AnalysisKind; settings: Record<string, Json>}
@@ -18,10 +21,12 @@ export interface SavedCircuit extends CircuitSummary {document: CircuitDocument}
 export type RunStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'canceled' | 'timed_out';
 export interface Result {
   kind: string; converged: boolean; summary: Record<string, Json>;
-  axis?: {name: string; unit: string; values: number[]}; signals: {name: string; unit: string; values: number[]}[];
+  axis?: {name: string; unit: string; values: number[]}; signals: Signal[];
   tables?: Json[]; logs?: string[]; netlist?: string; solver?: Record<string, Json>;
   model_metadata?: Record<string, Json>; diagnostics?: Record<string, Json>; rf_diagnostics?: Record<string, Json>; iedf?: Result;
 }
+export interface Signal {name:string;display_name?:string;unit:string;values:number[]}
+export function signalLabel(signal:Pick<Signal,'name'|'display_name'>):string{return signal.display_name??signal.name;}
 export interface Run {id: string; status: RunStatus; circuit_id: string; circuit_revision: number; employee_id: string; analysis: Analysis; created_at: string; error?: string; result?: Result; cancel_requested?: boolean}
 export class ApiError extends Error { constructor(public status: number, message: string) {super(message)} }
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -78,7 +83,7 @@ export const defaultSettings: Record<AnalysisKind, Record<string,Json>> = {
 export interface StudyAxis {path:string;values:number[]}
 export interface StudyCase {id:string;index:number;coordinates:Record<string,Json>;status:RunStatus;run_id?:string;attempts:{number:number;run_id:string;status:RunStatus;error?:string}[]}
 export interface Study {id:string;name:string;status:string;circuit_id:string;circuit_revision:number;axes:StudyAxis[];analysis?:Analysis;cases?:StudyCase[];counts:Partial<Record<RunStatus,number>>;created_at?:string;cancel_requested?:boolean;case_count?:number}
-export interface Comparison {runs:{id:string;status:RunStatus;summary:Record<string,Json>;analysis:Analysis}[];input_differences:{path:string;values:Record<string,Json>}[];phase_alignment:{aligned:boolean;reason?:string;frequencies_hz?:number[]};waveforms:{run_id:string;axis?:{name:string;unit:string;values:number[]}|null;signals:{name:string;unit:string;values:number[]}[]}[]}
+export interface Comparison {runs:{id:string;status:RunStatus;summary:Record<string,Json>;analysis:Analysis}[];input_differences:{path:string;values:Record<string,Json>}[];phase_alignment:{aligned:boolean;reason?:string;frequencies_hz?:number[]};waveforms:{run_id:string;axis?:{name:string;unit:string;values:number[]}|null;signals:Signal[]}[]}
 export interface Benchmark {id:string;name:string;material:string;measurement_definition:string;frequency_hz?:number;pressure_pa?:number;provenance:string|Record<string,Json>;metrics:{metric:string;value:number;unit:string;uncertainty?:number}[]}
 export async function downloadApi(path:string,filename:string){const response=await fetch(`/api${path}`);if(!response.ok){const body=await response.json().catch(()=>({}));throw new Error(typeof body.detail==='string'?body.detail:'エクスポートに失敗しました。');}const url=URL.createObjectURL(await response.blob());const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);}
 export function emptyDocument(): CircuitDocument {return {schema_version:1,name:'新しい回路',description:'',components:[],wires:[],parameters:{},models:[]};}

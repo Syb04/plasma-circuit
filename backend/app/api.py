@@ -346,7 +346,7 @@ def export_csv(run_id: str, session: Session = Depends(get_session)):
     axis = result.get("axis") or {}
     signals = result.get("signals") or []
     if axis.get("values"):
-        writer.writerow([f"{axis.get('name', 'axis')} [{axis.get('unit', '')}]"] + [f"{signal['name']} [{signal.get('unit', '')}]" for signal in signals])
+        writer.writerow([f"{axis.get('name', 'axis')} [{axis.get('unit', '')}]"] + [f"{signal.get('display_name', signal['name'])} [{signal.get('unit', '')}]" for signal in signals])
         for index, value in enumerate(axis["values"]):
             writer.writerow([value] + [signal["values"][index] if index < len(signal["values"]) else "" for signal in signals])
     else:

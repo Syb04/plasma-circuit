@@ -100,7 +100,7 @@ def main():
             expect(panel).to_contain_text('50.021')
             node = page.locator('.react-flow__node[data-id="coax1"]')
             assert node.locator('.react-flow__handle').count() == (2 if grounded else 4)
-            assert node.locator('.port-label').all_text_contents() == (['p1', 'p2'] if grounded else ['p1', 'n1', 'p2', 'n2'])
+            assert node.locator('[data-node-port]').all_text_contents() == (['p1', 'p2'] if grounded else ['p1', 'n1', 'p2', 'n2'])
             if grounded:
                 expect(page.locator('.coax-editor .info-box')).to_contain_text('シールドは内部で回路のGNDに接続')
             assert len(mutations) == 0
