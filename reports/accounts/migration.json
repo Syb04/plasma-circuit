@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "original_active_models": 60,
+  "preserved_rows": {
+    "benchmarks": 4,
+    "circuit_revisions": 182,
+    "circuits": 151,
+    "package_imports": 2,
+    "simulation_runs": 125,
+    "studies": 10,
+    "study_attempts": 84,
+    "study_cases": 52
+  },
+  "legacy_owners_unassigned": true,
+  "only_requested_admin_created": true,
+  "initial_admin_temporary_credentials_valid": true
+}

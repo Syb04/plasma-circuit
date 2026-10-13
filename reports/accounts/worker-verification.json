@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "source_sha256": {
+    "backend/app/worker.py": "3cbce0133cb6e3908b4b013179b9aae9078c1aba8fa0eb4d99ae84c5e1a09ba9",
+    "backend/tests/test_worker_connection.py": "cd02c01246b79bb9d80dd8412880ce68cd8a6b30d86cc6327ca43cb4bee866f7",
+    "scripts/check_worker_pubsub.py": "325afa150c6c52cbe77990641c1e192e2a404c1933e9c85433337322652fa603",
+    "scripts/check_jobs.py": "de0dd6f16db8b0bfe4a8acefce0541dbc6416a7f79a06aa362f5ac9fb10df909",
+    "scripts/auth_helpers.py": "9ec820060ef5c9b645b202a607d3d6b69657978e37ea528eff543c40f169e16a"
+  },
+  "backend_image": "sha256:edeb173c331d4effe10134bb2fdc57541a51f8779a674fdaa595899f80fa5f94",
+  "pubsub": {
+    "passed": true,
+    "idle_seconds": 13,
+    "rq_default_socket_deadline": 11,
+    "listener_alive": true,
+    "message_delivered": true
+  },
+  "job_control_passes": 2
+}

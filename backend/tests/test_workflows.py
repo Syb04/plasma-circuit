@@ -12,7 +12,7 @@ import pytest
 
 from app import api, database as db, worker, benchmarks, analysis_package, studies
 from app.schemas import CreateRun, CreateStudy, EmployeeRequest, ImportPackage, SaveCircuit, StudyAxis, UpdateCircuit
-from test_api import FakeQueue, client, document, save, solver  # noqa: F401 - shared isolated fixture
+from test_api import TEST_PASSWORD_HASH, FakeQueue, client, document, save, solver  # noqa: F401 - shared isolated fixture
 
 
 def create_study(client, circuit, axes=None):
@@ -108,7 +108,7 @@ def test_batch_enqueue_failure_retains_every_case_and_resumes_failed_only(client
         old = session.get(db.SimulationRun, failed["run_id"])
         new = session.get(db.SimulationRun, retry["run_id"])
         assert old.snapshot == new.snapshot and old.analysis == new.analysis
-        assert new.employee_id == "000456" and old.employee_id == "000123"
+        assert new.employee_id == old.employee_id == "000123"  # Authenticated account, not payload.
     assert client.post(f"/api/studies/{study['id']}/resume", json={"employee_id": "x"}).status_code == 409
     exported = client.get(f"/api/studies/{study['id']}/export.csv")
     rows = list(csv.reader(io.StringIO(exported.text.lstrip("\ufeff"))))
@@ -308,13 +308,23 @@ def workflow_database(tmp_path, monkeypatch):
     db.engine.dispose()
 
 
+def authenticated_actor(session, username="000123"):
+    account = session.query(db.Account).filter_by(username=username).one_or_none()
+    if account is None:
+        account = db.Account(username=username, display_name=username, password_hash=TEST_PASSWORD_HASH,
+                             is_admin=True, must_change_password=False)
+        session.add(account)
+        session.flush()
+    return account
+
+
 def direct_study():
     with db.session() as session:
-        circuit = api.create_circuit(SaveCircuit(employee_id="000123", document=document()), session)
+        circuit = api.create_circuit(SaveCircuit(employee_id="000123", document=document()), session, user=authenticated_actor(session, "000123"))
         request = CreateStudy(employee_id="000123", name="Pressure sweep", circuit_id=circuit["id"],
             expected_revision=1, analysis={"kind": "ccp", "settings": {"pressure_pa": 1}},
             axes=[{"path": "analysis.settings.pressure_pa", "values": [1, 2, 3]}])
-        return circuit, api.create_study(request, session)
+        return circuit, api.create_study(request, session, user=authenticated_actor(session, "000123"))
 
 
 def test_direct_study_failed_enqueue_retry_preserves_inputs_and_audit(workflow_database, monkeypatch):
@@ -333,8 +343,8 @@ def test_direct_study_failed_enqueue_retry_preserves_inputs_and_audit(workflow_d
     succeed(third["run_id"])
     with db.session() as session:
         api.update_circuit(circuit["id"], UpdateCircuit(employee_id="000456", expected_revision=1,
-            document=document(value=2200)), session)
-        resumed = api.resume_study(study["id"], EmployeeRequest(employee_id="000456"), session)
+            document=document(value=2200)), session, user=authenticated_actor(session, "000456"))
+        resumed = api.resume_study(study["id"], EmployeeRequest(employee_id="000456"), session, user=authenticated_actor(session, "000456"))
         retry = resumed["cases"][1]
         assert [a["status"] for a in retry["attempts"]] == ["failed", "queued"]
         assert [a["employee_id"] for a in retry["attempts"]] == ["000123", "000456"]
@@ -350,9 +360,9 @@ def test_direct_study_failed_enqueue_retry_preserves_inputs_and_audit(workflow_d
 def test_direct_study_cancel_and_resume_retains_terminal_history(workflow_database):
     _, study = direct_study()
     with db.session() as session:
-        canceled = api.cancel_study(study["id"], session)
+        canceled = api.cancel_study(study["id"], session, user=authenticated_actor(session, "000123"))
         assert canceled["counts"]["canceled"] == 3
-        resumed = api.resume_study(study["id"], EmployeeRequest(employee_id="001"), session)
+        resumed = api.resume_study(study["id"], EmployeeRequest(employee_id="001"), session, user=authenticated_actor(session, "001"))
         assert resumed["counts"]["queued"] == 3
         assert all([a["status"] for a in case["attempts"]] == ["canceled", "queued"]
                    for case in resumed["cases"])
@@ -362,16 +372,16 @@ def test_direct_study_cancel_and_resume_retains_terminal_history(workflow_databa
 def test_direct_stale_revision_and_invalid_study_write_no_batch(workflow_database):
     from fastapi import HTTPException
     with db.session() as session:
-        circuit = api.create_circuit(SaveCircuit(employee_id="001", document=document()), session)
+        circuit = api.create_circuit(SaveCircuit(employee_id="001", document=document()), session, user=authenticated_actor(session, "001"))
         api.update_circuit(circuit["id"], UpdateCircuit(employee_id="002", expected_revision=1,
-            document=document(value=2200)), session)
+            document=document(value=2200)), session, user=authenticated_actor(session, "002"))
         with pytest.raises(HTTPException) as caught:
             api.create_run(CreateRun(employee_id="001", circuit_id=circuit["id"], expected_revision=1,
-                analysis={"kind": "ccp"}), session)
+                analysis={"kind": "ccp"}), session, user=authenticated_actor(session, "001"))
         assert caught.value.status_code == 409
         with pytest.raises(HTTPException) as caught:
             api.create_study(CreateStudy(employee_id="001", circuit_id=circuit["id"], expected_revision=2,
-                analysis={"kind": "ccp"}, axes=[{"path": "document.models.custom.definition", "values": [1]}]), session)
+                analysis={"kind": "ccp"}, axes=[{"path": "document.models.custom.definition", "values": [1]}]), session, user=authenticated_actor(session, "001"))
         assert caught.value.status_code == 422
         assert session.query(db.SimulationRun).count() == session.query(db.Study).count() == 0
         assert not workflow_database.jobs
@@ -382,8 +392,8 @@ def test_direct_package_import_is_historical_and_snapshot_independent(workflow_d
     run_id = study["cases"][0]["run_id"]
     succeed(run_id, {"summary": {"electron_density_m3": 2e16}, "converged": True})
     with db.session() as session:
-        package = api.export_package(run_id, session)
-        imported = api.import_package(ImportPackage(employee_id="000456", package=package), session)
+        package = api.export_package(run_id, session, user=authenticated_actor(session, "000123"))
+        imported = api.import_package(ImportPackage(employee_id="000456", package=package), session, user=authenticated_actor(session, "000456"))
         assert imported["requires_recalculation"] is True and imported["result"] is None
         assert imported["verification"] == {"hashes_verified": True, "authenticity_verified": False}
         assert session.query(db.SimulationRun).count() == 3
@@ -391,7 +401,7 @@ def test_direct_package_import_is_historical_and_snapshot_independent(workflow_d
         assert archived.package == package and archived.employee_id == "000456"
         circuit = imported["circuit"]
         api.update_circuit(circuit["id"], UpdateCircuit(employee_id="000456", expected_revision=1,
-            document=document(value=999)), session)
+            document=document(value=999)), session, user=authenticated_actor(session, "000456"))
         session.refresh(archived)
         assert archived.package["input"]["document"]["components"][0]["parameters"]["value"] == 1000
 
@@ -451,10 +461,10 @@ def test_source_waveform_sweep_rejects_unrelated_missing_and_nonnumeric_fields(c
 def test_direct_waveform_study_durably_changes_source_and_preserves_original(workflow_database):
     original = authored_plasma_document()
     with db.session() as session:
-        circuit = api.create_circuit(SaveCircuit(employee_id="001", document=original), session)
+        circuit = api.create_circuit(SaveCircuit(employee_id="001", document=original), session, user=authenticated_actor(session, "001"))
         study = api.create_study(CreateStudy(employee_id="001", circuit_id=circuit["id"], expected_revision=1,
             analysis={"kind": "ccp", "settings": {}}, axes=[{
-                "path": "document.components.source.parameters.waveform.rf_peak_voltage", "values": [100, 200]}]), session)
+                "path": "document.components.source.parameters.waveform.rf_peak_voltage", "values": [100, 200]}]), session, user=authenticated_actor(session, "001"))
         runs = [session.get(db.SimulationRun, case["run_id"]) for case in study["cases"]]
         assert [run.snapshot["components"][0]["parameters"]["waveform"]["rf_peak_voltage"] for run in runs] == [100, 200]
         assert session.get(db.Circuit, circuit["id"]).document["components"][0]["parameters"]["waveform"]["rf_peak_voltage"] == 250

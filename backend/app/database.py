@@ -24,6 +24,43 @@ class Base(DeclarativeBase):
     pass
 
 
+class Account(Base):
+    __tablename__ = "accounts"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    username: Mapped[str] = mapped_column(String(80), unique=True)
+    display_name: Mapped[str] = mapped_column(String(100))
+    password_hash: Mapped[str] = mapped_column(String(300))
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    must_change_password: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class LoginSession(Base):
+    __tablename__ = "login_sessions"
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+
+class LoginThrottle(Base):
+    __tablename__ = "login_throttles"
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    window_started: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class AccountEvent(Base):
+    __tablename__ = "account_events"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    actor_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    target_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    action: Mapped[str] = mapped_column(String(40))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
 class Circuit(Base):
     __tablename__ = "circuits"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
@@ -36,6 +73,7 @@ class Circuit(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     deleted_by: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    owner_id: Mapped[str | None] = mapped_column(ForeignKey("accounts.id"), nullable=True, index=True)
 
 
 class CircuitRevision(Base):
@@ -108,6 +146,7 @@ class Benchmark(Base):
     name: Mapped[str] = mapped_column(String(200))
     reference: Mapped[dict[str, Any]] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    owner_id: Mapped[str | None] = mapped_column(ForeignKey("accounts.id"), nullable=True, index=True)
 
 
 class PackageImport(Base):
@@ -155,6 +194,13 @@ def init_database() -> None:
             if name not in columns:
                 sql_type = Circuit.__table__.c[name].type.compile(dialect=connection.dialect)
                 connection.execute(text(f"ALTER TABLE circuits ADD COLUMN {name} {sql_type}"))
+        # Legacy employee strings were unauthenticated: never infer ownership.
+        # Keep all old documents/results unchanged and visible only to admins.
+        for table_name in ("circuits", "benchmarks"):
+            columns = {column["name"] for column in inspect(connection).get_columns(table_name)}
+            if "owner_id" not in columns:
+                connection.execute(text(f"ALTER TABLE {table_name} ADD COLUMN owner_id VARCHAR(36) REFERENCES accounts(id)"))
+            connection.execute(text(f"CREATE INDEX IF NOT EXISTS ix_{table_name}_owner_id ON {table_name} (owner_id)"))
 
 
 def session() -> Session:

@@ -1,0 +1,2 @@
+PASS: real RQ queued cancellation and running ngspice/plasma cancellation
+PASS: worker accepts a real ngspice job after 12 seconds idle

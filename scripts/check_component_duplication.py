@@ -20,12 +20,14 @@ import traceback
 from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
+from auth_helpers import authenticate_browser
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--base-url', default='http://localhost:8080')
     parser.add_argument('--output', type=Path, default=Path('reports/component-duplication'))
+    parser.add_argument('--auth-file', type=Path)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     base = args.base_url.rstrip('/')
@@ -59,7 +61,7 @@ def main():
             page.on('dialog', lambda dialog: dialog.accept())
 
             def request(path, method='GET', body=None):
-                response = context.request.fetch(base + '/api' + path, method=method, data=body, timeout=10000)
+                response = context.request.fetch(base + '/api' + path, method=method, data=body, timeout=10000, headers={'X-CSRF-Token': csrf})
                 assert response.ok, (path, response.status, response.text())
                 return response.json()
 
@@ -71,10 +73,13 @@ def main():
                     if len(rows) >= listing['total']:
                         return sorted(rows, key=lambda row: row['id'])
 
+            account, csrf = authenticate_browser(page, context, base, args.auth_file)
+            employee = account['username']
             original_models = models()
             evidence['original_active_models'] = len(original_models)
             page.goto(base, wait_until='networkidle')
-            page.locator('#employee-id').fill(employee)
+            expect(page.locator('#employee-id')).to_have_value(employee)
+            assert page.locator('#employee-id').evaluate('e=>e.readOnly')
             page.get_by_label('外観', exact=True).select_option('light')
             evidence['frontend_assets'] = page.locator('script[src],link[rel="stylesheet"]').evaluate_all(
                 'els=>els.map(e=>e.getAttribute("src")||e.getAttribute("href"))')
@@ -91,7 +96,8 @@ def main():
                     const normalize = value => Array.isArray(value) ? value.map(normalize) :
                         value && typeof value === 'object' ? Object.fromEntries(
                             Object.keys(value).sort().map(key => [key, normalize(value[key])])) : value;
-                    return JSON.stringify(normalize(JSON.parse(document.querySelector('textarea[aria-label="回路JSON"]').value))) === JSON.stringify(normalize(expected));
+                    const area = document.querySelector('textarea[aria-label="回路JSON"]');
+                    return !!area && JSON.stringify(normalize(JSON.parse(area.value))) === JSON.stringify(normalize(expected));
                 }""", arg=value)
 
             def expect_parameter(path, value):

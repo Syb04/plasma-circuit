@@ -34,6 +34,9 @@ services:
       REDIS_URL: redis://redis:6379/0
       RQ_QUEUE: simulations
       JOB_TIMEOUT_SECONDS: ${JOB_TIMEOUT_SECONDS:-300}
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-false}
+      SESSION_TTL_SECONDS: ${SESSION_TTL_SECONDS:-28800}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
     depends_on:
       db:
         condition: service_healthy

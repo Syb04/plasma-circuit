@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Activity, ArrowRight, BookOpen, ChevronDown, ChevronRight, CircuitBoard, FolderOpen, History, LoaderCircle, Layers, Play, Plus, Save, Search, Square, Undo2, Redo2, X, Zap, AlertCircle, CheckCircle2, Download } from 'lucide-react';
+import { Activity, ArrowRight, BookOpen, ChevronDown, ChevronRight, CircuitBoard, FolderOpen, History, LoaderCircle, Layers, Play, Plus, Save, Search, Square, Undo2, Redo2, X, Zap, AlertCircle, CheckCircle2, Download, Users, KeyRound, LogOut } from 'lucide-react';
 import Schematic, { CircuitSymbol, PlasmaDiagram } from './Schematic';
 import { AnalysisPanel, ComponentInspector, DocumentPanel } from './Inspector';
 import Results from './Results';
 import Research from './Research';
+import AccountManagement from './Accounts';
 import ModelLibrary, {defaultModelFilters} from './ModelLibrary';
 import type {ModelFilters} from './ModelLibrary';
-import type { Analysis, AnalysisKind, CatalogComponent, CircuitDocument, Component, Endpoint, Preset, Run, SavedCircuit, CircuitList } from './types';
+import type { Analysis, AnalysisKind, CatalogComponent, CircuitDocument, Component, Endpoint, Preset, Run, SavedCircuit, CircuitList, Account } from './types';
 import { api, ApiError, clone, createId, defaultSettings, emptyDocument, statusNames, analysisLabel, isPrescribedPower, isPlasmaAnalysis } from './types';
 import { useTheme, type ThemePreference } from './theme';
 import {coaxDefaults} from './CoaxEditor';
@@ -28,11 +29,10 @@ const fallbackCatalog:CatalogComponent[]=[
   {kind:'PLASMA',label:'2端子プラズマ',category:'数式・モデル',ports:['p','n'],parameters:clone(defaultSettings.ccp)},
 ];
 function relativeTime(value:string){const date=new Date(value);return date.toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});}
-function readEmployee(){try{return localStorage.getItem('plasma-circuit.employee-id')??'';}catch{return '';}}
 function errorMessage(e:unknown){return e instanceof Error?e.message:String(e);}
 function isBusy(run:Run|null){return !!run&&(run.status==='queued'||run.status==='running');}
 type WorkspaceView = 'editor'|'results'|'research';
-export default function App() {
+export default function App({user,onLogout,onPassword}:{user:Account;onLogout:()=>Promise<void>;onPassword:()=>void}) {
   const [theme, setTheme] = useTheme();
   const [doc,setDoc]=useState<CircuitDocument>(emptyDocument);
   const docRef=useRef(doc);docRef.current=doc;
@@ -45,11 +45,11 @@ export default function App() {
   const selectComponent=useCallback((id:string|null)=>{setSelectedId(id);setSelectedPort(null);},[]);
   const selectPort=useCallback((endpoint:Endpoint)=>{setSelectedId(endpoint.component_id);setSelectedPort(endpoint.port);},[]);
   const [past,setPast]=useState<CircuitDocument[]>([]),[future,setFuture]=useState<CircuitDocument[]>([]);
-  const [employee,setEmployee]=useState(readEmployee),[employeeError,setEmployeeError]=useState(false);
+  const employee=user.username;
   const [catalog,setCatalog]=useState<CatalogComponent[]>(fallbackCatalog);
   const [presets,setPresets]=useState<Preset[]>([]),[modelCount,setModelCount]=useState(0),[runs,setRuns]=useState<Run[]>([]);
   const [selectedRun,setSelectedRun]=useState<Run|null>(null),[activeRun,setActiveRun]=useState<Run|null>(null);
-  const [view,setView]=useState<WorkspaceView|'models'>(()=>window.location.hash==='#models'?'models':'editor');
+  const [view,setView]=useState<WorkspaceView|'models'|'accounts'>(()=>window.location.hash==='#models'?'models':window.location.hash==='#accounts'&&user.is_admin?'accounts':'editor');
   const workspaceView=useRef<WorkspaceView>('editor');
   const [modelFilters,setModelFilters]=useState<ModelFilters>(defaultModelFilters);
   const [modal,setModal]=useState<'presets'|'history'|'replace'|null>(null);
@@ -59,7 +59,6 @@ export default function App() {
   const [message,setMessage]=useState<{text:string;error:boolean}|null>(null);
   const messageTimer=useRef<ReturnType<typeof setTimeout>>();
   const started=useRef(false);
-  const employeeRef=useRef<HTMLInputElement>(null);
   const displayMessage=useCallback((text:string,error=true)=>{setMessage({text,error});if(messageTimer.current)clearTimeout(messageTimer.current);messageTimer.current=setTimeout(()=>setMessage(null),error?12000:4000);},[]);
   const modelsDeleted=useCallback((ids:string[])=>{
     if(savedRef.current && ids.includes(savedRef.current.id)){
@@ -68,10 +67,11 @@ export default function App() {
     }else displayMessage(`${ids.length} 件のモデルを削除しました。`,false);
   },[displayMessage]);
   const commit=useCallback((next:CircuitDocument)=>{next=pruneNodeLabels(next);const previous=docRef.current;if(JSON.stringify(previous)===JSON.stringify(next))return;setPast(items=>[...items.slice(-49),clone(previous)]);setFuture([]);docRef.current=next;setDoc(next);setDirty(true);},[]);
-  function openModels(){if(view!=='models')workspaceView.current=view;window.location.hash='models';setView('models');}
-  function showWorkspace(next:WorkspaceView=workspaceView.current){workspaceView.current=next;if(window.location.hash==='#models')window.location.hash='workspace';setView(next);}
-  useEffect(()=>{function navigate(){setView(current=>{if(window.location.hash==='#models'){if(current!=='models')workspaceView.current=current;return 'models';}return workspaceView.current;});}window.addEventListener('hashchange',navigate);return()=>window.removeEventListener('hashchange',navigate);},[]);
-  useEffect(()=>{if(view!=='models')workspaceView.current=view;},[view]);
+  function openModels(){if(view!=='models'&&view!=='accounts')workspaceView.current=view;window.location.hash='models';setView('models');}
+  function showWorkspace(next:WorkspaceView=workspaceView.current){workspaceView.current=next;if(['#models','#accounts'].includes(window.location.hash))window.location.hash='workspace';setView(next);}
+  function openAccounts(){if(view!=='models'&&view!=='accounts')workspaceView.current=view;window.location.hash='accounts';setView('accounts');}
+  useEffect(()=>{function navigate(){setView(current=>{if(window.location.hash==='#models'||(window.location.hash==='#accounts'&&user.is_admin)){if(current!=='models'&&current!=='accounts')workspaceView.current=current;return window.location.hash==='#models'?'models':'accounts';}return workspaceView.current;});}window.addEventListener('hashchange',navigate);return()=>window.removeEventListener('hashchange',navigate);},[user.is_admin]);
+  useEffect(()=>{if(view!=='models'&&view!=='accounts')workspaceView.current=view;},[view]);
   function copyCurrent(){setSaved(null);setDirty(true);showWorkspace();displayMessage('コピーとして保存できる状態にしました。保存ボタンで別モデルを作成します。',false);}
   function loadDocument(document:CircuitDocument,savedCircuit:SavedCircuit|null,nextAnalysis?:Analysis){setDoc(clone(document));setSaved(savedCircuit);setDirty(!savedCircuit);setPast([]);setFuture([]);selectComponent(null);setSelectedRun(null);setRuns([]);showWorkspace('editor');setModal(null);if(nextAnalysis)setAnalysis(clone(nextAnalysis));}
   useEffect(()=>{
@@ -86,7 +86,6 @@ export default function App() {
       setInitializing(false);
     }void load();
   },[displayMessage]);
-  useEffect(()=>{try{localStorage.setItem('plasma-circuit.employee-id',employee);}catch{/* browser private mode */}},[employee]);
   useEffect(()=>{const listener=(event:BeforeUnloadEvent)=>{if(dirty){event.preventDefault();event.returnValue='';}};window.addEventListener('beforeunload',listener);return()=>window.removeEventListener('beforeunload',listener);},[dirty]);
   const refreshRuns=useCallback(async(id:string)=>{try{const data=await api<{runs:Run[]}>(`/runs?circuit_id=${encodeURIComponent(id)}`);setRuns(data.runs);}catch(e){displayMessage(errorMessage(e));}},[displayMessage]);
   useEffect(()=>{if(saved?.id)void refreshRuns(saved.id);},[saved?.id,refreshRuns]);
@@ -99,7 +98,6 @@ export default function App() {
   function undo(){if(!past.length)return;setFuture(items=>[clone(doc),...items]);setDoc(past[past.length-1]);setPast(items=>items.slice(0,-1));setDirty(true);selectComponent(null);}
   function redo(){if(!future.length)return;setPast(items=>[...items,clone(doc)]);setDoc(future[0]);setFuture(items=>items.slice(1));setDirty(true);selectComponent(null);}
   useEffect(()=>{function keyboard(event:KeyboardEvent){const target=event.target;if(target instanceof HTMLElement&&(target.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(target.tagName)))return;if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='z'){event.preventDefault();if(event.shiftKey)redo();else undo();}if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='y'){event.preventDefault();redo();}if((event.ctrlKey||event.metaKey)&&!event.shiftKey&&!event.altKey&&event.key.toLowerCase()==='d'&&view==='editor'&&!modal&&docRef.current.components.some(c=>c.id===selectedId)){event.preventDefault();if(!event.repeat)duplicateComponent();}}window.addEventListener('keydown',keyboard);return()=>window.removeEventListener('keydown',keyboard);});
-  function requireEmployee(){if(!employee.trim()){setEmployeeError(true);employeeRef.current?.focus();displayMessage('保存・計算には社員番号を入力してください。');return false;}setEmployeeError(false);return true;}
   function validateScientificInputs(selector='input[data-scientific-input]'){
     const invalid=Array.from(window.document.querySelectorAll<HTMLInputElement>(selector)).find(input=>!input.validity.valid);
     if(!invalid)return true;
@@ -107,7 +105,6 @@ export default function App() {
     invalid.focus();invalid.reportValidity();displayMessage(`${invalid.getAttribute('aria-label')??'数値入力'}: ${invalid.validationMessage}`);return false;
   }
   async function saveCurrent():Promise<SavedCircuit|null>{
-    if(!requireEmployee())return null;
     if(!validateScientificInputs())return null;
     const savedDocument=clone(docRef.current);
     const payload=saved?{employee_id:employee.trim(),expected_revision:saved.revision,document:savedDocument}:{employee_id:employee.trim(),document:savedDocument};
@@ -173,16 +170,17 @@ export default function App() {
   const grouped=useMemo(()=>{
     const result:Record<string,CatalogComponent[]>={};catalog.filter(c=>`${c.kind} ${c.label} ${c.category}`.toLowerCase().includes(search.toLowerCase())).forEach(c=>{(result[c.category??'その他']??=[]).push(c);});return result;
   },[catalog,search]);
-  return <div className={`app-shell ${view==='models'?'models-page':''}`}>
+  async function logout(){if(dirty&&!window.confirm('未保存の変更を閉じてログアウトしますか？'))return;try{await onLogout();}catch(reason){displayMessage(errorMessage(reason));}}
+  return <div className={`app-shell ${view==='models'||view==='accounts'?'models-page':''}`}>
     <aside className="sidebar"><div className="brand"><div className="brand-icon"><Zap size={21}/></div><div><strong>Plasma Circuit</strong><span>SIMULATION WORKSPACE</span></div></div>
-      <div className="sidebar-projects"><button onClick={()=>setModal('presets')}><BookOpen size={16}/>プリセットから始める<ChevronRight size={14}/></button><button onClick={openModels} className={view==='models'?'active':''} aria-current={view==='models'?'page':undefined}><FolderOpen size={16}/>保存済みモデル<span className="count">{modelCount}</span></button></div>
+      <div className="sidebar-projects"><button onClick={()=>setModal('presets')}><BookOpen size={16}/>プリセットから始める<ChevronRight size={14}/></button><button onClick={openModels} className={view==='models'?'active':''} aria-current={view==='models'?'page':undefined}><FolderOpen size={16}/>保存済みモデル<span className="count">{modelCount}</span></button>{user.is_admin&&<button onClick={openAccounts} className={view==='accounts'?'active':''} aria-current={view==='accounts'?'page':undefined}><Users size={16}/>アカウント管理</button>}</div>
       <div className="sidebar-heading"><span>部品ライブラリ</span><span className="count">{catalog.length}</span></div><div className="library-search"><Search size={14}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="部品を検索" aria-label="部品を検索"/></div>
       <div className="library-list">{Object.entries(grouped).map(([category,entries])=><details key={category} open><summary>{category}<ChevronDown size={12}/></summary><div className="palette-grid">{entries.map(entry=><button className="palette-item" key={`${entry.kind}-${entry.label}`} onClick={()=>addComponent(entry)} title={`${entry.label}を追加`}><CircuitSymbol kind={entry.kind}/><span>{entry.label}</span><small>{entry.kind}</small></button>)}</div></details>)}{!Object.keys(grouped).length&&<p className="muted text-small">該当する部品はありません。</p>}</div>
       <div className="sidebar-history"><div className="sidebar-heading"><span><History size={14}/>計算履歴</span><button className="text-button" onClick={()=>setModal('history')}>すべて</button></div>{runs.slice(0,3).map(item=><button className={`recent-run ${selectedRun?.id===item.id?'active':''}`} key={item.id} onClick={()=>void openRun(item.id)}><span className={`status-dot ${item.status}`}/><div><strong>{analysisLabel(item.analysis)}</strong><span>rev.{item.circuit_revision} · {relativeTime(item.created_at)}</span></div><ChevronRight size={13}/></button>)}{!runs.length&&<p>保存した回路の計算履歴が<br/>ここに表示されます。</p>}</div>
       <div className="sidebar-footer"><span className={`status-dot ${connected?'green':'amber'}`}/>{initializing?'接続を確認中':connected?'サーバー接続済み':'サーバー未接続'}<span>v0.1</span></div>
     </aside>
-    <div className="workbench"><header className="topbar"><div className="workspace-title"><span className="eyebrow">CIRCUIT & PLASMA</span><h1>{view==='models'?'モデルライブラリ':'解析ワークスペース'}</h1></div><div className="theme-field"><label htmlFor="appearance">外観</label><select id="appearance" value={theme} onChange={e=>setTheme(e.target.value as ThemePreference)}><option value="system">システム</option><option value="light">ライト</option><option value="dark">ダーク</option></select></div><div className="employee-field"><label htmlFor="employee-id">社員番号 <span>{view==='models'?'保存・削除時に必須':'必須'}</span></label><input id="employee-id" ref={employeeRef} className={employeeError?'invalid':''} value={employee} onChange={e=>{setEmployee(e.target.value);setEmployeeError(false);}} placeholder="例：001234" autoComplete="off" spellCheck={false}/></div><div className="topbar-actions">{view!=='models'&&<><button className="button secondary" disabled={busy} onClick={()=>void save()}>{busy?<LoaderCircle size={15} className="spin"/>:<Save size={15}/>}保存</button>{isBusy(activeRun)?<button className="button danger-outline" onClick={()=>void cancel()} disabled={activeRun?.cancel_requested}><Square size={14}/>{activeRun?.cancel_requested?'停止要求中':'計算を停止'}</button>:<button className="button primary" disabled={busy||initializing} onClick={()=>void run()}><Play size={15} fill="currentColor"/>計算を実行</button>}</>}</div></header>
-      {view==='models'?<ModelLibrary filters={modelFilters} onFiltersChange={setModelFilters} employee={employee} currentId={saved?.id} currentName={doc.name} dirty={dirty} busy={busy} onOpen={id=>void openCircuit(id)} onBack={()=>showWorkspace()} onCopy={copyCurrent} onTotal={setModelCount} onDeleted={modelsDeleted}/>:<>
+    <div className="workbench"><header className="topbar"><div className="workspace-title"><span className="eyebrow">CIRCUIT & PLASMA</span><h1>{view==='models'?'モデルライブラリ':view==='accounts'?'アカウント管理':'解析ワークスペース'}</h1></div><div className="theme-field"><label htmlFor="appearance">外観</label><select id="appearance" value={theme} onChange={e=>setTheme(e.target.value as ThemePreference)}><option value="system">システム</option><option value="light">ライト</option><option value="dark">ダーク</option></select></div><div className="employee-field"><label htmlFor="employee-id">ログイン中 <span>{user.is_admin?'管理者':'一般ユーザー'}</span></label><input id="employee-id" value={employee} readOnly title={user.display_name}/></div><div className="account-actions"><button className="icon-button" aria-label="パスワードを変更" title="パスワードを変更" onClick={onPassword}><KeyRound size={16}/></button><button className="icon-button" aria-label="ログアウト" title="ログアウト" onClick={()=>void logout()}><LogOut size={16}/></button></div><div className="topbar-actions">{view!=='models'&&view!=='accounts'&&<><button className="button secondary" disabled={busy} onClick={()=>void save()}>{busy?<LoaderCircle size={15} className="spin"/>:<Save size={15}/>}保存</button>{isBusy(activeRun)?<button className="button danger-outline" onClick={()=>void cancel()} disabled={activeRun?.cancel_requested}><Square size={14}/>{activeRun?.cancel_requested?'停止要求中':'計算を停止'}</button>:<button className="button primary" disabled={busy||initializing} onClick={()=>void run()}><Play size={15} fill="currentColor"/>計算を実行</button>}</>}</div></header>
+      {view==='accounts'&&user.is_admin?<AccountManagement user={user} onBack={()=>showWorkspace()}/>:view==='models'?<ModelLibrary user={user} filters={modelFilters} onFiltersChange={setModelFilters} employee={employee} currentId={saved?.id} currentName={doc.name} dirty={dirty} busy={busy} onOpen={id=>void openCircuit(id)} onBack={()=>showWorkspace()} onCopy={copyCurrent} onTotal={setModelCount} onDeleted={modelsDeleted} onOwnersChanged={circuits=>{const current=circuits.find(c=>c.id===savedRef.current?.id);if(current)setSaved(previous=>previous?{...previous,revision:current.revision,owner_id:current.owner_id,updated_by:current.updated_by,updated_at:current.updated_at}:previous);}}/>:<>
       <div className="workspace-bar"><div className="document-title"><CircuitBoard size={18}/><strong title={doc.name}>{doc.name}</strong><span className={`document-state ${dirty?'unsaved':''}`}>{dirty?'未保存':saved?`rev.${saved.revision}`:'新規'}</span></div><div className="workspace-actions"><button className="icon-button" aria-label="元に戻す" title="元に戻す Ctrl+Z" onClick={undo} disabled={!past.length}><Undo2 size={16}/></button><button className="icon-button" aria-label="やり直す" title="やり直す Ctrl+Shift+Z" onClick={redo} disabled={!future.length}><Redo2 size={16}/></button><span className="toolbar-divider"/><button className="icon-button" aria-label="回路JSONをダウンロード" title="回路JSONをダウンロード" onClick={downloadDocument}><Download size={16}/></button><button className="text-button" onClick={()=>replacing(()=>loadDocument(emptyDocument(),null,{kind:'transient',settings:clone(defaultSettings.transient)}))}><Plus size={14}/>新規</button></div></div>
       <div className="workbench-body"><main className="main-workspace"><div className="view-tabs"><button className={view==='editor'?'active':''} onClick={()=>setView('editor')}><CircuitBoard size={16}/>{templateMode?'プラズマモデル':'回路エディタ'}</button><button className={view==='results'?'active':''} onClick={()=>setView('results')}><Activity size={16}/>計算結果{isBusy(activeRun)&&<span className="status-dot running"/>}</button><button className={view==='research'?'active':''} onClick={()=>setView('research')}><Layers size={16}/>研究・比較</button><span className="analysis-badge">{analysisLabel(analysis)}</span></div>
         {view==='editor'?templateMode?<PlasmaDiagram gas={String(analysis.settings.gas??'Ar')} global={['global','global_transient'].includes(analysis.kind)} prescribedPower={isPrescribedPower(analysis)} kind={analysis.kind}/>:<Schematic document={doc} selectedId={selectedId} selectedPort={selectedPort} onSelect={selectComponent} onSelectPort={selectPort} onChange={commit} onDuplicate={duplicateComponent} onMessage={displayMessage}/>:view==='results'?<div className="results-scroll"><Results run={selectedRun} onMessage={displayMessage}/></div>:<div className="results-scroll"><Research document={doc} analysis={analysis} saved={saved} employee={employee} runs={runs} saveCurrent={saveCurrent} onOpenRun={id=>void openRun(id)} onImport={(circuit,nextAnalysis)=>replacing(()=>loadDocument(circuit.document,circuit,nextAnalysis))} onMessage={displayMessage}/></div>}

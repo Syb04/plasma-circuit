@@ -1,7 +1,8 @@
 import {useEffect, useRef, useState} from 'react';
 import {ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, CircuitBoard, Copy, Filter, FolderOpen, LoaderCircle, RefreshCw, Search, Trash2, X} from 'lucide-react';
 import {api, ApiError} from './types';
-import type {CircuitList} from './types';
+import type {Account,CircuitList,SavedCircuit} from './types';
+import OwnerAssignment from './OwnerAssignment';
 
 export interface ModelFilters {
   query: string;
@@ -18,7 +19,8 @@ function dateLabel(value: string) {
   return new Date(value).toLocaleString('ja-JP', {year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'});
 }
 
-export default function ModelLibrary({filters, onFiltersChange, employee, currentId, currentName, dirty, busy, onOpen, onBack, onCopy, onTotal, onDeleted}: {
+export default function ModelLibrary({user,filters, onFiltersChange, employee, currentId, currentName, dirty, busy, onOpen, onBack, onCopy, onTotal, onDeleted,onOwnersChanged}: {
+  user:Account;
   filters: ModelFilters;
   onFiltersChange: (next: ModelFilters) => void;
   employee: string;
@@ -31,6 +33,7 @@ export default function ModelLibrary({filters, onFiltersChange, employee, curren
   onCopy: () => void;
   onTotal: (total: number) => void;
   onDeleted: (ids: string[]) => void;
+  onOwnersChanged:(circuits:SavedCircuit[])=>void;
 }) {
   const [data, setData] = useState<CircuitList | null>(null);
   const [loading, setLoading] = useState(true);
@@ -142,6 +145,7 @@ export default function ModelLibrary({filters, onFiltersChange, employee, curren
       <label htmlFor="model-sort">並べ替え<select id="model-sort" aria-label="並べ替え" value={filters.sort} disabled={deleting} onChange={e => filter({sort: e.target.value})}><option value="updated_desc">更新が新しい順</option><option value="updated_asc">更新が古い順</option><option value="name_asc">モデル名の昇順</option><option value="name_desc">モデル名の降順</option><option value="created_desc">作成が新しい順</option></select></label>
       <div className="model-filter-actions"><button className="button small secondary" disabled={!employee.trim() || deleting} onClick={() => filter({updatedBy: employee.trim()})}><Filter size={13}/>自分が更新したモデル</button>{hasFilters && <button className="text-button" disabled={deleting} onClick={() => changeFilters({...defaultModelFilters, pageSize: filters.pageSize})}><X size={13}/>検索条件をクリア</button>}</div>
     </section>
+    <p className="muted text-small model-visibility-note">{user.is_admin?'管理者として全モデルを表示しています。未割当のモデルは管理者だけが閲覧できます。':'自分が所有するモデルだけを表示しています。'}</p>
     <section className="model-library-results" aria-label="モデル一覧" aria-busy={loading}>
       <div className="model-results-toolbar"><p role="status" aria-live="polite">{loading ? 'モデルを読み込んでいます…' : error ? 'モデル一覧を取得できませんでした' : <><strong>{total.toLocaleString()}</strong> 件{hasFilters && data && <span> / 全 {data.total_all.toLocaleString()} 件</span>}</>}</p><button className="button small secondary" disabled={unavailable} onClick={() => {setSelected([]); setActionError(''); setRefresh(n => n + 1);}}><RefreshCw size={13} className={loading ? 'spin' : ''}/>一覧を更新</button></div>
       {!confirmation && actionError && <p className="model-action-error" role="alert">{actionError}</p>}
@@ -152,10 +156,11 @@ export default function ModelLibrary({filters, onFiltersChange, employee, curren
         <button className="button small danger-outline model-delete-button" disabled={unavailable || !selected.length || !employee.trim()} onClick={() => {setActionError(''); setConfirmation(data.circuits.filter(model => selected.includes(model.id)));}}><Trash2 size={14}/>選択したモデルを削除</button>
         {!employee.trim() && <p className="model-delete-help">削除するには上部に社員番号を入力してください。</p>}
       </div>}
+      {user.is_admin&&!loading&&!error&&!!data?.circuits.length&&<OwnerAssignment models={data.circuits.filter(model=>selected.includes(model.id))} disabled={unavailable} onAssigned={circuits=>{onOwnersChanged(circuits);setSelected([]);setActionError('');setRefresh(n=>n+1);}}/>}
       {error ? <div className="model-library-empty" role="alert"><FolderOpen size={30}/><h3>一覧を取得できませんでした</h3><p>{error}</p><button className="button secondary" onClick={() => setRefresh(n => n + 1)}>再試行</button></div>
       : loading ? <div className="model-library-empty"><LoaderCircle size={28} className="spin"/><p>モデルを読み込み中</p></div>
       : !data?.circuits.length ? <div className="model-library-empty"><FolderOpen size={32}/><h3>{hasFilters ? '検索条件に一致するモデルがありません' : '保存済みモデルはまだありません'}</h3><p>{hasFilters ? 'キーワードや更新者、更新期間を変更してください。' : '編集画面でモデルを保存すると、ここに表示されます。'}</p><button className="button secondary" onClick={hasFilters ? () => changeFilters({...defaultModelFilters, pageSize: filters.pageSize}) : onBack}>{hasFilters ? '検索条件をクリア' : '編集画面に戻る'}</button></div>
-      : <div className="model-table-wrap"><table className="model-table"><caption className="sr-only">保存済みモデルの検索結果</caption><thead><tr><th scope="col">モデル</th><th scope="col">作成者</th><th scope="col">更新者</th><th scope="col">更新日時</th><th scope="col">版</th><th scope="col"><span className="sr-only">操作</span></th></tr></thead><tbody>{data.circuits.map(model => <tr key={model.id} data-model-id={model.id} className={[model.id === currentId ? 'current' : '', selected.includes(model.id) ? 'selected' : ''].filter(Boolean).join(' ')}><td data-label="モデル"><div className="model-name"><input type="checkbox" aria-label={`${model.name}を選択`} checked={selected.includes(model.id)} disabled={unavailable} onChange={e => setSelected(ids => e.target.checked ? [...ids, model.id] : ids.filter(id => id !== model.id))}/><CircuitBoard size={18}/><button onClick={() => onOpen(model.id)} disabled={unavailable} aria-label={`${model.name}を開く`}>{model.name}</button>{model.id === currentId && <span className="kind-tag">編集中</span>}</div>{model.description && <p className="model-description" title={model.description}>{model.description}</p>}</td><td data-label="作成者">{model.created_by}</td><td data-label="更新者">{model.updated_by}</td><td data-label="更新日時"><time dateTime={model.updated_at}>{dateLabel(model.updated_at)}</time></td><td data-label="版"><span className="kind-tag">rev.{model.revision}</span></td><td className="model-row-action"><button className="button small secondary" onClick={() => onOpen(model.id)} disabled={unavailable} aria-label={`${model.name}を編集画面で開く`}>開く<ArrowRight size={13}/></button></td></tr>)}</tbody></table></div>}
+      : <div className="model-table-wrap"><table className="model-table"><caption className="sr-only">保存済みモデルの検索結果</caption><thead><tr><th scope="col">モデル</th>{user.is_admin&&<th scope="col">所有者</th>}<th scope="col">作成者</th><th scope="col">更新者</th><th scope="col">更新日時</th><th scope="col">版</th><th scope="col"><span className="sr-only">操作</span></th></tr></thead><tbody>{data.circuits.map(model => <tr key={model.id} data-model-id={model.id} className={[model.id === currentId ? 'current' : '', selected.includes(model.id) ? 'selected' : ''].filter(Boolean).join(' ')}><td data-label="モデル"><div className="model-name"><input type="checkbox" aria-label={`${model.name}を選択`} checked={selected.includes(model.id)} disabled={unavailable} onChange={e => setSelected(ids => e.target.checked ? [...ids, model.id] : ids.filter(id => id !== model.id))}/><CircuitBoard size={18}/><button onClick={() => onOpen(model.id)} disabled={unavailable} aria-label={`${model.name}を開く`}>{model.name}</button>{model.id === currentId && <span className="kind-tag">編集中</span>}</div>{model.description && <p className="model-description" title={model.description}>{model.description}</p>}</td>{user.is_admin&&<td data-label="所有者">{model.owner_username??'管理者のみ（未割当）'}</td>}<td data-label="作成者">{model.created_by}</td><td data-label="更新者">{model.updated_by}</td><td data-label="更新日時"><time dateTime={model.updated_at}>{dateLabel(model.updated_at)}</time></td><td data-label="版"><span className="kind-tag">rev.{model.revision}</span></td><td className="model-row-action"><button className="button small secondary" onClick={() => onOpen(model.id)} disabled={unavailable} aria-label={`${model.name}を編集画面で開く`}>開く<ArrowRight size={13}/></button></td></tr>)}</tbody></table></div>}
       <nav className="model-pagination" aria-label="モデル一覧のページ送り"><label htmlFor="model-page-size">表示件数<select id="model-page-size" aria-label="表示件数" value={filters.pageSize} disabled={deleting} onChange={e => filter({pageSize: Number(e.target.value)})}><option value={25}>25件</option><option value={50}>50件</option><option value={100}>100件</option></select></label><span>{loading ? '—' : `${total ? (filters.page - 1) * filters.pageSize + 1 : 0}–${Math.min(filters.page * filters.pageSize, total)} / ${total.toLocaleString()} 件`}</span><div><button className="button small secondary" aria-label="前のページ" disabled={unavailable || !!error || filters.page <= 1} onClick={() => changeFilters({...filters, page: filters.page - 1})}><ChevronLeft size={14}/>前へ</button><span>{filters.page} / {pages}</span><button className="button small secondary" aria-label="次のページ" disabled={unavailable || !!error || filters.page >= pages} onClick={() => changeFilters({...filters, page: filters.page + 1})}>次へ<ChevronRight size={14}/></button></div></nav>
     </section>
     {confirmation && <div className="modal-backdrop" onMouseDown={e => {if (e.target === e.currentTarget && !deleting) setConfirmation(null);}}><section ref={dialogRef} className="modal compact model-delete-dialog" role="dialog" aria-modal="true" aria-labelledby="model-delete-title" aria-describedby="model-delete-description">

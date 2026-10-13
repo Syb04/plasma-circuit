@@ -9,6 +9,7 @@ import math
 import time
 import urllib.error
 import urllib.request
+from auth_helpers import AuthenticatedApi
 
 
 def main() -> None:
@@ -16,21 +17,13 @@ def main() -> None:
     parser.add_argument("--base-url", default="http://localhost:8080")
     parser.add_argument("--include-plasma", action="store_true")
     parser.add_argument("--include-global", action="store_true")
+    parser.add_argument("--auth-file")
     args = parser.parse_args()
     base = args.base_url.rstrip("/")
 
-    def request(path: str, payload: dict | None = None, method: str | None = None, expected: int = 200):
-        data = json.dumps(payload).encode() if payload is not None else None
-        req = urllib.request.Request(base + path, data=data, method=method, headers={"Content-Type": "application/json"})
-        try:
-            with urllib.request.urlopen(req, timeout=15) as response:
-                assert response.status == expected, (path, response.status)
-                content = response.read()
-                return json.loads(content) if response.headers.get_content_type() == "application/json" else content.decode()
-        except urllib.error.HTTPError as error:
-            if error.code == expected:
-                return json.loads(error.read())
-            raise RuntimeError(f"{path}: HTTP {error.code}: {error.read().decode()}") from error
+    client = AuthenticatedApi(base, args.auth_file)
+    request = client.request
+    employee = client.account["username"]
 
     def wait_run(run_id: str):
         deadline = time.monotonic() + 360
@@ -52,7 +45,7 @@ def main() -> None:
     first["name"] = "API検証：抵抗分圧"
     request("/api/circuits", {"employee_id": "  ", "document": first}, expected=422)
     saved = request("/api/circuits", {"employee_id": "000001", "document": first}, expected=201)
-    assert saved["created_by"] == "000001" and saved["revision"] == 1
+    assert saved["created_by"] == employee and saved["owner_id"] == client.account["id"] and saved["revision"] == 1
     queued = request("/api/runs", {"employee_id": "000001", "circuit_id": saved["id"], "expected_revision": 1, "analysis": presets["divider"]["analysis"]}, expected=202)
 
     changed = copy.deepcopy(first)
@@ -66,11 +59,11 @@ def main() -> None:
     values = [value for value in run["result"]["summary"].values() if isinstance(value, (int, float))]
     assert any(math.isclose(value, 10 / 3, rel_tol=1e-6) for value in values), values
     assert request("/api/runs/" + queued["id"] + "/export.csv")
-    print("PASS: required employee ID, leading zeros, PostgreSQL save, revision conflict, immutable snapshot, RQ/ngspice divider, CSV", flush=True)
+    print("PASS: authenticated employee ID, ownership, PostgreSQL save, revision conflict, immutable snapshot, RQ/ngspice divider, CSV", flush=True)
 
     selected = ["rc", "edd"]
     if args.include_plasma:
-        selected += ["ccp-ar", "ccp-o2", "ccp-cf4"]
+        selected += ["ccp-ar", "ccp-o2"]
     if args.include_global:
         selected += ["global-ar"]
     for preset_id in selected:

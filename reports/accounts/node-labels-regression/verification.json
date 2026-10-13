@@ -1,0 +1,59 @@
+{
+  "completed": true,
+  "api_mocked": false,
+  "solver_results_mocked": false,
+  "checks": [
+    "Clicking terminal names selects electrical nodes; connected terminals share a name; rename/clear and undo/redo update the whole node",
+    "Wire selection opens the correct node; ground terminals share their label; assigning the same name to a different node is rejected without modifying the document",
+    "Actual terminal dragging rejects a connection between differently named nodes; clearing one name permits wiring; undo restores both the original wiring and names",
+    "Real transient solver returns the expected 2/3 divider ratio and zero ground trace; named legend toggles, tooltips, X–Y axes and CSV work while raw signal IDs remain stable",
+    "Saving a new node name and reopening the model restores it on all connected terminals; the existing waveform and reopened historical run keep the name used at calculation time",
+    "Real AC magnitude and phase traces use the saved node name; transient and AC histories retain their own labels",
+    "At 390px, terminal selection reaches the editable node name and apply/clear actions without page overflow",
+    "Only the owned fixture is hidden; existing active models are unchanged, historical runs remain available, and browser runtime errors are zero"
+  ],
+  "browser_runtime_errors": [],
+  "fixture_name": "ノード名検証 1791915470927601489",
+  "runs": [
+    {
+      "id": "a13c83e6-f816-4fe9-b02e-8a52b583e45a",
+      "kind": "transient",
+      "status": "succeeded",
+      "solver": {
+        "pyspice": "1.5",
+        "ngspice": "39"
+      }
+    },
+    {
+      "id": "646d6d7a-4880-4a1b-8491-e1f87594c807",
+      "kind": "ac",
+      "status": "succeeded",
+      "solver": {
+        "pyspice": "1.5",
+        "ngspice": "39"
+      }
+    }
+  ],
+  "source_sha256": {
+    "frontend/src/App.tsx": "a21505a293e527c4c9cf1e5accad54a4f55c32b040e9c3b730453055ec8dfcd8",
+    "frontend/src/Inspector.tsx": "a0ddc3d7097ef77eb476d3734df029c174f7b985550e171d48303556be82f047",
+    "frontend/src/NodeLabels.tsx": "7524d065acfbedbc74c9003319ec08e44666297add0d51d22835a3007463dfaa",
+    "frontend/src/Schematic.tsx": "a074e11f1e6bc6782596eddf714e7a54d8a0d210a9df43b05a3c6b798ace9678",
+    "frontend/src/Results.tsx": "c500a8253d2a9ecec8e26e0262225ca2a6fe8fe1830c6d33f875fda19677e70f",
+    "frontend/src/Research.tsx": "ce8c787849749fd16e6756f50ac8f3b02fe40e96e83e2c94f8e7baca8cd47590",
+    "frontend/src/types.ts": "99bb0870f99021c6dd081f308d361522717b45196b5a7691605089618f925739",
+    "frontend/src/styles.css": "330e6d1225fb1bad5bbc49e0d545c20606cb1c2b8589904ee588420d7d3c7df0",
+    "backend/app/node_labels.py": "12e689b9b86a7692e62b134f5443c518f5a2cb5f2099cee86e12676dcca96a20",
+    "backend/app/schemas.py": "204e42f5f907f9afbe610626a3604ac69f78137a9e2070a8b81f3b2085feb2d8",
+    "backend/app/engine.py": "7365735b6516345a699f4f7ce1f4fce9536d3fe82395137799c66d1afe82b04f",
+    "backend/app/external_rf.py": "248067d9dcc3a6afd288720acb63999afb47f870ea3450f6211bb29462cc4ca6",
+    "backend/app/api.py": "c4f989610b2440809b56c10de0010f4fbd83b6d9be25b18e9ba24f90b295a3e7"
+  },
+  "original_active_models": 3,
+  "frontend_assets": [
+    "/assets/index-D9h3qiS1.js",
+    "/assets/index-DSdSjWVF.css"
+  ],
+  "fixture_id": "4deab25c-17e1-40bc-9d35-a5a92caaf968",
+  "fixture_deleted": true
+}

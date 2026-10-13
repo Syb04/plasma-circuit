@@ -88,11 +88,14 @@ class CoaxPreview(BaseModel):
 
 
 class EmployeeRequest(BaseModel):
-    employee_id: str = Field(min_length=1, max_length=80)
+    # Accepted for older clients; the authenticated account supplies the actor.
+    employee_id: str | None = Field(default=None, min_length=1, max_length=80)
 
     @field_validator("employee_id")
     @classmethod
-    def normalize_employee_id(cls, value: str) -> str:
+    def normalize_employee_id(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
         value = value.strip()
         if not value:
             raise ValueError("社員番号を入力してください")
@@ -129,6 +132,10 @@ class CreateRun(EmployeeRequest):
     circuit_id: str
     expected_revision: int = Field(ge=1)
     analysis: Analysis
+
+
+class AssignOwners(DeleteCircuits):
+    owner_id: str | None = Field(max_length=36)
 
 
 class StudyAxis(BaseModel):

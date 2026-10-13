@@ -17,6 +17,16 @@ from . import database as db
 TERMINAL_STATUSES = {"succeeded", "failed", "canceled", "timed_out"}
 
 
+class SimulationWorker(Worker):
+    def _set_connection(self, connection: Redis) -> Redis:
+        # RQ 2.2 replaces an explicit None timeout with its dequeue timeout.
+        # PubSub then times out during idle and stops receiving stop commands.
+        # Keep the worker's deliberately blocking pool; API pools remain bounded.
+        if connection.connection_pool.connection_kwargs.get("socket_timeout", "unset") is None:
+            return connection
+        return super()._set_connection(connection)
+
+
 def job_timeout() -> int:
     return max(10, min(3600, int(os.getenv("JOB_TIMEOUT_SECONDS", "180"))))
 
@@ -182,7 +192,7 @@ def main() -> None:
     connection = redis_connection(blocking=True)
     queue = Queue(os.getenv("RQ_QUEUE", "simulations"), connection=connection, default_timeout=job_timeout())
     recover_active_runs()
-    worker = Worker([queue], connection=connection, maintenance_interval=30, work_horse_killed_handler=on_work_horse_killed)
+    worker = SimulationWorker([queue], connection=connection, maintenance_interval=30, work_horse_killed_handler=on_work_horse_killed)
     worker.work(with_scheduler=False, logging_level="INFO")
 
 

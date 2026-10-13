@@ -20,18 +20,16 @@ import urllib.request
 import uuid
 
 
-def http_checks(base: str) -> None:
-    def request(path, data=None):
-        payload = json.dumps(data).encode() if data is not None else None
-        req = urllib.request.Request(base.rstrip("/") + path, data=payload, headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=15) as response:
-            return json.load(response)
+def http_checks(base: str, auth_file) -> None:
+    from auth_helpers import AuthenticatedApi
+    client = AuthenticatedApi(base, auth_file)
+    request = client.request
 
     def start(preset, analysis=None):
         document = copy.deepcopy(preset["document"])
         document["name"] = "ジョブ制御検証: " + document["name"]
-        saved = request("/api/circuits", {"employee_id": "000JOBTEST", "document": document})
-        return request("/api/runs", {"employee_id": "000JOBTEST", "circuit_id": saved["id"], "expected_revision": saved["revision"], "analysis": analysis or preset["analysis"]})
+        saved = request("/api/circuits", {"document": document}, expected=201)
+        return request("/api/runs", {"employee_id": "000JOBTEST", "circuit_id": saved["id"], "expected_revision": saved["revision"], "analysis": analysis or preset["analysis"]}, expected=202)
 
     def wait(run_id, target, deadline_seconds=30):
         deadline = time.monotonic() + deadline_seconds
@@ -106,5 +104,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-url", default="http://localhost:8080")
     parser.add_argument("--isolated-timeout", action="store_true")
+    parser.add_argument("--auth-file")
     args = parser.parse_args()
-    isolated_timeout() if args.isolated_timeout else http_checks(args.base_url)
+    isolated_timeout() if args.isolated_timeout else http_checks(args.base_url, args.auth_file)

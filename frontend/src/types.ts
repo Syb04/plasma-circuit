@@ -15,7 +15,7 @@ export type AnalysisKind = 'op' | 'dc' | 'ac' | 'transient' | 'ccp' | 'global' |
 export interface Analysis {kind: AnalysisKind; settings: Record<string, Json>}
 export interface CatalogComponent {kind: string; label: string; category: string; ports: string[]; parameters: Record<string, Json>; description?: string}
 export interface Preset {id: string; name: string; description: string; document: CircuitDocument; analysis: Analysis}
-export interface CircuitSummary {id: string; name: string; description?: string; revision: number; created_by: string; updated_by: string; created_at: string; updated_at: string}
+export interface CircuitSummary {id: string; name: string; description?: string; revision: number; created_by: string; updated_by: string; created_at: string; updated_at: string;owner_id?:string|null;owner_username?:string|null}
 export interface CircuitList {circuits: CircuitSummary[]; total: number; total_all: number; limit: number | null; offset: number}
 export interface SavedCircuit extends CircuitSummary {document: CircuitDocument}
 export type RunStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'canceled' | 'timed_out';
@@ -29,12 +29,23 @@ export interface Signal {name:string;display_name?:string;unit:string;values:num
 export function signalLabel(signal:Pick<Signal,'name'|'display_name'>):string{return signal.display_name??signal.name;}
 export interface Run {id: string; status: RunStatus; circuit_id: string; circuit_revision: number; employee_id: string; analysis: Analysis; created_at: string; error?: string; result?: Result; cancel_requested?: boolean}
 export class ApiError extends Error { constructor(public status: number, message: string) {super(message)} }
+export interface Account {id:string;username:string;display_name:string;is_admin:boolean;is_active:boolean;must_change_password:boolean;created_at:string;deleted_at:string|null}
+export interface AuthSession {account:Account;csrf_token:string}
+export interface AccountList {accounts:Account[];total:number;limit:number;offset:number}
+let csrfToken='';
+export function setCsrfToken(value:string){csrfToken=value;}
+export function notifyAuthFailure(response:Response,payload?:{detail?:unknown}){
+  if(response.status===401||(response.status===403&&typeof payload?.detail==='object'&&payload.detail!==null&&'code' in payload.detail&&payload.detail.code==='password_change_required'))window.dispatchEvent(new Event('plasma-auth-required'));
+}
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(`/api${path}`, {...options, headers: {'Content-Type': 'application/json', ...options.headers}});
+  const headers=new Headers(options.headers);headers.set('Content-Type','application/json');
+  if(csrfToken&&!['GET','HEAD','OPTIONS'].includes(options.method??'GET'))headers.set('X-CSRF-Token',csrfToken);
+  const response = await fetch(`/api${path}`, {...options, credentials:'same-origin', headers});
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
+    if(!path.startsWith('/auth/'))notifyAuthFailure(response,payload);
     const detail = payload.detail ?? payload.error ?? `HTTP ${response.status}`;
-    throw new ApiError(response.status, typeof detail === 'string' ? detail : JSON.stringify(detail, null, 2));
+    throw new ApiError(response.status, typeof detail === 'string' ? detail : detail.message??JSON.stringify(detail, null, 2));
   }
   return payload as T;
 }
@@ -85,5 +96,5 @@ export interface StudyCase {id:string;index:number;coordinates:Record<string,Jso
 export interface Study {id:string;name:string;status:string;circuit_id:string;circuit_revision:number;axes:StudyAxis[];analysis?:Analysis;cases?:StudyCase[];counts:Partial<Record<RunStatus,number>>;created_at?:string;cancel_requested?:boolean;case_count?:number}
 export interface Comparison {runs:{id:string;status:RunStatus;summary:Record<string,Json>;analysis:Analysis}[];input_differences:{path:string;values:Record<string,Json>}[];phase_alignment:{aligned:boolean;reason?:string;frequencies_hz?:number[]};waveforms:{run_id:string;axis?:{name:string;unit:string;values:number[]}|null;signals:Signal[]}[]}
 export interface Benchmark {id:string;name:string;material:string;measurement_definition:string;frequency_hz?:number;pressure_pa?:number;provenance:string|Record<string,Json>;metrics:{metric:string;value:number;unit:string;uncertainty?:number}[]}
-export async function downloadApi(path:string,filename:string){const response=await fetch(`/api${path}`);if(!response.ok){const body=await response.json().catch(()=>({}));throw new Error(typeof body.detail==='string'?body.detail:'エクスポートに失敗しました。');}const url=URL.createObjectURL(await response.blob());const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);}
+export async function downloadApi(path:string,filename:string){const response=await fetch(`/api${path}`,{credentials:'same-origin'});if(!response.ok){const body=await response.json().catch(()=>({}));notifyAuthFailure(response,body);throw new Error(typeof body.detail==='string'?body.detail:'エクスポートに失敗しました。');}const url=URL.createObjectURL(await response.blob());const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);}
 export function emptyDocument(): CircuitDocument {return {schema_version:1,name:'新しい回路',description:'',components:[],wires:[],parameters:{},models:[]};}

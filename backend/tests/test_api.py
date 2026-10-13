@@ -12,7 +12,10 @@ from fastapi.testclient import TestClient
 from redis.exceptions import ConnectionError
 from rq.exceptions import NoSuchJobError
 
-from app import api, database as db, worker
+from app import api, auth, database as db, worker
+
+TEST_PASSWORD = "test-password-000123"
+TEST_PASSWORD_HASH = auth.hash_password(TEST_PASSWORD)
 
 
 class FakeConnection:
@@ -65,6 +68,15 @@ def client(tmp_path, monkeypatch):
 
     monkeypatch.setattr(api.Job, "fetch", classmethod(fetch))
     with TestClient(api.app) as test_client:
+        with db.session() as session:
+            account = db.Account(username="000123", display_name="検証管理者", password_hash=TEST_PASSWORD_HASH,
+                                 is_admin=True, must_change_password=False)
+            session.add(account)
+            session.commit()
+        logged_in = test_client.post("/api/auth/login", json={"username": "000123", "password": TEST_PASSWORD})
+        assert logged_in.status_code == 200, logged_in.text
+        test_client.account = logged_in.json()["account"]
+        test_client.headers["X-CSRF-Token"] = logged_in.json()["csrf_token"]
         test_client.queue = queue
         yield test_client
     db.engine.dispose()
@@ -94,8 +106,10 @@ def solver(monkeypatch, function):
     monkeypatch.setitem(sys.modules, "app.engine", types.SimpleNamespace(execute_circuit=function))
 
 
-def test_employee_required_and_leading_zero_preserved(client):
-    assert client.post("/api/circuits", json={"document": document()}).status_code == 422
+def test_authenticated_employee_and_leading_zero_preserved(client):
+    created = client.post("/api/circuits", json={"document": document()})
+    assert created.status_code == 201
+    assert created.json()["created_by"] == "000123"
     assert client.post("/api/circuits", json={"employee_id": "  ", "document": document()}).status_code == 422
     saved = save(client)
     assert saved["created_by"] == saved["updated_by"] == "000123"
@@ -183,7 +197,7 @@ def test_revision_conflict_and_immutable_run_snapshot(client):
     response = client.put(f"/api/circuits/{saved['id']}", json={"employee_id": "000456", "expected_revision": 1, "document": document(value=2200)})
     assert response.status_code == 200
     assert response.json()["revision"] == 2
-    assert response.json()["updated_by"] == "000456"
+    assert response.json()["updated_by"] == "000123"  # Request identity cannot spoof the actor.
     stale = client.put(f"/api/circuits/{saved['id']}", json={"employee_id": "000123", "expected_revision": 1, "document": document(value=999)})
     assert stale.status_code == 409
     old_run = client.get(f"/api/runs/{created['id']}").json()

@@ -1,0 +1,85 @@
+{
+  "completed": true,
+  "api_mocked": false,
+  "solver_results_mocked": false,
+  "database": "isolated PostgreSQL",
+  "checks": [
+    "Unauthenticated pages show login; protected model/run/account APIs reject requests; 390px login has no overflow",
+    "Console-issued temporary administrator password must be changed before entering the workspace",
+    "Admin UI issues two normal accounts and shows passwords once; both users must change them; account identity is read-only and admin navigation is hidden",
+    "Browser saves preserve authenticated owners; each model list, count and direct ID lookup exposes only its own model",
+    "UI calculation and concurrent submissions complete three real ngspice jobs with 2/3 divider voltages; foreign histories/CSV/packages are denied and admin access succeeds",
+    "Admin model-list assignment reveals unassigned models only to the chosen user; transferring ownership also transfers immutable run-history access",
+    "Changing a personal password rotates the session and preserves unsaved edits; modal keyboard shortcuts do not duplicate underlying components",
+    "Admin password reset revokes an existing browser session; its next operation returns to login and the new temporary password must be changed",
+    "Admin role changes and deactivation revoke prior sessions; reactivation permits a fresh login with current permissions",
+    "At 390px, normal model lists and administrator account controls are usable without horizontal page overflow",
+    "Deleting an account immediately removes login access while models and successful calculation histories remain available to administrators",
+    "Concurrent cross-deactivation of the final two administrators is serialized by PostgreSQL; one remains active and self-deletion is refused"
+  ],
+  "browser_runtime_errors": [],
+  "runs": [
+    {
+      "id": "8eeb146f-5a71-4737-bad9-b4c87c1bddaf",
+      "status": "succeeded",
+      "employee_id": "qa-a-1791915358733849274",
+      "solver": {
+        "pyspice": "1.5",
+        "ngspice": "39"
+      },
+      "output_v": 3.333333333333333,
+      "expected_v": 3.3333333333333335
+    },
+    {
+      "id": "5f89c259-60e5-4f12-9cc5-07de715b7072",
+      "status": "succeeded",
+      "employee_id": "qa-a-1791915358733849274",
+      "solver": {
+        "pyspice": "1.5",
+        "ngspice": "39"
+      },
+      "output_v": 3.333333333333333,
+      "expected_v": 3.3333333333333335
+    },
+    {
+      "id": "59e9e561-26f1-4026-b9c6-e0d972ee7526",
+      "status": "succeeded",
+      "employee_id": "qa-b-1791915358733849274",
+      "solver": {
+        "pyspice": "1.5",
+        "ngspice": "39"
+      },
+      "output_v": 8.0,
+      "expected_v": 8.0
+    }
+  ],
+  "source_sha256": {
+    "backend/app/access.py": "0bc2bdd084aa9ad65026b021f6968f1a83fa989a335699146363cded8624719b",
+    "backend/app/accounts.py": "8537a20bdcecdf260555d9ae2270f8ca01dac307350c2cb5ce0f0f7fcd8b3010",
+    "backend/app/api.py": "c4f989610b2440809b56c10de0010f4fbd83b6d9be25b18e9ba24f90b295a3e7",
+    "backend/app/auth.py": "c1a8e3338eaad7d0a486681d6e93080bacb6df180f7c2b8840843d17a3dbd412",
+    "backend/app/database.py": "ab2c6d2b682a0d4a7870b85c4f908ebe273a440aafca8f689f5cecd478ba371e",
+    "backend/app/schemas.py": "204e42f5f907f9afbe610626a3604ac69f78137a9e2070a8b81f3b2085feb2d8",
+    "frontend/nginx.conf": "8140b1ae4e5085da880e3e16ef6b97f84c9174e605075b7bfccbba3a4634ab15",
+    "frontend/src/Accounts.tsx": "122ea3faf4cf3a71c060e29355cf1b5441424a06b73764f1385a945c8d51c798",
+    "frontend/src/Auth.tsx": "ef542265aa6eab7f46a02008dcb2d295d4e32bcd797459e4ece0694e6c07d88b",
+    "frontend/src/App.tsx": "a21505a293e527c4c9cf1e5accad54a4f55c32b040e9c3b730453055ec8dfcd8",
+    "frontend/src/OwnerAssignment.tsx": "65ec7b0f8082c405b4d1f36fe89cfff598d4c922e47492c483bbdf4d9808781d",
+    "frontend/src/ModelLibrary.tsx": "dfcfdf0e2f882555d4d25b4422d9c8593b22b2977f8171d4d7c0db308a04e19d",
+    "frontend/src/types.ts": "99bb0870f99021c6dd081f308d361522717b45196b5a7691605089618f925739",
+    "frontend/src/styles.css": "330e6d1225fb1bad5bbc49e0d545c20606cb1c2b8589904ee588420d7d3c7df0",
+    "frontend/src/main.tsx": "d0bf7b7f20a0735a02e16651740c25408c1573854dd97bd8999dba76d2a5c17c",
+    "compose.yaml": "621bca15082b129b6588dfe36838238719ad8f59d9fab2f0f0fb9bd1b4521879"
+  },
+  "frontend_assets": [
+    "/assets/index-D9h3qiS1.js",
+    "/assets/index-DSdSjWVF.css"
+  ],
+  "concurrent_admin_updates": {
+    "statuses": [
+      200,
+      403
+    ],
+    "remaining_active_admins": 1
+  }
+}

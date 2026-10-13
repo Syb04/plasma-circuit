@@ -14,3 +14,4 @@ frontend/*.tsbuildinfo
 *.sqlite
 test-results/
 artifacts/
+.private/

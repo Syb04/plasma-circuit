@@ -1,0 +1,18 @@
+# Disposable acceptance stack only. Use the plasma-auth-check project; down -v removes only its test data.
+name: plasma-auth-check
+services:
+  db:
+    environment:
+      POSTGRES_PASSWORD: auth-qa-only
+  api:
+    environment:
+      DATABASE_URL: postgresql+psycopg://plasma:auth-qa-only@db:5432/plasma
+      AUTH_COOKIE_SECURE: 'false'
+  worker:
+    environment:
+      DATABASE_URL: postgresql+psycopg://plasma:auth-qa-only@db:5432/plasma
+      AUTH_COOKIE_SECURE: 'false'
+  frontend:
+    image: plasma-circuit-frontend
+    ports: !override
+      - '127.0.0.1:8081:80'

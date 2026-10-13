@@ -32,7 +32,7 @@ def test_batch_delete_hides_only_selected_models_and_records_employee(client):
     with db.session() as session:
         for circuit in (first, second):
             row = session.get(db.Circuit, circuit["id"])
-            assert row.deleted_by == "000456" and row.deleted_at is not None
+            assert row.deleted_by == "000123" and row.deleted_at is not None
             assert row.revision == circuit["revision"] and row.updated_by == circuit["updated_by"]
             assert row.document == circuit["document"]
         assert session.query(db.CircuitRevision).count() == 3
@@ -62,15 +62,13 @@ def test_stale_missing_or_deleted_target_aborts_the_whole_batch(client, invalid)
         assert client.get(f"/api/circuits/{second['id']}").status_code == 404
 
 
-@pytest.mark.parametrize("mutation", ["missing_employee", "blank_employee", "empty", "duplicates", "too_many",
+@pytest.mark.parametrize("mutation", ["blank_employee", "empty", "duplicates", "too_many",
     "zero_revision", "float_revision", "boolean_revision", "string_revision", "missing_revision", "unknown_field", "target_unknown_field"])
 def test_invalid_deletion_never_writes(client, mutation):
     circuit = save(client)
     unchanged = client.get(f"/api/circuits/{circuit['id']}").json()
     payload = {"employee_id": "000456", "circuits": [{"id": circuit["id"], "expected_revision": 1}]}
-    if mutation == "missing_employee":
-        payload.pop("employee_id")
-    elif mutation == "blank_employee":
+    if mutation == "blank_employee":
         payload["employee_id"] = "  "
     elif mutation == "empty":
         payload["circuits"] = []
@@ -196,8 +194,8 @@ def test_existing_sqlite_database_is_migrated_without_changing_saved_inputs(tmp_
         for _ in range(2):
             db.init_database()
             with db.engine.connect() as connection:
-                assert tuple(connection.execute(text("SELECT * FROM circuits")).one()) == (*original_row, None, None)
-                assert {column["name"] for column in inspect(connection).get_columns("circuits")} >= {"deleted_at", "deleted_by"}
+                assert tuple(connection.execute(text("SELECT * FROM circuits")).one()) == (*original_row, None, None, None)
+                assert {column["name"] for column in inspect(connection).get_columns("circuits")} >= {"deleted_at", "deleted_by", "owner_id"}
             with db.session() as session:
                 assert session.query(db.CircuitRevision).one().document == snapshot
                 result = session.get(db.SimulationRun, "legacy-run")

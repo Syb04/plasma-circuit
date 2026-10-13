@@ -9,7 +9,9 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from typing import Any, Literal
 
-from fastapi import Depends, FastAPI, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, Query, Response
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from redis.exceptions import RedisError
 from rq.command import send_stop_job_command
@@ -19,8 +21,8 @@ from sqlalchemy import and_, func, or_, select, text, update
 from sqlalchemy.orm import Session
 
 from . import database as db
-from . import worker, studies, benchmarks, analysis_package
-from .schemas import (CoaxPreview, CompareBenchmark, CompareRuns, CreateBenchmark, CreateRun, CreateStudy,
+from . import worker, studies, benchmarks, analysis_package, auth, access
+from .schemas import (AssignOwners, CoaxPreview, CompareBenchmark, CompareRuns, CreateBenchmark, CreateRun, CreateStudy,
                       DeleteCircuits, EmployeeRequest, ImportPackage, SaveCircuit, UpdateCircuit)
 
 logger = logging.getLogger(__name__)
@@ -37,11 +39,29 @@ async def lifespan(application: FastAPI):
 
 
 app = FastAPI(title="プラズマ回路シミュレーター", version="0.1.0", lifespan=lifespan)
+protected = APIRouter(dependencies=[Depends(auth.require_user)])
 origins = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",") if origin.strip()]
-app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST", "PUT"], allow_headers=["Content-Type"])
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True,
+                   allow_methods=["GET", "POST", "PUT", "DELETE"], allow_headers=["Content-Type", "X-CSRF-Token"])
 
 
-@app.post("/api/coax/preview")
+@app.exception_handler(RequestValidationError)
+async def validation_error(request, exc):
+    # Never echo a password or uploaded document into validation responses.
+    return JSONResponse(status_code=422, content={"detail": [
+        {key: item[key] for key in ("type", "loc", "msg") if key in item} for item in exc.errors()]})
+
+
+@app.middleware("http")
+async def private_responses(request, call_next):
+    response = await call_next(request)
+    if request.url.path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
+@protected.post("/api/coax/preview")
 def preview_coax(request: CoaxPreview):
     from .coax import Coax
     try:
@@ -50,9 +70,7 @@ def preview_coax(request: CoaxPreview):
         raise HTTPException(422, str(exc)) from exc
 
 
-def get_session():
-    with db.session() as session:
-        yield session
+get_session = auth.get_session
 
 
 def iso(value: datetime | None) -> str | None:
@@ -68,6 +86,7 @@ def circuit_response(circuit: db.Circuit, detail: bool = True) -> dict[str, Any]
         "updated_by": circuit.updated_by,
         "created_at": iso(circuit.created_at),
         "updated_at": iso(circuit.updated_at),
+        "owner_id": circuit.owner_id,
     }
     if detail:
         result["document"] = circuit.document
@@ -128,7 +147,7 @@ def health(session: Session = Depends(get_session)):
     return {"status": "ok" if queue_status == "ok" else "degraded", "database": "ok", "queue": queue_status, "pyspice": pyspice_version}
 
 
-@app.get("/api/catalog")
+@protected.get("/api/catalog")
 def catalog():
     try:
         from .catalog import get_catalog
@@ -137,7 +156,7 @@ def catalog():
     return get_catalog()
 
 
-@app.get("/api/presets")
+@protected.get("/api/presets")
 def presets():
     try:
         from .presets import get_presets
@@ -146,7 +165,7 @@ def presets():
     return get_presets()
 
 
-@app.get("/api/circuits")
+@protected.get("/api/circuits")
 def list_circuits(
     q: str = Query("", max_length=200),
     updated_by: str = Query("", max_length=80),
@@ -155,12 +174,13 @@ def list_circuits(
     limit: int | None = Query(None, ge=1, le=100),
     offset: int = Query(0, ge=0),
     session: Session = Depends(get_session),
+    user: db.Account = Depends(auth.require_user),
 ):
     # Keep the original unpaginated API available to existing clients. The UI
     # always supplies a bounded limit and never downloads every document.
     circuit = db.Circuit
     description = circuit.document["description"].as_string()
-    filters = [circuit.deleted_at.is_(None)]
+    filters = [circuit.deleted_at.is_(None), access.circuit_scope(user)]
     if term := q.strip():
         filters.append(or_(*(column.icontains(term, autoescape=True) for column in
                              (circuit.name, description, circuit.created_by, circuit.updated_by))))
@@ -176,10 +196,10 @@ def list_circuits(
         "created_desc": circuit.created_at.desc(),
     }
     total = session.scalar(select(func.count()).select_from(circuit).where(*filters))
-    total_all = session.scalar(select(func.count()).select_from(circuit).where(circuit.deleted_at.is_(None)))
+    total_all = session.scalar(select(func.count()).select_from(circuit).where(circuit.deleted_at.is_(None), access.circuit_scope(user)))
     statement = select(circuit.id, circuit.name, circuit.revision, circuit.created_by,
                        circuit.updated_by, circuit.created_at, circuit.updated_at,
-                       description.label("description")).where(*filters).order_by(orders[sort], circuit.id).offset(offset)
+                       description.label("description"), circuit.owner_id, db.Account.username.label("owner_username")).outerjoin(db.Account, circuit.owner_id == db.Account.id).where(*filters).order_by(orders[sort], circuit.id).offset(offset)
     if limit is not None:
         statement = statement.limit(limit)
     circuits = [{**row, "description": row["description"] or "",
@@ -188,23 +208,23 @@ def list_circuits(
     return {"circuits": circuits, "total": total, "total_all": total_all, "limit": limit, "offset": offset}
 
 
-@app.post("/api/circuits", status_code=201)
-def create_circuit(request: SaveCircuit, session: Session = Depends(get_session)):
+@protected.post("/api/circuits", status_code=201)
+def create_circuit(request: SaveCircuit, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
     document = finite_json(request.document.model_dump())
-    circuit = db.Circuit(name=document["name"], document=document, created_by=request.employee_id, updated_by=request.employee_id)
+    circuit = db.Circuit(name=document["name"], document=document, created_by=user.username, updated_by=user.username, owner_id=user.id)
     session.add(circuit)
     session.flush()
-    session.add(db.CircuitRevision(circuit_id=circuit.id, revision=1, document=db.json_copy(document), employee_id=request.employee_id))
+    session.add(db.CircuitRevision(circuit_id=circuit.id, revision=1, document=db.json_copy(document), employee_id=user.username))
     session.commit()
     return circuit_response(circuit)
 
 
-@app.post("/api/circuits/delete")
-def delete_circuits(request: DeleteCircuits, session: Session = Depends(get_session)):
+@protected.post("/api/circuits/delete")
+def delete_circuits(request: DeleteCircuits, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
     ids = [target.id for target in request.circuits]
     # A consistent lock order makes overlapping batch deletes serialize safely.
     circuits = {circuit.id: circuit for circuit in session.scalars(
-        select(db.Circuit).where(db.Circuit.id.in_(ids)).order_by(db.Circuit.id).with_for_update()
+        select(db.Circuit).where(db.Circuit.id.in_(ids), access.circuit_scope(user)).order_by(db.Circuit.id).with_for_update()
     )}
     for target in request.circuits:
         circuit = circuits.get(target.id)
@@ -217,7 +237,7 @@ def delete_circuits(request: DeleteCircuits, session: Session = Depends(get_sess
         db.Circuit.deleted_at.is_(None),
         or_(*(and_(db.Circuit.id == target.id, db.Circuit.revision == target.expected_revision)
               for target in request.circuits)),
-    ).values(deleted_at=deleted_at, deleted_by=request.employee_id))
+    ).values(deleted_at=deleted_at, deleted_by=user.username))
     if result.rowcount != len(ids):
         session.rollback()
         raise HTTPException(409, "モデルの状態が変わりました。一覧を更新して選び直してください。今回は削除していません")
@@ -225,45 +245,39 @@ def delete_circuits(request: DeleteCircuits, session: Session = Depends(get_sess
     return {"deleted_ids": ids, "deleted_at": iso(deleted_at)}
 
 
-@app.get("/api/circuits/{circuit_id}")
-def get_circuit(circuit_id: str, session: Session = Depends(get_session)):
-    circuit = session.get(db.Circuit, circuit_id)
-    if circuit is None or circuit.deleted_at is not None:
-        raise HTTPException(404, "回路が見つかりません")
+@protected.get("/api/circuits/{circuit_id}")
+def get_circuit(circuit_id: str, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
+    circuit = access.require_circuit(session, circuit_id, user)
     return circuit_response(circuit)
 
 
-@app.put("/api/circuits/{circuit_id}")
-def update_circuit(circuit_id: str, request: UpdateCircuit, session: Session = Depends(get_session)):
+@protected.put("/api/circuits/{circuit_id}")
+def update_circuit(circuit_id: str, request: UpdateCircuit, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
     document = finite_json(request.document.model_dump())
     result = session.execute(
         update(db.Circuit)
-        .where(db.Circuit.id == circuit_id, db.Circuit.revision == request.expected_revision, db.Circuit.deleted_at.is_(None))
-        .values(name=document["name"], document=document, revision=request.expected_revision + 1, updated_by=request.employee_id, updated_at=db.utcnow())
+        .where(db.Circuit.id == circuit_id, db.Circuit.revision == request.expected_revision, db.Circuit.deleted_at.is_(None), access.circuit_scope(user))
+        .values(name=document["name"], document=document, revision=request.expected_revision + 1, updated_by=user.username, updated_at=db.utcnow())
     )
     if result.rowcount != 1:
         session.rollback()
-        circuit = session.get(db.Circuit, circuit_id)
-        if circuit is None or circuit.deleted_at is not None:
-            raise HTTPException(404, "回路が見つかりません")
+        access.require_circuit(session, circuit_id, user)
         raise HTTPException(409, "他の保存で回路が更新されています。最新の回路を読み込んでから保存してください")
-    session.add(db.CircuitRevision(circuit_id=circuit_id, revision=request.expected_revision + 1, document=document, employee_id=request.employee_id))
+    session.add(db.CircuitRevision(circuit_id=circuit_id, revision=request.expected_revision + 1, document=document, employee_id=user.username))
     session.commit()
     circuit = session.get(db.Circuit, circuit_id, populate_existing=True)
     return circuit_response(circuit)
 
 
-@app.post("/api/runs", status_code=202)
-def create_run(request: CreateRun, session: Session = Depends(get_session)):
-    circuit = session.get(db.Circuit, request.circuit_id, with_for_update=True)
-    if circuit is None or circuit.deleted_at is not None:
-        raise HTTPException(404, "回路が見つかりません")
+@protected.post("/api/runs", status_code=202)
+def create_run(request: CreateRun, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
+    circuit = access.require_circuit(session, request.circuit_id, user, lock=True)
     if circuit.revision != request.expected_revision:
         raise HTTPException(409, "回路が更新されています。最新の回路を確認してから計算してください")
     run = db.SimulationRun(
         circuit_id=circuit.id,
         circuit_revision=circuit.revision,
-        employee_id=request.employee_id,
+        employee_id=user.username,
         snapshot=db.json_copy(circuit.document),
         analysis=finite_json(request.analysis.model_dump()),
         runtime_config=worker.runtime_config(),
@@ -280,28 +294,25 @@ def create_run(request: CreateRun, session: Session = Depends(get_session)):
     return run_response(run)
 
 
-@app.get("/api/runs")
-def list_runs(circuit_id: str | None = None, session: Session = Depends(get_session)):
-    query = select(db.SimulationRun).order_by(db.SimulationRun.created_at.desc()).limit(100)
+@protected.get("/api/runs")
+def list_runs(circuit_id: str | None = None, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
+    query = select(db.SimulationRun).join(db.Circuit).where(access.circuit_scope(user)).order_by(db.SimulationRun.created_at.desc()).limit(100)
     if circuit_id:
+        access.require_circuit(session, circuit_id, user, include_deleted=True)
         query = query.where(db.SimulationRun.circuit_id == circuit_id)
     runs = session.scalars(query).all()
     return {"runs": [run_response(reconcile(run, session), detail=False) for run in runs]}
 
 
-@app.get("/api/runs/{run_id}")
-def get_run(run_id: str, session: Session = Depends(get_session)):
-    run = session.get(db.SimulationRun, run_id)
-    if run is None:
-        raise HTTPException(404, "計算履歴が見つかりません")
+@protected.get("/api/runs/{run_id}")
+def get_run(run_id: str, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
+    run = access.require_run(session, run_id, user)
     return run_response(reconcile(run, session))
 
 
-@app.post("/api/runs/{run_id}/cancel")
-def cancel_run(run_id: str, session: Session = Depends(get_session)):
-    run = session.get(db.SimulationRun, run_id, with_for_update=True)
-    if run is None:
-        raise HTTPException(404, "計算履歴が見つかりません")
+@protected.post("/api/runs/{run_id}/cancel")
+def cancel_run(run_id: str, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
+    run = access.require_run(session, run_id, user, lock=True)
     if run.status in worker.TERMINAL_STATUSES:
         return run_response(run)
     was_queued = run.status == "queued"
@@ -333,11 +344,9 @@ def cancel_run(run_id: str, session: Session = Depends(get_session)):
     return run_response(run)
 
 
-@app.get("/api/runs/{run_id}/export.csv")
-def export_csv(run_id: str, session: Session = Depends(get_session)):
-    run = session.get(db.SimulationRun, run_id)
-    if run is None:
-        raise HTTPException(404, "計算履歴が見つかりません")
+@protected.get("/api/runs/{run_id}/export.csv")
+def export_csv(run_id: str, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
+    run = access.require_run(session, run_id, user)
     if run.status != "succeeded" or run.result_compressed is None:
         raise HTTPException(409, "計算が正常終了した後にCSVを取得できます")
     result = db.decompress_result(run.result_compressed)
@@ -366,25 +375,16 @@ def export_csv(run_id: str, session: Session = Depends(get_session)):
     return Response(content="\ufeff" + output.getvalue(), media_type="text/csv; charset=utf-8", headers={"Content-Disposition": f'attachment; filename="simulation-{run_id}.csv"'})
 
 
-def require_study(study_id: str, session: Session, lock: bool = False) -> db.Study:
-    study = session.get(db.Study, study_id, with_for_update=lock)
-    if study is None:
-        raise HTTPException(404, "Study not found")
-    return study
-
-
 def reconcile_study(study: db.Study, session: Session) -> None:
     for _, attempts in studies.case_records(session, study.id):
         if attempts:
             reconcile(attempts[-1][1], session)
 
 
-@app.post("/api/studies", status_code=202)
-def create_study(request: CreateStudy, session: Session = Depends(get_session)):
+@protected.post("/api/studies", status_code=202)
+def create_study(request: CreateStudy, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
     # The lock serializes snapshotting with the revision CAS used by circuit saves.
-    circuit = session.get(db.Circuit, request.circuit_id, with_for_update=True)
-    if circuit is None or circuit.deleted_at is not None:
-        raise HTTPException(404, "Circuit not found")
+    circuit = access.require_circuit(session, request.circuit_id, user, lock=True)
     if circuit.revision != request.expected_revision:
         raise HTTPException(409, "Circuit revision changed; reload the circuit before creating a study")
     axes, analysis = finite_json([a.model_dump() for a in request.axes]), finite_json(request.analysis.model_dump())
@@ -393,7 +393,7 @@ def create_study(request: CreateStudy, session: Session = Depends(get_session)):
     except (ValueError, TypeError) as exc:
         raise HTTPException(422, str(exc)) from exc
     study = db.Study(name=request.name, circuit_id=circuit.id, circuit_revision=circuit.revision,
-                     employee_id=request.employee_id, snapshot=db.json_copy(circuit.document), analysis=analysis, axes=axes)
+                     employee_id=user.username, snapshot=db.json_copy(circuit.document), analysis=analysis, axes=axes)
     session.add(study)
     session.flush()
     runtime = worker.runtime_config()
@@ -402,7 +402,7 @@ def create_study(request: CreateStudy, session: Session = Depends(get_session)):
         case = db.StudyCase(study_id=study.id, case_index=index, coordinates=coordinates)
         session.add(case)
         session.flush()
-        runs.append(studies.new_attempt(session, study, case, 1, request.employee_id, document, case_analysis, runtime))
+        runs.append(studies.new_attempt(session, study, case, 1, user.username, document, case_analysis, runtime))
     # Every case exists before any queue submission. Queue failures are case
     # failures retained in history, not partial database batches.
     session.commit()
@@ -411,10 +411,11 @@ def create_study(request: CreateStudy, session: Session = Depends(get_session)):
     return studies.response(session.get(db.Study, study.id), session)
 
 
-@app.get("/api/studies")
-def list_studies(circuit_id: str | None = None, session: Session = Depends(get_session)):
-    query = select(db.Study).order_by(db.Study.created_at.desc()).limit(100)
+@protected.get("/api/studies")
+def list_studies(circuit_id: str | None = None, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
+    query = select(db.Study).join(db.Circuit).where(access.circuit_scope(user)).order_by(db.Study.created_at.desc()).limit(100)
     if circuit_id:
+        access.require_circuit(session, circuit_id, user, include_deleted=True)
         query = query.where(db.Study.circuit_id == circuit_id)
     result = []
     for study in session.scalars(query).all():
@@ -423,27 +424,27 @@ def list_studies(circuit_id: str | None = None, session: Session = Depends(get_s
     return {"studies": result}
 
 
-@app.get("/api/studies/{study_id}")
-def get_study(study_id: str, session: Session = Depends(get_session)):
-    study = require_study(study_id, session)
+@protected.get("/api/studies/{study_id}")
+def get_study(study_id: str, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
+    study = access.require_study(session, study_id, user)
     reconcile_study(study, session)
     return studies.response(study, session)
 
 
-@app.post("/api/studies/{study_id}/cancel")
-def cancel_study(study_id: str, session: Session = Depends(get_session)):
-    study = require_study(study_id, session, lock=True)
+@protected.post("/api/studies/{study_id}/cancel")
+def cancel_study(study_id: str, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
+    study = access.require_study(session, study_id, user, lock=True)
     study.cancel_requested = True
     session.commit()
     ids = [attempts[-1][1].id for _, attempts in studies.case_records(session, study.id) if attempts and attempts[-1][1].status not in worker.TERMINAL_STATUSES]
     for run_id in ids:
-        cancel_run(run_id, session)
+        cancel_run(run_id, session, user)
     return studies.response(study, session)
 
 
-@app.post("/api/studies/{study_id}/resume", status_code=202)
-def resume_study(study_id: str, request: EmployeeRequest, session: Session = Depends(get_session)):
-    study = require_study(study_id, session, lock=True)
+@protected.post("/api/studies/{study_id}/resume", status_code=202)
+def resume_study(study_id: str, request: EmployeeRequest, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
+    study = access.require_study(session, study_id, user, lock=True)
     # Each retry is a new run, preserving original failures and their diagnostics.
     runtime, run_ids = worker.runtime_config(), []
     for case, attempts in studies.case_records(session, study.id):
@@ -452,7 +453,7 @@ def resume_study(study_id: str, request: EmployeeRequest, session: Session = Dep
         last_attempt, previous = attempts[-1]
         if previous.status not in {"failed", "timed_out", "canceled"}:
             continue
-        new_run = studies.new_attempt(session, study, case, last_attempt.number + 1, request.employee_id,
+        new_run = studies.new_attempt(session, study, case, last_attempt.number + 1, user.username,
                                       db.json_copy(previous.snapshot), db.json_copy(previous.analysis), runtime)
         run_ids.append(new_run.id)
     if not run_ids:
@@ -464,9 +465,9 @@ def resume_study(study_id: str, request: EmployeeRequest, session: Session = Dep
     return studies.response(session.get(db.Study, study_id), session)
 
 
-@app.get("/api/studies/{study_id}/export.csv")
-def export_study_csv(study_id: str, session: Session = Depends(get_session)):
-    study = require_study(study_id, session)
+@protected.get("/api/studies/{study_id}/export.csv")
+def export_study_csv(study_id: str, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
+    study = access.require_study(session, study_id, user)
     reconcile_study(study, session)
     records, summary_keys = [], set()
     for case, attempts in studies.case_records(session, study.id):
@@ -486,15 +487,13 @@ def export_study_csv(study_id: str, session: Session = Depends(get_session)):
                     headers={"Content-Disposition": f'attachment; filename="study-{study_id}.csv"'})
 
 
-@app.post("/api/compare")
-def compare(request: CompareRuns, session: Session = Depends(get_session)):
+@protected.post("/api/compare")
+def compare(request: CompareRuns, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
     if len(set(request.run_ids)) != len(request.run_ids):
         raise HTTPException(422, "Select distinct runs")
     records = []
     for run_id in request.run_ids:
-        run = session.get(db.SimulationRun, run_id)
-        if run is None:
-            raise HTTPException(404, f"Run not found: {run_id}")
+        run = access.require_run(session, run_id, user)
         records.append(run_response(reconcile(run, session)))
     return benchmarks.compare_runs(records, request.phase_align)
 
@@ -503,38 +502,34 @@ def benchmark_response(reference: db.Benchmark) -> dict:
     return {**reference.reference, "id": reference.id, "created_at": reference.created_at.isoformat()}
 
 
-@app.post("/api/benchmarks", status_code=201)
-def create_benchmark(request: CreateBenchmark, session: Session = Depends(get_session)):
+@protected.post("/api/benchmarks", status_code=201)
+def create_benchmark(request: CreateBenchmark, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
     try:
         parsed = benchmarks.parse_reference(finite_json(request.model_dump()))
     except (ValueError, TypeError, KeyError, AttributeError) as exc:
         raise HTTPException(422, str(exc)) from exc
-    reference = db.Benchmark(name=request.name, reference=parsed)
+    reference = db.Benchmark(name=request.name, reference=parsed, owner_id=user.id)
     session.add(reference)
     session.commit()
     return benchmark_response(reference)
 
 
-@app.get("/api/benchmarks")
-def list_benchmarks(session: Session = Depends(get_session)):
-    references = session.scalars(select(db.Benchmark).order_by(db.Benchmark.created_at.desc()).limit(100)).all()
+@protected.get("/api/benchmarks")
+def list_benchmarks(session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
+    references = session.scalars(select(db.Benchmark).where(access.benchmark_scope(user)).order_by(db.Benchmark.created_at.desc()).limit(100)).all()
     return {"benchmarks": [benchmark_response(reference) for reference in references]}
 
 
-@app.get("/api/benchmarks/{benchmark_id}")
-def get_benchmark(benchmark_id: str, session: Session = Depends(get_session)):
-    reference = session.get(db.Benchmark, benchmark_id)
-    if reference is None:
-        raise HTTPException(404, "Reference not found")
+@protected.get("/api/benchmarks/{benchmark_id}")
+def get_benchmark(benchmark_id: str, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
+    reference = access.require_benchmark(session, benchmark_id, user)
     return benchmark_response(reference)
 
 
-@app.post("/api/benchmarks/{benchmark_id}/compare")
-def compare_benchmark(benchmark_id: str, request: CompareBenchmark, session: Session = Depends(get_session)):
-    reference = session.get(db.Benchmark, benchmark_id)
-    run = session.get(db.SimulationRun, request.run_id)
-    if reference is None or run is None:
-        raise HTTPException(404, "Reference or run not found")
+@protected.post("/api/benchmarks/{benchmark_id}/compare")
+def compare_benchmark(benchmark_id: str, request: CompareBenchmark, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
+    reference = access.require_benchmark(session, benchmark_id, user)
+    run = access.require_run(session, request.run_id, user)
     reconcile(run, session)
     if run.status != "succeeded" or run.result_compressed is None:
         raise HTTPException(409, "A completed run is required for reference comparison")
@@ -542,30 +537,28 @@ def compare_benchmark(benchmark_id: str, request: CompareBenchmark, session: Ses
             **benchmarks.compare_reference(db.decompress_result(run.result_compressed), reference.reference, run.analysis)}
 
 
-@app.get("/api/runs/{run_id}/package")
-def export_package(run_id: str, session: Session = Depends(get_session)):
-    run = session.get(db.SimulationRun, run_id)
-    if run is None:
-        raise HTTPException(404, "Run not found")
+@protected.get("/api/runs/{run_id}/package")
+def export_package(run_id: str, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
+    run = access.require_run(session, run_id, user)
     try:
         return analysis_package.export_run(reconcile(run, session))
     except ValueError as exc:
         raise HTTPException(409, str(exc)) from exc
 
 
-@app.post("/api/packages/import", status_code=201)
-def import_package(request: ImportPackage, session: Session = Depends(get_session)):
+@protected.post("/api/packages/import", status_code=201)
+def import_package(request: ImportPackage, session: Session = Depends(get_session), user: db.Account = Depends(auth.require_user)):
     try:
         package = analysis_package.verify_package(request.package)
     except (ValueError, TypeError) as exc:
         raise HTTPException(422, str(exc)) from exc
     document = db.json_copy(package["input"]["document"])
     circuit = db.Circuit(name=document["name"], document=document,
-                         created_by=request.employee_id, updated_by=request.employee_id)
+                         created_by=user.username, updated_by=user.username, owner_id=user.id)
     session.add(circuit)
     session.flush()
-    session.add(db.CircuitRevision(circuit_id=circuit.id, revision=1, document=db.json_copy(document), employee_id=request.employee_id))
-    provenance = db.PackageImport(circuit_id=circuit.id, employee_id=request.employee_id,
+    session.add(db.CircuitRevision(circuit_id=circuit.id, revision=1, document=db.json_copy(document), employee_id=user.username))
+    provenance = db.PackageImport(circuit_id=circuit.id, employee_id=user.username,
                                   original_run_id=package["original_run_id"], package=package)
     session.add(provenance)
     session.commit()
@@ -575,3 +568,32 @@ def import_package(request: ImportPackage, session: Session = Depends(get_sessio
                            "runtime_config": package["runtime_config"]},
             "verification": {"hashes_verified": True, "authenticity_verified": False},
             "requires_recalculation": True, "result": None}
+
+
+@protected.post("/api/admin/circuits/owner")
+def assign_owners(request: AssignOwners, user: db.Account = Depends(auth.require_admin), session: Session = Depends(get_session)):
+    auth.admin_mutation_guard(session, user)
+    if request.owner_id is not None:
+        owner = session.get(db.Account, request.owner_id)
+        if owner is None or not owner.is_active or owner.deleted_at is not None:
+            raise HTTPException(422, "割り当て先には有効なアカウントを選択してください")
+    ids = [target.id for target in request.circuits]
+    circuits = {c.id: c for c in session.scalars(select(db.Circuit).where(db.Circuit.id.in_(ids)).order_by(db.Circuit.id).with_for_update())}
+    for target in request.circuits:
+        circuit = circuits.get(target.id)
+        if circuit is None or circuit.deleted_at is not None:
+            raise HTTPException(404, "割り当て対象のモデルが見つかりません")
+        if circuit.revision != target.expected_revision:
+            raise HTTPException(409, "対象モデルが更新されています。一覧を更新してください。今回は変更していません")
+    for circuit in circuits.values():
+        circuit.owner_id = request.owner_id
+        circuit.revision += 1
+        circuit.updated_by, circuit.updated_at = user.username, db.utcnow()
+        session.add(db.CircuitRevision(circuit_id=circuit.id, revision=circuit.revision,
+                    document=db.json_copy(circuit.document), employee_id=user.username))
+    session.commit()
+    return {"circuits": [circuit_response(c) for c in circuits.values()]}
+
+
+app.include_router(protected)
+app.include_router(auth.router)

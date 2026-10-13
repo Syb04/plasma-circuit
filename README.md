@@ -16,6 +16,14 @@ docker compose up --build -d
 
 ブラウザで **http://localhost:8080** を開きます。初回はイメージと依存パッケージを取得します。ポートを変える場合は `.env.example` を `.env` にコピーして `APP_PORT` を変更してください。
 
+新しい環境では、初期管理者を登録してログインしてください。パスワードはプロンプトで入力します。
+
+```bash
+docker compose exec api python -m app.accounts create-admin --username admin
+```
+
+アカウントの発行・削除、既存モデルの所有者割り当て、HTTPS設定は[ログインとアカウント管理](docs/accounts.md)を参照してください。
+
 ```bash
 docker compose logs -f api worker
 docker compose down
@@ -33,26 +41,30 @@ docker compose -f compose.yaml -f compose.cloud.yaml up --build -d
 
 1. 「プリセットから始める」で分圧回路、RC、同軸ケーブル、非線形EDD、Ar/O₂のCCP、外部RF・整合・DCブロック付きCCPを選びます。
 2. 通常回路では部品を配置し、端子から端子へ配線します。部品を選ぶと値・モデル・EDD式を編集できます。選択した部品は設定欄の「部品を複製」、回路上部の複製ボタン、または `Ctrl+D`（Macは `⌘D`）で内部設定ごと複製できます。複製は近くに配置され、個別に編集できます。配線は追加されないので必要な端子を接続してください。「元に戻す」「やり直す」にも対応しています。
-3. 解析種類と条件を設定し、社員番号を入力して保存・実行します。社員番号は文字列で、先頭の0も保存します。
+3. ログイン後に解析種類と条件を設定し、保存・実行します。ログインID（社員番号）を操作履歴へ自動記録し、先頭の0も保持します。
 4. 結果画面で波形、数値、RF測定面、計算条件、モデル、収支残差、ネットリストを確認します。「CSV保存」「モデルパッケージ」で書き出せます。
 5. 「研究・比較」で1〜2軸のパラメータ研究、失敗ケースの再開、2〜4結果の比較、参照CSV/JSONとの比較、パッケージの読込を行います。
 6. 「保存済みモデル」の一覧ページで、モデル名・メモ・社員番号を検索できます。更新者・更新期間での絞り込み、並べ替え、25／50／100件ずつのページ表示に対応しています。編集中の内容を保持して一覧へ移動でき、保存回路と計算履歴から再表示できます。他の人の更新と競合した保存は通知します。
-7. 一覧のチェックボックスで1件・複数件を選び、「選択したモデルを削除」で対象を確認して削除できます。社員番号が必要です。「このページをすべて選択」は表示中のページだけが対象です。過去の計算結果・研究履歴は残り、編集中のモデルを削除しても手元の内容は保持します。次の保存では別モデルを作成します。
+7. 一覧のチェックボックスで1件・複数件を選び、「選択したモデルを削除」で対象を確認して削除できます。「このページをすべて選択」は表示中のページだけが対象です。過去の計算結果・研究履歴は残り、編集中のモデルを削除しても手元の内容は保持します。次の保存では別モデルを作成します。
 
-認証はありません。社員番号は操作履歴の記録に用います。接続できるチームメンバーが回路と履歴を共有する構成です。
+一般ユーザーは自分が所有するモデルと関連履歴だけを閲覧・編集できます。管理者は全モデルを閲覧し、アカウントとモデル所有者を管理します。認証追加前のモデルは管理者だけに表示し、管理者が所有者を割り当てます。CSV、研究、比較、パッケージにも同じ閲覧制限を適用します。
+
+認証・権限分離・保存・実計算・移行・モバイルの確認結果は[アカウント管理の検証レポート](reports/accounts/report.md)を参照してください。
 
 モデル削除の動作・履歴保持・共有更新・DB移行の確認結果は[検証レポート](reports/model-deletion/report.md)を参照してください。実ブラウザ確認は[check_model_deletion.py](scripts/check_model_deletion.py)で再実行できます。
 
-素子複製の全30種別・個別編集・保存再読込・実計算の確認結果は[素子複製の検証レポート](reports/component-duplication/report.md)を参照してください。[check_component_duplication.py](scripts/check_component_duplication.py)で再実行できます。
+素子複製の全30種別・個別編集・保存再読込・実計算の確認結果は[素子複製の検証レポート](reports/component-duplication/report.md)を参照してください。[check_component_duplication.py](scripts/check_component_duplication.py)で再実行できます。認証後は検証用アカウントの `--auth-file` を指定します。
 
 端子名や配線をクリックし、設定欄の「端子・ノード名」で任意の名前を適用できます。つながる端子は同じ名前になり、波形の凡例・X–Y・CSVに `V(電極)` などで表示します。保存した過去の計算は計算時の名前を保持します。詳しくは[ノード名の操作](docs/node-labels.md)を参照してください。
 
-ノード名の実計算・凡例・保存履歴・モバイルと既存機能の確認結果は[検証レポート](reports/node-labels/report.md)を参照してください。[check_node_labels.py](scripts/check_node_labels.py)で再実行できます。
+ノード名の実計算・凡例・保存履歴・モバイルと既存機能の確認結果は[検証レポート](reports/node-labels/report.md)を参照してください。[check_node_labels.py](scripts/check_node_labels.py)で再実行できます。認証後は検証用アカウントの `--auth-file` を指定します。
 
 ## 実装範囲
 
 | 機能 | 内容 |
 | --- | --- |
+| ログイン・アカウント | 管理者による発行・削除・無効化・権限変更・仮パスワード再発行。初回変更、本人のパスワード変更、ログアウト、失効可能なCookieセッション |
+| 閲覧制限 | 一般ユーザーは所有モデルとその履歴だけにアクセス。管理者は全モデル・所有者割り当てを管理。既存モデルは未割当として保護 |
 | 回路解析 | DC動作点、DCスイープ、AC小信号、過渡解析 |
 | 基本素子 | R/C/L、相互結合、独立・従属電源、数式電源、スイッチ、ダイオード、BJT、JFET、MESFET、伝送線、サブ回路、接地・接続点 |
 | 素子の複製 | 配置済み部品の内部設定・端子・回転角をコピー。固有IDと部品名で配置し、個別編集・取り消し・保存・再読込に対応 |
@@ -128,26 +140,26 @@ Docker内で、数値解を含むバックエンドテストを実行できま�
 docker compose run --rm --no-deps api python -m pytest -q
 ```
 
-起動中のサービスに対して、社員番号の必須入力、回路保存、版競合、スナップショット、実ソルバー、結果保存、CSVを検証します。Python 3の標準ライブラリだけで実行できます。
+起動中の専用検証サービスに対して、ログイン中の社員番号・所有者、回路保存、版競合、スナップショット、実ソルバー、結果保存、CSVを検証します。Python 3の標準ライブラリだけで実行できます。仮パスワード変更済みの検証アカウントをJSONファイル（`username` と `password`）に用意し、Gitへ含めないでください。
 
 ```bash
-python3 scripts/smoke.py --include-plasma --include-global
+python3 scripts/smoke.py --auth-file .private/check-account.json --include-plasma --include-global
 ```
 
 この検証はテスト用の回路・履歴をDBに作成します。数値テストの成功と、物理モデルの実験的な妥当性は別の検証です。
 
-拡張機能の実キューAPI確認は [check_plasma_features.py](scripts/check_plasma_features.py)、研究・比較・参照・パッケージのブラウザ確認は [check_feature_ui.py](scripts/check_feature_ui.py) で実行できます。どちらも検証用データをDBへ保存します。
+認証・アカウント管理・モデル所有者の受入確認は、使い捨てのPostgreSQL/Redis環境を対象に [check_accounts.py](scripts/check_accounts.py) で実行します。一般ユーザー2人の保存・実計算・履歴・所有者変更と、管理者の発行・失効・削除を確認します。共有の本番DBでは実行しないでください。
 
 ```bash
-python3 scripts/check_plasma_features.py --base-url http://localhost:8080
-.venv/bin/python scripts/check_feature_ui.py --base-url http://localhost:8080 --verify-existing-physics
+python3 scripts/check_accounts.py --base-url http://localhost:8081 --admin-file .private/auth-test-admin.json --confirm-isolated-test-db
+python3 scripts/check_node_labels.py --base-url http://localhost:8081 --auth-file .private/check-account.json
+python3 scripts/check_component_duplication.py --base-url http://localhost:8081 --auth-file .private/check-account.json
+python3 scripts/check_jobs.py --base-url http://localhost:8081 --auth-file .private/check-account.json
 ```
 
-ブラウザ確認にはPlaywrightとChromiumが必要です。上記の順でAPI確認を先に実行します。`--verify-existing-physics` は成功・数値収束したCCP＋IEDF、時間発展0D、径方向の3種類を必須として表示を確認します。[拡張機能の検証レポート](reports/simulator-extensions/report.md)に、最終Dockerテスト、実API結果、機能別の確認範囲、モデル適用範囲の警告を記録しています。最新のブラウザ確認状況もレポートを参照してください。
+ブラウザ確認にはPlaywrightとChromiumが必要です。認証用JSONは検証用の秘密情報で、レポートに含めません。
 
-保存済みモデルの一覧・検索・ページ送り・コピー保存は `python3 scripts/check_model_library.py --base-url http://localhost:8080` で確認できます。27件の検証モデル、コピー・別クライアント保存、実計算1件をDBに作成します。[一覧ページの検証記録](reports/model-library/report.md)を参照してください。
-
-指数入力・詳細ダイオードの保存と実計算は `python3 scripts/check_source_diode_ui.py --base-url http://localhost:8080` で確認できます。モデル1件と正弦波／パルスの実計算2件をDBに作成します。[今回の検証記録](reports/source-diode/report.md)を参照してください。
+拡張機能・研究・比較・参照・パッケージの過去の確認範囲は[拡張機能レポート](reports/simulator-extensions/report.md)、保存モデルの検索・一覧は[モデル一覧レポート](reports/model-library/report.md)、指数入力・詳細ダイオードは[回路素子レポート](reports/source-diode/report.md)を参照してください。認証導入前の検証記録と、今回の認証を含む検証記録を区別します。旧APIクライアントやブラウザスクリプトを利用する場合も、ログインとCSRFトークンに対応する必要があります。
 
 研究スクリプトをDockerの外で実行する場合は、Python 3.12の仮想環境と計算・描画用の依存パッケージを準備します。以下はプロジェクトのルートで実行します。
 
